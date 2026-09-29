@@ -332,4 +332,81 @@ set `X` then every independent set of `H` is one of `G[X]`, so `α(H) ≤ α(G[X
   `missing_theorems = ["jsp_000090_main"]`. Declaring a weaker theorem under that name would
   misrepresent the result.
 
+### Round 48 — `JSPProblem/Connect.lean`: the connectivity and 1-cut reductions
+
+Round 47 named the next step: instantiate the new instance with the family of **connected
+components**.  Round 48 carries that out and then continues along the same axis to the **1-cut**
+(a cut at a *single* vertex), so that the classical chain *connected → 2-connected → 3-connected*
+is formal.  New file `JSPProblem/Connect.lean` (64 declarations, 1183 lines, **0 sorry**,
+`lake build` OK).
+
+Proved:
+
+  - `compPiece G v = (univ).filter (G.Reachable v)`, `compPieces G = (univ).image compPiece`, and
+    **`anticoverDecomposition_compPieces`**: the connected components of `G` are pairwise disjoint,
+    pairwise anticomplete, cover `V`, and anticomplete to the complement of their union — the
+    hypothesis of round 47's instance, which a mere *cover* does not give.  This is the first use of
+    Mathlib's connectivity API (`SimpleGraph.Reachable`) in this development;
+  - **`card_le_of_pieces_pack`** — the counting lemma for a family of pieces indexed by an
+    *arbitrary type* (the parts of a 1-cut are indexed by `Fin t`, not by `Finset V`) — and
+    **`oddCycleErdosPosa_of_anticover_decomposition`** — round 47's instance restated with the
+    *packing number* in place of the `LocIndep` parameter, i.e. in the form in which the research
+    statement `OddCycleErdosPosa r` is phrased;
+  - **`erdos73On_of_connected_components` — a new instance of the headline theorem**: if every
+    connected component of `G` is `m`-close to bipartite then `LocIndep k G` forces
+    `CloseToBipartite (k * m) G`, a constant independent of the number of components and with no
+    bound on the odd girth, packing weight or number of branch vertices;
+  - `PieceErdős73On`, **`erdos73On_of_piece`** and **`erdos73_of_erdos73_piece` — the connectivity
+    reduction**: if a constant `m` works for *connected pieces* — `PiecePreconnected G s` says any
+    two vertices of `s` are joined by a path of `G`, and for `s = V` this is `G.Preconnected`
+    (`PiecePreconnected.univ`) — then the constant `k * m` works for all graphs;
+  - `PieceOddCycleErdosPosa`, **`oddCycleErdosPosa_of_piece`** (bound `r * m`) and
+    **`erdos73_of_connected_erdosPosa`**: the same reduction for the **research statement** — so
+    `jsp_000090_main` now follows from the *connected-piece* case of Erdős–Pósa for odd cycles, a
+    strictly weaker and precisely stated missing lemma;
+  - `OneSplit G v t` — a **1-cut** `V = {v} ⊔ T₁ ⊔ … ⊔ T_t` (the counterpart of
+    `JSPProblem.Separator.VertexSplit`, a 2-cut), with `cycle_subset_part` / `oddCycle_part_or_hit`
+    (a cycle avoiding the cut vertex lies in a single part),
+    **`isBipartite_of_bipartite_pieces`** and **`isBipartite_iff_bipartite_pieces`** — the **1-sum
+    lemma**, `G` is bipartite **iff** every *piece* `T_i ∪ {v}` is bipartite — plus
+    `one_nonBipartitePiece`, `card_nonBipartiteParts_le` and `exists_transversal_nonBipartite`
+    (a transversal of size `1 + ∑` over the non-bipartite parts);
+  - **`erdos73On_of_1split_of_bounded_pieces` — a second new instance of the headline theorem**, with
+    the constant `1 + m * k`.  A 1-cut shares a *single* vertex with each of its pieces, so this
+    **improves** on round 43's 2-cut instance `2 + m * k`, and it is again independent of the
+    number of parts;
+  - **`erdos73On_of_1split_pieces`**: chains the two reductions — the classical step
+    *connected → 2-connected*;
+  - `HasProper1Split`, `NoProper1Split`, `OneDepth` (with `oneDepth_succ`, `oneDepth_add`,
+    `oneDepth_mono`), `oneBound` and
+    **`oddCycleErdosPosa_of_noOneCut_of_bounded_oneDepth`** — the precise reduction along the 1-cut
+    axis, the 1-cut analogue of round 43's `erdos73_of_noSplit2_of_bounded_splitDepth`: Erdős–Pósa
+    for odd cycles follows from the **1-cut-free case** together with a uniform bound on the number
+    of successive 1-cuts.
+
+Two **negative results** were found and recorded (in the file's docstrings; the concrete witness —
+a triangle with a pendant vertex, cut at the triangle vertex carrying the pendant — is *not* yet
+machine-checked):
+
+  1. "*a non-bipartite graph with a 1-cut has **at least two** non-bipartite pieces*" is **false**:
+     in that example both *parts* are bipartite and `G` is not.  The proved statement is
+     `one_nonBipartitePiece` (at least one);
+  2. consequently "*all parts bipartite ⟹ `G` bipartite*" is **false** — which is why the
+     **pieces** `T_i ∪ {v}`, and not the parts, are the right objects of the decomposition.
+
+The remaining gap is therefore now stated twice, and both statements are proved reductions:
+
+  - it suffices to prove `PieceOddCycleErdosPosa r` for every `r` (its `s = V` case being the
+    connected case);
+  - and it suffices to prove it for graphs with **no proper 1-cut**, provided the **block-cut tree
+    bound** `oneDepth_le_of_packing`: every graph whose odd cycle packings have at most `r` members
+    satisfies `OneDepth G (2 * r + 1)` — i.e. a chain of cut vertices of length `2r + 2` forces
+    `r + 1` pairwise disjoint odd cycles.  This is the one missing lemma; it is not proved here
+    because the naive induction step is refuted by negative result 1 and the correct argument needs
+    the block-cut tree, which the pinned Mathlib slice does not provide (no `SimpleGraph.Block`, no
+    Menger, no `Connectivity.lean`).
+
+`jsp_000090_main` is **not** declared, so the harness keeps reporting
+`missing_theorems = ["jsp_000090_main"]`.
+
 `formalization.yaml` remains `status: wip`, `prize_ready: false`. No award claim is made.

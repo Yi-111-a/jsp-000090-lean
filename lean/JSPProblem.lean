@@ -224,6 +224,37 @@ problem `JSP-000090`.
     and every non-bipartite piece is `m`-close to bipartite, then `LocIndep k G` forces
     `CloseToBipartite (k * m) G`, a constant **independent of the number of pieces**.
 
+* `JSPProblem.Connect` — **the connectivity and 1-cut reductions** (round 48), a ninth attack family
+  built on the composition lemma `JSPProblem/Additive.lean` and the 2-cut machinery of
+  `JSPProblem/Separator.lean`:
+  - `compPiece` / `compPieces` and **`anticoverDecomposition_compPieces`**: the connected components of
+    `G` form an `AnticoverDecomposition` — pairwise disjoint, pairwise anticomplete, covering `V`,
+    anticomplete to the complement of their union; and `compPiece_piecePreconnected` is the
+    irreducibility of a component;
+  - `card_le_of_pieces_pack` and `oddCycleErdosPosa_of_anticover_decomposition`: the counting lemma
+    and round 47's instance in the **Erdős–Pósa** form (the *packing number* replaces the
+    `LocIndep` parameter, which is the form the research statement is phrased in);
+  - `erdos73On_of_connected_components`: **a new instance of the headline theorem** — if every
+    connected component of `G` is `m`-close to bipartite, then `LocIndep k G` forces
+    `CloseToBipartite (k * m) G`, a constant independent of the number of components;
+  - `PieceErdős73On` / **`erdos73On_of_piece` / `erdos73_of_erdos73_piece`**: **Erdős #73 reduces
+    to connected pieces** at the price of one factor `k` (`PiecePreconnected G s` = any two vertices
+    of `s` are joined by a path of `G`; for `s = V` this is `G.Preconnected`), and
+  - `PieceOddCycleErdosPosa` / **`oddCycleErdosPosa_of_piece` / `erdos73_of_connected_erdosPosa`**:
+    **the research statement reduces to the connected case** with the explicit bound `r * m`;
+  - `OneSplit` — a **1-cut** `V = {v} ⊔ T₁ ⊔ … ⊔ T_t` (the counterpart of `VertexSplit`, a 2-cut),
+    with `cycle_subset_part` (a cycle avoiding the cut vertex lies in a single part),
+    **`isBipartite_of_bipartite_pieces`** (the 1-cut parity lemma: all *pieces* `T_i ∪ {v}`
+    bipartite ⟹ `G` bipartite) and `one_nonBipartitePiece`;
+  - **`erdos73On_of_1split_of_bounded_pieces`: a second new instance of the headline theorem**, with
+    the constant `1 + m * k` — a 1-cut shares a *single* vertex with each of its pieces, so this
+    improves on round 43's 2-cut constant `2 + m * k`; and `erdos73On_of_1split_pieces` chains it
+    with the connectivity reduction, i.e. the classical step *connected → 2-connected*;
+  - `HasProper1Split`, `NoProper1Split`, `OneDepth`, `oneBound` and
+    **`oddCycleErdosPosa_of_noOneCut_of_bounded_oneDepth`**: the precise reduction along the 1-cut
+    axis — Erdős–Pósa for odd cycles follows from the 1-cut-free case together with a uniform bound
+    on the number of successive 1-cuts (the block-cut tree bound, the remaining missing lemma).
+
 The full theorem `Erdős73 k` for every `k ≥ 0` is Reed 1999, *Mangoes and Blueberries*, Combinatorica
 19 (1999) 267–296.  Everything except the Erdős–Pósa theorem for odd cycles
 (`JSP90.OddCycleErdosPosa`, Reed–Robertson–Seymour–Thomas 2002) is proved, and
@@ -253,3 +284,4 @@ import JSPProblem.Count
 import JSPProblem.Weight
 import JSPProblem.Optimal
 import JSPProblem.Additive
+import JSPProblem.Connect
