@@ -474,3 +474,111 @@ copies of `lake-manifest.json` / `lean-toolchain` were added.  `score.py` now re
 so the only remaining obstruction to `prize_ready` is the mathematics.  `jsp_000090_main` is still
 **not** declared, and `formalization.yaml` remains `status: wip`, `prize_ready: false`.  No award
 claim is made.
+
+---
+
+## Round 54 — `JSPProblem/Deficiency.lean`: the maximum deficiency, the *numerical* form of Erdős's hypothesis
+
+New file `lean/JSPProblem/Deficiency.lean` (55 declarations, 882 lines, **0 sorry**, `lake build` OK
+with 1219 jobs), imported from the root module `JSPProblem.lean`.  This is the **eleventh attack
+family**.  Rounds 40–48 attacked the *decomposition* axes (residues, 2-cuts, components, 1-cuts) and
+rounds 46/53 attacked the Erdős–Pósa *function* (the identity case; minimal transversals).  All of them
+consume the hypothesis `LocIndep k G` in the same single way — to bound the number of vertex-disjoint
+odd cycles — and all of them are blocked by the same statement.  Round 54 changes the **hypothesis
+itself**: `LocIndep k G` is a `∀ ∃` statement over all vertex sets, and it is replaced by a *number*.
+
+### The new quantity
+
+```lean
+MaxDef G = max { |X| - 2 * α(G[X]) : X ⊆ V }
+```
+
+— the *maximum deficiency* of `G`, where `|H| - 2 α(H)` is the classical deficiency of `H` (0 on a
+bipartite `H`, 1 on an odd cycle, `|H| - 2` on a clique).  Reed's condition "every subgraph `H` has
+`α(H) ≥ (|H| - k) / 2`" says exactly that `G` has deficiency at most `k`.
+
+### What is proved
+
+* **`JSP90.locIndep_iff_maxDef_le` — THE REFORMULATION OF THE HYPOTHESIS.**
+  `LocIndep k G ↔ MaxDef G ≤ k`, with `JSP90.erdos73_iff_maxDef` restating the whole of Erdős #73 in
+  that language:
+
+  ```lean
+  Erdős73 k ↔ ∃ m, ∀ (W : Type u) (_ : Fintype W) (G : SimpleGraph W), MaxDef G ≤ k → CloseToBipartite m G
+  ```
+
+  So the hypothesis of the problem is a **numerical bound on a function of `G`**, which is what an
+  induction on `|V|`, a minimal-counterexample argument, or any "pass the bound on" step needs.  The
+  building block is `exists_indepCard` (α of an induced subgraph is *attained*), plus `indepCard` and
+  `MaxDef` as the natural numbers `sup`-ing the sizes.
+* **THE SANDWICH `ν(G) ≤ MaxDef G ≤ τ(G)`** (`JSP90.packing_le_maxDef_le_transversal`):
+  * `card_le_of_maxDef_le` — a deficiency bound bounds every packing of odd cycles (the packing
+    bound of `Packing.lean` in numerical form);
+  * **`maxDef_le_of_hitsOddCycles` / `maxDef_le_closeToBipartite` — the NEW direction**: every odd
+    cycle transversal has at least `MaxDef G` vertices, so *the deficiency is a lower bound for the
+    number of vertices one must delete*.  The proof is combinatorial: off the transversal the graph is
+    bipartite, so the vertices of `Y` outside it are covered two by two by independent sets, whence
+    `|Y| - 2 α(Y) ≤ |Y ∩ X| ≤ |X|`.
+  This is exactly the chain along which the Erdős–Pósa theorem would prove JSP-000090, with `MaxDef`
+  in place of the packing number — and both halves are now formalised.
+* **`maxDef_eq_zero_iff : MaxDef G = 0 ↔ G.IsBipartite`** — the proved case `k = 0` of Erdős #73
+  (`JSP90.erdos73_zero`) *is* the statement "deficiency 0 means bipartite"; also
+  `maxDef_pos_of_not_isBipartite`.
+* **The exact values on the two extremal witnesses, so the deficiency is not a loose bound:**
+  * `maxDef_kTriangles : MaxDef (kTriangles k) = k` (upper bound read off `locIndep_kTriangles` by the
+    equivalence, lower bound from the whole vertex set `3k - 2k`);
+  * `closeToBipartite_kTriangles_iff_maxDef` and `no_closeToBipartite_of_maxDef_kTriangles` — on the
+    sharp witness the exact value of the conclusion *is* the deficiency, i.e. the lower bound
+    `f(k) ≥ k`;
+  * `maxDef_completeGraph : MaxDef (K_n) = n - 2` for `n ≥ 2`, `maxDef_completeGraph_small` for
+    `n ≤ 2`, and `closeToBipartite_completeGraph_iff_maxDef` — on complete graphs the number of
+    vertices to delete is the deficiency.
+* **The arithmetic of the new quantity** (Part 6):
+  * `maxDef_mono` (adding edges does not decrease the deficiency), `maxDef_induceFinset_le`,
+    **`maxDef_deleteFinset_le`** — the residue inherits the bound, the numerical form of
+    `LocIndep.of_deleteFinset` and of the residue induction, so an induction on `MaxDef G` (rather than
+    on `|V|`) is now available;
+  * **`maxDef_le_maxDef_induceFinset_add_card`** — local-to-global: a piece plus the number of
+    vertices outside it;
+  * **`card_indepCard_anticover_add`** — the *exact* linear split over an anticomplete decomposition
+    (`|Y| = |Y ∩ A| + |Y ∩ B|` and `α(Y) = α(Y ∩ A) + α(Y ∩ B)`), hence `defOf_le_add_of_anticover`
+    and `maxDef_le_add_of_anticover`.
+* **A weaker sufficient input, named precisely**: `LinearErdős73 C` — "every graph is the union of a
+  bipartite graph and `C * MaxDef G` vertices" — implies **all** of Erdős #73 with the explicit
+  constant `C * k` (`erdos73Of_linearErdős73`).  This is a statement about the function `τ / MaxDef`
+  and is a *strictly weaker* input than the Erdős–Pósa theorem; `not_linearErdős73_zero` refutes it
+  for `C = 0` (witness `K_3`), so `C` is a genuine parameter.
+
+### A mathematical finding recorded in the file
+
+The deficiency is **subadditive, not additive**, over an anticomplete decomposition: for `Y` = a
+triangle disjoint from one isolated vertex, split into the two parts, `defOf G Y = 0` while
+`defOf (G[A]) (Y ∩ A) + defOf (G[B]) (Y ∩ B) = 1 + 0 = 1`.  The obstruction is the truncation at
+zero in `|X| - 2 α(X)`, which is why the exact statement proved is the *linear* one
+(`card_indepCard_anticover_add`) and the deficiency statement is an inequality.  This is recorded in
+the docstring of `JSP90.defOf_le_add_of_anticover`.
+
+### What is *not* proved
+
+`MaxDef G ≤ k → CloseToBipartite (C * k) G` is exactly Erdős #73 in the language of this file and is
+not proved here; neither is `JSP90.OddCycleErdosPosa r` (Reed–Robertson–Seymour–Thomas), the
+unchanged primary blocker.  The *converse* of `maxDef_le_add_of_anticover` (equality for `MaxDef`) is
+not proved either: it needs the extra fact that a vertex of `X \ s` is isolated in `G[s]`, so that
+adding it to `X` raises `|X|` and `α(G[s][X])` by the same amount.
+
+Toolchain facts verified this round (they cost most of the round): `Finset.max' s H` takes the
+`Nonempty` proof as an *explicit* argument and `Finset.le_max'` mentions a *different* witness, so
+`Finset.sup` + `Finset.le_sup_iff` is the workable route to an attained maximum; `Finset.Nonempty s` is
+`∃ x, x ∈ s` while `Finset.nonempty_iff_ne_empty` is `s ≠ ∅`; `Nat.sub_le_iff_le_add` rewrites a
+truncated subtraction into a linear inequality (`Nat.sub_le_iff_le_add : a - b ≤ c ↔ a ≤ c + b`) and
+`omega` treats `a - b` as an opaque atom otherwise; `Nat.add_sub_assoc` is *false* in ℕ, while
+`Nat.sub_sub : a - b - c = a - (b + c)` and `Nat.sub_add_cancel` hold; `Nat.sub_le_sub_right` takes
+the hypothesis *first*; `Finset.mem_filter.mpr` needs the `DecidablePred` instance of the
+*definition site*, so the predicate's decider is named as a `local instance`; and a `Finset (Fin n)`
+built in one file is not syntactically the one built in another when the two files use different
+`DecidableEq` instances (this is why round 53's `K_4` witness did not elaborate).
+
+`jsp_000090_main` is still **not** declared, so the harness keeps reporting
+`missing_theorems = ["jsp_000090_main"]`; `score.py --strict-prize` reports
+`build_ok = true, sorry = 0, admit = 0, partial_ok = true`.  `formalization.yaml` remains
+`status: wip`, `prize_ready: false`.  No award claim is made.

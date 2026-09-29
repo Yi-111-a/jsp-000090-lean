@@ -272,6 +272,37 @@ problem `JSP-000090`.
   - **`JSP90.erdos73_of_spreadMinimalTransversal`**: the new, precise localisation of the missing
     lemma — Erdős Problem #73 follows as soon as every graph of odd cycle packing number at most `r`
     admits a minimal odd cycle transversal whose critical intersection graph is `r`-colourable.
+* `JSPProblem.Deficiency` — **the maximum deficiency: the numerical form of Erdős's hypothesis**
+  (round 54, the eleventh attack family).  `LocIndep k G` is a `∀ ∃` statement over all vertex sets;
+  `MaxDef G = max { |X| - 2 α(G[X]) : X ⊆ V }` is a *number*, and the two are equivalent:
+  - **`JSP90.locIndep_iff_maxDef_le`**: `LocIndep k G ↔ MaxDef G ≤ k`, and
+    `JSP90.erdos73_iff_maxDef` restates the whole of Erdős Problem #73 in that language, so the
+    hypothesis of the problem is a numerical bound on a function of `G` (what an induction on `|V|`
+    or a minimal-counterexample argument needs);
+  - **THE SANDWICH `ν(G) ≤ MaxDef G ≤ τ(G)`** (`JSP90.packing_le_maxDef_le_transversal`): every
+    packing of odd cycles is at most as large as the maximum deficiency
+    (`JSP90.card_le_of_maxDef_le`), which is at most every odd cycle transversal
+    (`JSP90.maxDef_le_of_hitsOddCycles`, `JSP90.maxDef_le_closeToBipartite` — the *new* direction:
+    a transversal must be at least as large as the deficiency).  This is exactly the chain along
+    which the Erdős–Pósa theorem would prove JSP-000090, with `MaxDef` in place of the packing
+    number;
+  - **`JSP90.maxDef_eq_zero_iff`**: deficiency `0` is bipartiteness, i.e. the proved case `k = 0`
+    (`JSP90.erdos73_zero`) in the new language;
+  - the exact values on the two extremal witnesses: **`JSP90.maxDef_kTriangles`**,
+    `JSP90.maxDef_completeGraph` (`MaxDef (K_n) = n - 2`), together with
+    `closeToBipartite_kTriangles_iff_maxDef` and `closeToBipartite_completeGraph_iff_maxDef`, which
+    say that on those graphs the number of vertices to delete *is* the deficiency;
+  - the arithmetic: `JSP90.maxDef_mono`, `maxDef_induceFinset_le`, **`maxDef_deleteFinset_le`** (the
+    residue inherits the bound — an induction on `MaxDef G` is now possible),
+    `maxDef_le_maxDef_induceFinset_add_card` (local-to-global), and
+    **`JSP90.card_indepCard_anticover_add`** / `defOf_le_add_of_anticover` /
+    `maxDef_le_add_of_anticover` (the deficiency splits, and is *subadditive*, over an anticomplete
+    decomposition — equality fails, e.g. a triangle disjoint from an isolated vertex, and that
+    failure is recorded in the file);
+  - **`JSP90.LinearErdős73` / `erdos73Of_linearErdős73`**: a *linear* statement about the deficiency,
+    `τ(G) ≤ C * MaxDef G` for a universal `C`, would prove the whole of Erdős #73 with constant
+    `C * k`; it is a strictly weaker input than Erdős–Pósa, and `not_linearErdős73_zero` refutes it
+    for `C = 0` (witness `K_3`).
 
 The full theorem `Erdős73 k` for every `k ≥ 0` is Reed 1999, *Mangoes and Blueberries*, Combinatorica
 19 (1999) 267–296.  Everything except the Erdős–Pósa theorem for odd cycles
@@ -304,3 +335,4 @@ import JSPProblem.Optimal
 import JSPProblem.Additive
 import JSPProblem.Connect
 import JSPProblem.Critical
+import JSPProblem.Deficiency
