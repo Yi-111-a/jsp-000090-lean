@@ -410,3 +410,67 @@ The remaining gap is therefore now stated twice, and both statements are proved 
 `missing_theorems = ["jsp_000090_main"]`.
 
 `formalization.yaml` remains `status: wip`, `prize_ready: false`. No award claim is made.
+
+---
+
+## Round 53 — the tenth attack family: minimal transversals and critical cycles
+
+New file `lean/JSPProblem/Critical.lean` (25 declarations, 0 placeholders), imported from the root
+module `JSPProblem.lean`.  Rounds 43–48 attacked the *decomposition* axes of the classical proof
+(components, 1-cuts, 2-cuts).  This round works **inside a single graph**, on the transversal itself,
+and never decomposes.
+
+### What is proved
+
+* `exists_criticalCycle_of_minimal`, `exists_criticalTransversal_of_minimal` — **critical cycles**:
+  if `X` is a *minimal* odd cycle transversal and `x ∈ X`, there is an odd cycle of `G` meeting `X`
+  exactly in `x` (because `X \ {x}` is not a transversal and every odd cycle meets `X`).  This is
+  the classical first step of the Reed–Robertson–Seymour–Thomas proof of Erdős–Pósa for odd cycles.
+* `CriticalTransversal`, `IntGraph`, `disjoint_of_colour_eq` — the **critical intersection graph**
+  (vertices `x ∈ X`, edge when the critical cycles of `x` and `y` meet).  Inside one colour class the
+  critical cycles are pairwise vertex-disjoint.
+* **`card_X_le_of_colouring_pack`** — the counting lemma: a `c`-colourable critical intersection
+  graph plus a packing bound `k` gives `|X| ≤ c * k`.  No bound on the odd girth, on the lengths of
+  the critical cycles, on the packing weight, or on the connectivity of `G`.
+* **New instances of the headline theorem**
+  * `erdos73On_of_spread_transversal (c k)`: a graph admitting a `c`-spread transversal satisfies
+    `LocIndep k G → CloseToBipartite (c * k) G`;
+  * `erdos73On_of_disjoint_transversal` (`c = 1`, equivalently `erdos73On_of_spread_transversal_one`):
+    `LocIndep k G → CloseToBipartite k G`, the **optimal** constant `f(k) = k`, a strict
+    generalisation of round 38's `erdos73On_of_no_branch`.
+* `packing_of_disjoint_transversal`, `card_le_of_disjoint_transversal` — for a 1-spread transversal
+  the critical cycles are also a packing of the same size: on that class of graphs the odd cycle
+  packing number and the odd cycle transversal number coincide.
+* **New localisation of the missing lemma**: `SpreadMinimalTransversal r c`,
+  `oddCycleErdosPosa_of_spreadMinimalTransversal` (constant `c * r`) and
+  **`erdos73_of_spreadMinimalTransversal`**: the whole of Erdős Problem #73 follows as soon as every
+  graph of odd cycle packing number at most `r` admits a *minimal* odd cycle transversal whose
+  critical intersection graph is `r`-colourable.  For `c = 2` this is the classical shape of the
+  Reed–Robertson–Seymour–Thomas theorem (a transversal of size at most twice the packing number).
+  This replaces the block-cut-tree formulation of round 48 by a statement needing no tree.
+
+### What is *not* proved
+
+The K_4 counterexample showing that `c = 1` is not always available (`{0,1}` is a minimal
+transversal of `K_4` whose critical cycles `{0,2,3}` and `{1,2,3}` meet in `{2,3}`) was written but
+did not elaborate: the statements of `IsOddCycle` and `HitsOddCycles` are elaborated in
+`Transversal.lean` with `Classical.decEq V`, and that instance is baked into the definitions, so at a
+concrete vertex type every `Finset (Fin 4)` literal must use it — and in that scope `decide` and
+`simp` can no longer evaluate `Fin` equalities.  The claim is recorded in the file header as a
+documented observation, and the exact recipe (Weight.lean-style triangle construction with
+`Fin.ext` + `omega`) is in `discovery/JSP-000090/policy.json`.
+
+### Harness layout (this round)
+
+`harness/score.py` runs `lake build` in the **problem** directory, while the Lake package lived in
+`problems/JSP-000090/lean/`; `build_ok` was therefore `false` in all 52 previous rounds and
+`partial_ok` was unreachable at the harness level.  As in `problems/JSP-000087`, a top-level
+`lakefile.lean` (`lean_lib JSPProblem where srcDir := "lean"`), a `.lake -> lean/.lake` symlink and
+copies of `lake-manifest.json` / `lean-toolchain` were added.  `score.py` now reports
+
+    build_ok = true,  sorry = 0,  admit = 0,  partial_ok = true,
+    missing_theorems = ["jsp_000090_main"]
+
+so the only remaining obstruction to `prize_ready` is the mathematics.  `jsp_000090_main` is still
+**not** declared, and `formalization.yaml` remains `status: wip`, `prize_ready: false`.  No award
+claim is made.

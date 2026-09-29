@@ -254,6 +254,24 @@ problem `JSP-000090`.
     **`oddCycleErdosPosa_of_noOneCut_of_bounded_oneDepth`**: the precise reduction along the 1-cut
     axis — Erdős–Pósa for odd cycles follows from the 1-cut-free case together with a uniform bound
     on the number of successive 1-cuts (the block-cut tree bound, the remaining missing lemma).
+* `JSPProblem/Critical.lean` — the **tenth attack family** (round 53): *minimal transversals and
+  critical cycles*, i.e. the interior of a single graph, with no decomposition at all:
+  - `JSP90.exists_criticalCycle_of_minimal` / `exists_criticalTransversal_of_minimal`: minimality of
+    an odd cycle transversal `X` gives, for each `x ∈ X`, an odd cycle meeting `X` exactly in `x`
+    (the classical first step of the Reed–Robertson–Seymour–Thomas proof);
+  - `JSP90.IntGraph`, `CriticalTransversal`, `disjoint_of_colour_eq`: the **critical intersection
+    graph** — inside one colour class the critical cycles are pairwise vertex-disjoint;
+  - **`JSP90.card_X_le_of_colouring_pack`** (and its `LocIndep` form `card_X_le_of_colouring`): the
+    counting lemma — a `c`-colourable critical intersection graph gives `|X| ≤ c * k`, with no
+    bound on the odd girth, on the cycle lengths, or on the connectivity of `G`;
+  - **`JSP90.erdos73On_of_spread_transversal`**: a new instance of the headline theorem with the
+    constant `c * k`; its `c = 1` case `erdos73On_of_disjoint_transversal` has the optimal constant
+    `f(k) = k` and strictly generalises `erdos73On_of_no_branch`;
+  - `packing_of_disjoint_transversal` / `card_le_of_disjoint_transversal`: for a 1-spread transversal
+    the critical cycles are also a packing of the same size (packing number = transversal number);
+  - **`JSP90.erdos73_of_spreadMinimalTransversal`**: the new, precise localisation of the missing
+    lemma — Erdős Problem #73 follows as soon as every graph of odd cycle packing number at most `r`
+    admits a minimal odd cycle transversal whose critical intersection graph is `r`-colourable.
 
 The full theorem `Erdős73 k` for every `k ≥ 0` is Reed 1999, *Mangoes and Blueberries*, Combinatorica
 19 (1999) 267–296.  Everything except the Erdős–Pósa theorem for odd cycles
@@ -285,3 +303,4 @@ import JSPProblem.Weight
 import JSPProblem.Optimal
 import JSPProblem.Additive
 import JSPProblem.Connect
+import JSPProblem.Critical
