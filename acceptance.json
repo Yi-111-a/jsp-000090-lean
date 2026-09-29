@@ -1,0 +1,13 @@
+{
+  "jsp_id": "JSP-000090",
+  "catalog_url": "https://github.com/TheJustinSunPrize/awards/blob/main/problems/README.md",
+  "catalog_record_url": "https://github.com/TheJustinSunPrize/awards/blob/main/problems/catalog-0001-0100.md#JSP-000090",
+  "original_question_en": "If local subgraphs have large independent sets, must the whole graph be close to bipartite after few modifications?",
+  "underlying_problem": "Erdos Problems #73 (https://www.erdosproblems.com/73), solved by B. Reed, 'Mangoes and Blueberries', Combinatorica (1999), 267-296.",
+  "formal_statement": "Let k >= 0 and let G be a finite graph such that every subgraph H of G has an independent set of size at least (|V(H)| - k)/2. Then for every k there is f(k) such that deleting at most f(k) vertices leaves G bipartite.",
+  "lean_statement_of_record": "JSP90.Erdős73 (k : ℕ) : Prop := ∃ m, Erdős73On k m, with LocIndep and CloseToBipartite in lean/JSPProblem/Definitions.lean",
+  "required_theorems": [
+    "jsp_000090_main"
+  ],
+  "notes": "Statement recovered from the official catalog in round 31 (was a TODO scaffold). jsp_000090_main must be the complete Erdős #73 theorem; it is deliberately not declared while the hard direction (Reed's theorem) is unproved, so the harness keeps reporting it missing. See ACCEPTANCE.md and discovery/JSP-000090/policy.json for the exact remaining lemmas."
+}
