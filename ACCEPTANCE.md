@@ -855,3 +855,101 @@ budget ran out.  The exact statement, the two routes to it and the environment f
 `missing_theorems = ["jsp_000090_main"]`; `score.py --strict-prize` reports
 `build_ok = true, sorry = 0, admit = 0, partial_ok = true`.  `formalization.yaml` remains
 `status: wip`, `prize_ready: false`.  No award claim is made.
+
+## Round 63
+
+**Attack family 14 (continued): the cut descent of the deficiency, finished in the
+`CloseToBipartite` vocabulary.**  `JSPProblem/Cut.lean` now holds **42 declarations, 0 sorry,
+0 admit, `lake build` OK (1222 jobs)**.  The round closed round 62's named blocker
+`indepCard_le_sum_inter` and then discharged the *instance* half of the planned reduction
+(`closeToBipartite_of_anticoverCut`), which had been the largest remaining Lean item of the line.
+
+### What is now proved
+
+* `JSP90.indepCard_le_sum_inter` — **the round-62 blocker.**  For a family `𝒬` of pairwise disjoint,
+  pairwise anticomplete pieces with `(h : AnticoverCoverFamily G 𝒬)` covering `X`,
+
+  ```lean
+  indepCard G X ≤ ∑ Q ∈ 𝒬, indepCard G (X ∩ Q)
+  ```
+
+  proved by induction on the family with `indepCard_le_add` as the merge step, which is exactly
+  route 1 of the recorded plan.  No `IsIndepSet` bookkeeping of compound finsets is needed.
+* `JSP90.AnticoverCut` — **a cut of `G` at a set `T`**: `AnticoverCoverFamily G 𝒬`, every piece
+  disjoint from `T`, every piece anticomplete to `T`, and `𝒬` covering `V \ T`.  With
+  `AnticoverCut.anticomplete_to_T`.
+* `JSP90.closeToBipartite_of_anticoverCut` — **A NEW INSTANCE OF THE HEADLINE THEOREM, OVER A CUT AT
+  A `3`-CLIQUE.**  If `T` is a triangle and the vertices of `V \ T` split anticompletely into pieces,
+  each disjoint from `T`, anticomplete to it, and `m`-close to bipartite, then
+
+  ```lean
+  LocIndep k G → CloseToBipartite (3 + k * m) G
+  ```
+
+  The constant is **independent of the number of pieces**: at most `k` of them are non-bipartite
+  (`card_nonBipartiteParts_le_cover`), and the rest cost nothing.  **No bound is assumed on the odd
+  girth, on the packing weight, or on the number of branch vertices** — this is the hypothesis
+  triple that rounds 54–62 kept having to impose.
+* `JSP90.closeToBipartite_sub_induceFinset` — a `CloseToBipartite` bound reads on any subgraph with
+  the *same* constant (witness `Y ∩ U`, via `U \ (Y ∩ U) = U \ Y`).
+* `JSP90.closeToBipartite_of_anticoverCut_on` — the instance read on a vertex set `U ⊆ V`, the form
+  the reduction consumes.
+* The vertex-set-restricted deficiency `JSP90.maxDefIn G U = (U.powerset).sup (defOf G)`, with
+  `le_maxDefIn`, `exists_eq_maxDefIn`, `maxDefIn_mono`, `defOf_induceFinset_of_subset`,
+  `maxDefIn_induceFinset_eq`, and the two clique absorption lemmas
+  `maxDefIn_ge_one_add_maxDefIn_of_clique` / `..._of_clique_sub`
+  (`1 + MaxDef (G[T]) ≤ MaxDefIn G U` for a triangle `T ⊆ U`).
+
+### A mathematical correction worth recording
+
+`maxDefIn (induceFinset G Q) V` is **not** `maxDefIn G Q`: for `Y ⊄ Q` the quantity
+`defOf (G[Q]) Y` is defined by `indepCard (G[Q]) Y`, and `Y` ranges over subsets of the *ambient*
+`V`, so it is a different (larger) number.  Any statement that restricts a deficiency bound to a
+piece must therefore quantify over the pair `(G, U)` and conclude about `induceFinset G U`; it
+cannot be phrased as a bound on `MaxDef (G[Q])`.  `closeToBipartite_of_anticoverCut_on` is the
+bridge that makes this point harmless: a `CloseToBipartite` bound *does* transfer to subgraphs.
+
+The proof of the instance is exactly the plan of round 62, in the `CloseToBipartite` rather than
+the `MaxDef` vocabulary: filter `𝒬` to the non-bipartite pieces `N` (`|N| ≤ k`), apply
+`closeToBipartite_of_anticoverFamily_cost` with the constant `m` on each, put
+`Z = X₁ ∩ N.biUnion id` (so `|Z| ≤ m * k` and `N.biUnion id \ Z = N.biUnion id \ X₁`), show
+`G[univ \ (T ∪ N.biUnion id)]` bipartite by `isOddCycle_sub_anticoverCover` (every odd cycle of the
+residue lies in a piece, and a non-bipartite piece would sit inside the residue), and glue with
+`closeToBipartite_of_anticover` on the `Anticover` split
+`(T ∪ N.biUnion id) ∐ (univ \ (T ∪ N.biUnion id))`.
+
+### Toolchain findings of this round
+
+* `Finset.mem_sdiff.mp h` returns `x ∈ s ∧ x ∉ t`, so `.2` is the **negation function**: `hh.2 h` with
+  `h : x ∈ t`, and `hh.2` alone has type `¬ x ∈ t`.  `(Finset.mem_sdiff.mp hx).2` is *not* a
+  membership and is the source of most of the errors of this round.
+* `Finset.mem_union.mpr (Or.inl h)` does **not** elaborate when the goal is a `Quot` membership: Lean
+  infers the *other* finset of the union from the branch of the `Or` and picks the wrong one (goal
+  `x ∈ A ∪ B`, term `x ∈ B` reported as expected to be `x ∈ A`).  Use the pinned helpers
+  `JSP90.mem_union_left' A B` / `JSP90.mem_union_right' A B`, or restructure so that the membership
+  is transported with an explicit `have h2 : … := …` annotation.  This is the same class of problem
+  as round 61's note about `Finset.mem_inter`'s `s₁ s₂` binders.
+* `N.biUnion id` needs `(id : Finset V → Finset V)` annotated: `biUnion` infers its codomain from
+  the argument and `id` alone is polymorphic.
+* `Finset.sum_const` followed by `nsmul_eq_mul` yields `m * ↑#s` on the left and `m * #s` on the
+  right, and neither `Nat.cast_rfl` nor `Nat.cast_ofNat` is accepted; **plain `simp`** normalises the
+  `↑` and then `Nat.mul_comm` finishes.  So `∑ x ∈ s, m = s.card * m` is `by simp`, and the
+  inequality is `have h : … := by simp; rw [h, Nat.mul_comm]`.
+* `Finset.inter_subset_left : s ∩ t ⊆ s` and `Finset.inter_subset_right : s ∩ t ⊆ t` are element
+  projections, so they cannot be passed as an `⊆` *function* to `Finset.card_le_card` without a type
+  ascription (`Finset.inter_subset_left : X₁ ∩ NN ⊆ X₁`); with a `set`-bound local the `show` is
+  needed because the projection does not match the folded finset syntactically.
+* `deleteFinset_induceFinset (A X : Finset V)` takes no named `G` argument (it is a section
+  variable), so `(G := …)` is rejected; the `G` has to be fixed by annotating the *goal*:
+  `have hdel : deleteFinset (induceFinset G A) X = … := deleteFinset_induceFinset _ _`.
+  `induceFinset_univ : induceFinset G (Finset.univ : Finset V) = G` converts a `deleteFinset G Y`
+  hypothesis into an `IsBipartite` statement about `G[univ \ Y]`.
+* `IsOddCycle.of_induceFinset` lifts an odd cycle of `G[s]` to one of `G`, and
+  `isOddCycle_sub_induceFinset (s := …)` gives the vertex set, so an odd cycle of a residue can be
+  pushed up and then fed to `isOddCycle_sub_anticoverCover` — the whole `hrest` argument of the
+  instance is these three lines plus `isOddCycle_card_ge_three`.
+
+`jsp_000090_main` is still **not** declared; `harness/score.py --strict-prize problems/JSP-000090`
+reports `build_ok = true, sorry = 0, admit = 0, partial_ok = true,
+missing_theorems = ["jsp_000090_main"]`.  `formalization.yaml` remains `status: wip`,
+`prize_ready: false`.  No award claim is made.
