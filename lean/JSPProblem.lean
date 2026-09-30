@@ -401,3 +401,4 @@ import JSPProblem.Boundary
 import JSPProblem.Cut
 import JSPProblem.CutTriangle
 import JSPProblem.Attach
+import JSPProblem.Triangle

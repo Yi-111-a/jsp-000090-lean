@@ -332,6 +332,85 @@ set `X` then every independent set of `H` is one of `G[X]`, so `α(H) ≤ α(G[X
   `missing_theorems = ["jsp_000090_main"]`. Declaring a weaker theorem under that name would
   misrepresent the result.
 
+---
+
+## Round 68 — `JSPProblem/Triangle.lean`: **Erdős #73 is EQUIVALENT to its triangle-free case**
+
+New file `lean/JSPProblem/Triangle.lean` (19 declarations, 0 sorry/admit, `lake build` OK with 1225
+jobs), imported from the root module `JSPProblem.lean`.  This is the **eighteenth attack family**,
+and it *closes* one of the two statements that round 64 left open, leaving a single one.
+
+### The gap that is closed
+
+Round 64 reduced Erdős #73 to **two** statements — `JSP90.TriangleFreeErdős73` (the triangle-free
+case) and `JSP90.CutTriangleErdős73` (near a triangle, either the graph cuts there or it is
+`O_k(1)`-close to bipartite) — because the only instance of the headline theorem at a triangle then
+available was `JSP90.closeToBipartite_of_cutTriangle`, which needs the hypothesis
+`JSP90.CutTriangle G T` (*no edge from the triangle to the rest of the graph*).  `K_4` shows that
+hypothesis is not automatic, and a `C_5` with a hub and a pendant edge (deficiency `1`, not
+bipartite, no cut triangle) shows the alternative is a genuine case distinction, not a theorem.
+
+**Neither the hypothesis nor the alternative is needed.**  Two facts do all the work, and both were
+already available but had not been put together:
+
+* **the descent needs only disjointness.**  `JSP90.maxDefIn_ge_one_add_maxDefIn_of_clique`
+  (`JSPProblem/Cut.lean`) asks for `Disjoint U T` and nothing else — no separation, no cut.  Round 59
+  had to assume *separation* from an odd cycle; round 64 had to assume the cut.  Repackaged here as
+  `JSP90.maxDefIn_add_one_le_maxDef_of_triangle` and
+  `JSP90.locIndep_of_disjoint_triangle`: *every vertex set disjoint from a triangle inherits Erdős's
+  hypothesis with the parameter dropped by one*;
+* **the composition needs no condition on the edges from `T` to the pieces.**  The third field of
+  `JSP90.AnticoverCut` is used, in the proof of `JSP90.closeToBipartite_of_anticoverCut`, only to
+  feed an `Anticover` structure to `JSP90.closeToBipartite_of_anticover`.  That recombination is
+  avoidable: the residue `G[V \ (T ∪ Z)]` is bipartite outright, because an odd cycle of `G`
+  avoiding `T` and covered by pairwise anticomplete pieces lies in a **single** piece
+  (`JSP90.isOddCycle_sub_anticoverCover`) and contradicts that piece's bipartiteness.
+
+### What is proved
+
+* `JSP90.maxDefIn_add_one_le_maxDef_of_triangle`, `JSP90.maxDef_add_one_le_maxDef_of_triangle`,
+  **`JSP90.locIndep_of_disjoint_triangle`** — the descent at a triangle, with **no** separation and
+  **no** cut hypothesis;
+* `JSP90.maxDefIn_add_card_le_maxDef_add_two_of_clique` — the general form, *a clique of size `t`
+  costs `t − 2` units of deficiency off any disjoint vertex set* (this contains
+  `JSP90.maxDef_allNeighOf_le` of round 65 and explains why the completion sets of a clique are free);
+* **`JSP90.closeToBipartite_of_pieces`** — a **new instance of the headline theorem**: a `3`-vertex
+  set `T` with a pairwise-disjoint, pairwise-anticomplete cover `𝒬` of `V \ T`, every piece
+  `m`-close to bipartite ⟹ `LocIndep k G → CloseToBipartite (3 + k * m) G`.  The anticompleteness
+  of the pieces to `T` of rounds 63–64 is **dropped**, and so is the disjointness of the pieces
+  from `T`, and `T` need not even be a clique;
+* `JSP90.closeToBipartite_of_triangle` — the same instance at the **canonical** family of pieces
+  (the connected components of `G − T`) and at an **arbitrary** triangle: no `JSP90.CutTriangle`
+  hypothesis, constant `3 + k * m` independent of the number of components, no bound on the odd
+  girth, packing weight or number of branch vertices;
+* `JSP90.locIndep_piece_of_triangle` — every component of `G − T` satisfies `LocIndep (k − 1)`, the
+  induction step of the classical proof at a triangle;
+* **`JSP90.TriangleFreeOnly`, `JSP90.erdos73On_of_triangleFreeOnly`,
+  `JSP90.erdos73_of_triangleFreeOnly`** — Erdős #73 **in full**, with the constant `cutBound` of
+  round 64, from the triangle-free case **alone**; the induction is on `k` and at a triangle takes
+  the components of `G − T`, which are anticomplete with no hypothesis at all;
+* **`JSP90.erdos73_iff_triangleFreeOnly`** — **Erdős Problem #73 is equivalent to Erdős #73 for
+  triangle-free graphs** (`(∀ k, Erdős73On k (cutBound k)) ↔ TriangleFreeOnly`);
+* **`JSP90.cutTriangleErdős73_of_triangleFreeOnly`** — round 64's second statement is now a
+  **theorem**, not a hypothesis, and `JSP90.erdos73_of_triangleFreeErdos73` is round 64's
+  `JSP90.erdos73_of_triangleFree` with the `CutTriangleErdős73` argument deleted;
+* **`JSP90.descent_tight`** — the descent is **tight**: on the sharp witness `kTriangles k` (deficiency
+  exactly `k`) a single triangle is disjoint from a vertex set of deficiency exactly `k − 1`, so the
+  induction really drops by exactly one unit per triangle and `cutBound` is not an artefact
+  (with `JSP90.card_le_kTriangles_avoid`, the `α`-count behind it).
+
+### What is *not* proved
+
+`JSP90.TriangleFreeOnly` — Erdős #73 for triangle-free graphs, constant `cutBound`.  It is a
+statement about a *class* of graphs, and it is now the **whole** remaining content of JSP-000090
+(rounds 64–65 named two statements; there is one).  Behind it stands
+`JSP90.OddCycleErdosPosa r` (Reed–Robertson–Seymour–Thomas), still the primary blocker.
+
+`jsp_000090_main` is **not** declared, so the harness keeps reporting
+`missing_theorems = ["jsp_000090_main"]`; `score.py --strict-prize` reports
+`build_ok = true, sorry = 0, admit = 0, partial_ok = true`.  `formalization.yaml` remains
+`status: wip`, `prize_ready: false`.  No award claim is made.
+
 ### Round 48 — `JSPProblem/Connect.lean`: the connectivity and 1-cut reductions
 
 Round 47 named the next step: instantiate the new instance with the family of **connected
