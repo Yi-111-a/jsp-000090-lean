@@ -953,3 +953,128 @@ residue lies in a piece, and a non-bipartite piece would sit inside the residue)
 reports `build_ok = true, sorry = 0, admit = 0, partial_ok = true,
 missing_theorems = ["jsp_000090_main"]`.  `formalization.yaml` remains `status: wip`,
 `prize_ready: false`.  No award claim is made.
+
+---
+
+## Round 64 — `JSPProblem/CutTriangle.lean`: the cut triangle, and the reduction of Erdős #73 to
+two local statements
+
+New file `lean/JSPProblem/CutTriangle.lean` (**26 declarations, 608 lines, 0 `sorry`, 0 `admit`,
+`lake build` OK, 1223 jobs**), imported from the root module `JSPProblem.lean`.  It is the
+**fifteenth attack family** and it *finishes* the reduction that rounds 62–63 planned: the two gaps
+that round 63 named as blockers are closed, and the induction on `k` is run.
+
+### What is proved
+
+1. **The deficiency of an induced subgraph** (`Part 1`) — the transport lemma that makes an
+   induction on Erdős's parameter act on a *piece* of a decomposition:
+   * `JSP90.indepCard_induceFinset_inter_add_sdiff`: **α of an induced subgraph splits off the
+     vertices outside it**, `α(G[U], Y) = α(G[U], Y ∩ U) + |Y \ U|` (the vertices of `Y \ U` are
+     isolated in `G[U]`, so they can all be added to an independent set — the combinatorial content
+     is `JSP90.mem_indepSets_union_sdiff`);
+   * `JSP90.defOf_induceFinset_inter_le`, and therefore
+   * **`JSP90.maxDef_eq_maxDefIn_induceFinset : MaxDef (induceFinset G U) = maxDefIn G U`** — the
+     deficiency of the *graph* `G[U]`, read over all subsets of the ambient vertex type, is the
+     deficiency *inside `U`*.  This is the answer to the "mathematical correction" that round 63
+     recorded against the unrestricted `maxDefIn (induceFinset G Q) V`;
+   * `JSP90.locIndep_induceFinset_of_maxDefIn_le`: a bound on the deficiency inside a vertex set is
+     a local hypothesis on the induced subgraph.
+2. **A cut triangle** (`Parts 2–3`):
+   * `JSP90.anticoverCoverFamily_compPieces_sub` — the components of a subgraph `H ≤ G`, restricted
+     to a vertex set `S` on which `H` and `G` have the same edges, are pairwise disjoint and
+     pairwise anticomplete **in `G`**.  This is what lets the components of `G[V \ T]` be used as
+     pieces of a decomposition of `G`;
+   * **`JSP90.CutTriangle G T`** = `T.card = 3 ∧ (no edge of `G` joins `T` to `V \ T`)**, and
+     `JSP90.cutPieces G T` = the components of `G[V \ T]` **intersected with `V \ T`** (the
+     intersection is what makes every piece avoid `T` *by construction*, so no appeal to the
+     internals of `SimpleGraph.Walk` is needed);
+   * `JSP90.anticoverCoverFamily_cutPieces`, `JSP90.mem_cutPieces`,
+     **`JSP90.anticoverCut_of_cutTriangle`** — a cut triangle gives the `AnticoverCut` of
+     `JSPProblem/Cut.lean` at that triangle.  This closes the blocker that round 63 recorded as
+     "the triangle-cut construction, now the only real gap";
+   * **`JSP90.closeToBipartite_of_cutTriangle` — a new instance of the headline theorem at a
+     canonical cut**: if every component of `G[V \ T]` is `m`-close to bipartite and `T` is a
+     triangle with no edge to the rest of `G`, then `LocIndep k G → CloseToBipartite (3 + k * m) G`,
+     with no bound on the odd girth, the packing weight or the number of branch vertices.
+3. **The descent at a cut triangle** (`Part 4`): **`JSP90.maxDefIn_le_of_cutPiece`**,
+   `1 + maxDefIn G Q ≤ k` for every piece `Q` (the statement round 63 named as missing), and
+   **`JSP90.locIndep_piece_of_cutTriangle`**, `LocIndep k G → Q ∈ cutPieces G T →
+   LocIndep (k - 1) (G[Q])`.
+4. **THE REDUCTION** (`Part 5`) — **`JSP90.erdos73_of_triangleFree`**: *Erdős Problem #73, in full,
+   follows from two local statements*, with the explicit constant `JSP90.cutBound`
+   (`cutBound 0 = 1`, `cutBound (k + 1) = 3 + (k + 1) * cutBound k`):
+   * `JSP90.TriangleFreeErdős73` — Erdős #73 restricted to **triangle-free** graphs;
+   * `JSP90.CutTriangleErdős73` — a graph satisfying `LocIndep k` with `k ≥ 1` either has a *cut
+     triangle* or is already `cutBound k`-close to bipartite;
+   * the induction is on `k` alone (`k = 0` is `JSP90.erdos73_zero`; at `k + 1` a triangle-free
+     graph is a `TriangleFreeErdős73`, and otherwise the pieces of the cut at the cut triangle are
+     `LocIndep k`, hence `cutBound k`-close to bipartite by the induction hypothesis, and
+     `closeToBipartite_of_cutTriangle` gives `3 + (k + 1) * cutBound k = cutBound (k + 1)`);
+   * `JSP90.erdos73_of_triangleFree_of_allTrianglesCut` closes the reduction unconditionally on the
+     class of graphs whose `3`-cliques all cut.
+5. **A machine-checked negative result**: `JSP90.not_cutTriangle_completeGraph_four` — in `K_4` no
+   `3`-clique cuts the graph (the fourth vertex is adjacent to all three), so `CutTriangle` is a
+   hypothesis and not a theorem.  This is the same obstruction that round 44 recorded for the naive
+   absorption step (`JSP90.absorption_step_fails`, `K_5`) and round 63 for the construction of
+   `AnticoverCut`.
+
+### A correction to rounds 62–63
+
+Those rounds planned the constant `f k = 4 ^ k`, on the strength of `JSP90.sup_pow_four` and
+`JSP90.step_pow_four`.  **That constant cannot work**: the instance of round 63 costs
+`3 + k * f (k - 1)`, and `3 + k * 4 ^ (k - 1) > 4 ^ k` for `k ≥ 5`
+(`k = 10`: `3 + 10 · 4⁹ = 2 621 443 > 4¹⁰ = 1 048 576`).  The recurrence actually forced by the
+instance is `f (k + 1) = 3 + (k + 1) * f k`, which is `JSP90.cutBound`; the two numerical lemmas of
+`Cut.lean` are therefore not the hypotheses of the reduction and are not used.  A constant of the
+shape `4 ^ k` would need the *superadditive* half of the additivity of the deficiency over a cut
+(`∑_Q maxDefIn G Q ≤ MaxDef G - 1`), i.e. `JSP90.sum_sub_eq_of_le` applied to a vertex set on which
+no truncation occurs; that half is not proved and is not needed for the reduction.
+
+### What is *not* proved
+
+Exactly two statements, and they are the whole remaining content:
+
+* **`JSP90.TriangleFreeErdős73`** — Erdős #73 for triangle-free graphs (the classical triangle-free
+  case);
+* **`JSP90.CutTriangleErdős73`** — the local absorption of the round-61 line: near a triangle,
+  either the graph cuts there or it is `O_k(1)` from bipartite.  A cut triangle need not exist for a
+  `LocIndep 1` graph (a `C_5` with a hub adjacent to all of it and a pendant edge at the hub has
+  `MaxDef = 1`, is not bipartite and has no cut triangle), so this is a genuine case distinction;
+  it is the local lemma of Reed's *Mangoes and Blueberries*.
+
+Both are statements about a *class* of graphs, and both are strictly weaker than the
+Reed–Robertson–Seymour–Thomas theorem (`JSPProblem/Transversal.lean`, `JSP90.OddCycleErdosPosa r`,
+the primary blocker of the earlier rounds): neither mentions a packing number, a transversal, an
+odd girth, a packing weight or a number of branch vertices.
+
+`jsp_000090_main` is still **not** declared, so the harness keeps reporting
+`missing_theorems = ["jsp_000090_main"]`; `harness/score.py --strict-prize problems/JSP-000090`
+reports `build_ok = true, sorry = 0, admit = 0, partial_ok = true`.  `formalization.yaml` remains
+`status: wip`, `prize_ready: false`.  No award claim is made.
+
+### Toolchain findings of this round
+
+* **A composite finset expression at a `Set`-expected position is elaborated with `Set`
+  operations, not `Finset` ones.**  `G.IsIndepSet (S ∪ (Y \ U))` elaborates the argument as
+  `↑S ∪ (↑Y \ ↑U)`, which is **not defeq** to `↑(S ∪ (Y \ U))` (the round-62 note, confirmed
+  again).  The robust idiom is to state such facts in *finset* language — e.g.
+  `S ∪ (Y \ U) ∈ indepSets (G[U]) Y` — so that the argument position is a `Finset` variable and the
+  `mem_filter` predicate applies the `↑` coercion itself;
+* **`Finset.eq_empty_iff_forall_notMem` exists** (contrary to the round-62 note) and
+  `Finset.inter_eq_empty` does **not**; `Finset.sdiff_subset_left` and
+  `Finset.not_mem_empty` do not exist either;
+* applying a *subset* hypothesis to get a membership, and destructuring the result with
+  `Finset.mem_inter.mp`, needs an intermediate `have` with the membership type written out: the
+  elaborator does not see through `⦃a⦄, a ∈ s → a ∈ t`;
+* strict-implicit binders (`⦃x y : V⦄` in a `CutTriangle` hypothesis) must be given by name
+  (`hT.2 (x := y) (y := x) …`);
+* `omega` **does** prove `a ≤ (a - c) + c`, and it does normalise multiplication by numerals, so
+  `2 * (α + b) = 2 * α + 2 * b` needs no help; it still cannot eliminate `Nat` subtraction
+  (`JSP90.le_pred_of_succ_le` of `OffCycle.lean` remains the way to get `n ≤ k - 1` from
+  `n + 1 ≤ k`);
+* `SimpleGraph.Reachable` at this revision is `Nonempty (G.Walk u v)` and `G.Walk` is an inductive
+  on `V → V → Type`; avoiding it entirely (by intersecting the components with `V \ T` before
+  forming the family) turned out to be much cheaper than any induction on walks;
+* `push_neg` is deprecated in this build (`push Not` instead), and it makes no progress on
+  `¬ G.CliqueFree 3` (`CliqueFree n = ∀ t, ¬ G.IsNClique n t`), so a `by_contra` is the way to
+  extract the `3`-clique.

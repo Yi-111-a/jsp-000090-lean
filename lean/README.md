@@ -631,3 +631,80 @@ equals the packing number" is **refuted**, and the exact remaining content is th
 overlap of a pair of odd cycles.  This is the same `K_5` obstruction as
 `JSPProblem.absorption_step_fails` (round 44), now seen as a statement about the Erdős–Pósa
 function itself.
+
+---
+
+## Round 64 — `JSPProblem/CutTriangle.lean`: the cut triangle, and Erdős #73 from two local
+statements
+
+Rounds 62–63 built the *instance* half of a reduction of Erdős #73 to its triangle-free case
+(`closeToBipartite_of_anticoverCut`: a cut at a triangle, constant `3 + k * m`) and named two
+gaps.  This file closes both and **runs the induction**, so that the whole remaining content of
+JSP-000090 is now a pair of statements about *classes* of graphs.
+
+### 1. The deficiency of an induced subgraph
+
+| item | content |
+| --- | --- |
+| `indepCard_induceFinset_of_subset` | `α(G[U], X) = α(G, X)` for `X ⊆ U` |
+| `mem_indepSets_union_sdiff` | if `S ⊆ Y ∩ U` is independent in `G[U]`, then `S ∪ (Y \ U) ∈ indepSets (G[U]) Y`: the vertices outside `U` are **isolated** in `G[U]` |
+| **`indepCard_induceFinset_inter_add_sdiff`** | **`α(G[U], Y) = α(G[U], Y ∩ U) + |Y \ U|`** |
+| `defOf_induceFinset_inter_le` | `|Y| - 2 α(G[U], Y) ≤ |Y ∩ U| - 2 α(G[U], Y ∩ U)` |
+| **`maxDef_eq_maxDefIn_induceFinset`** | **`MaxDef (induceFinset G U) = maxDefIn G U`** — the deficiency of the graph `G[U]`, read over all subsets of the ambient vertex type, is the deficiency *inside `U`* |
+| `locIndep_induceFinset_of_maxDefIn_le` | a bound on the deficiency inside a vertex set is a `LocIndep` hypothesis on the induced subgraph |
+
+This is the answer to the correction round 63 recorded against the unrestricted
+`maxDefIn (induceFinset G Q) V`, and it is what lets an induction on Erdős's parameter run over
+the *pieces* of a cut.
+
+### 2. A cut triangle
+
+| item | content |
+| --- | --- |
+| `anticoverCoverFamily_compPieces_sub` | the components of a subgraph `H ≤ G`, restricted to a vertex set on which `H` and `G` have the same edges, are pairwise disjoint and pairwise anticomplete **in `G`** |
+| **`CutTriangle G T`** | `T.card = 3` and **no edge of `G` joins `T` to `V \ T`** |
+| `cutPieces G T` | the components of `G[V \ T]`, each **intersected with `V \ T`** |
+| `cutPieces_sub`, `mem_cutPieces`, `anticoverCoverFamily_cutPieces` | the pieces avoid `T` by construction, are pairwise disjoint/anticomplete, and cover `V \ T` |
+| **`anticoverCut_of_cutTriangle`** | they are the `AnticoverCut` of `JSPProblem/Cut.lean` at that triangle |
+| **`closeToBipartite_of_cutTriangle`** | **a new instance of the headline theorem at a canonical cut:** `LocIndep k G` + every component of `G[V \ T]` is `m`-close to bipartite ⟹ `CloseToBipartite (3 + k * m) G` |
+
+The intersection of each component with `V \ T` is what makes the pieces avoid `T` *by
+construction*: the components of `deleteFinset G T` do **not** form an `AnticoverCut` (a component
+may contain a vertex of `T` that has a neighbour outside `T`), which is the gap round 63 recorded.
+Here the gap is replaced by a hypothesis, and no induction on `SimpleGraph.Walk` is needed.
+
+### 3. The descent
+
+| item | content |
+| --- | --- |
+| **`maxDefIn_le_of_cutPiece`** | at a cut triangle, `1 + maxDefIn G Q ≤ k` for every piece `Q` |
+| **`locIndep_piece_of_cutTriangle`** | `LocIndep k G`, `Q ∈ cutPieces G T` ⟹ `LocIndep (k - 1) (induceFinset G Q)` |
+
+### 4. The reduction
+
+```lean
+def cutBound : ℕ → ℕ          -- cutBound 0 = 1,  cutBound (k + 1) = 3 + (k + 1) * cutBound k
+def TriangleFreeErdős73       -- Erdős #73 for triangle-free graphs, with the constant cutBound
+def CutTriangleErdős73        -- LocIndep k G, k ≥ 1 ⟹ a cut triangle, or CloseToBipartite (cutBound k) G
+
+theorem erdos73_of_triangleFree (htf : TriangleFreeErdős73) (hc : CutTriangleErdős73) :
+    ∀ k, Erdős73 k
+```
+
+**Erdős Problem #73, in full, from two local statements**, by induction on `k` alone.  Neither
+hypothesis mentions a packing number, a transversal, an odd girth, a packing weight or a number of
+branch vertices; both are statements about a class of graphs.
+
+### 5. A negative result and a correction
+
+* `not_cutTriangle_completeGraph_four` — in `K_4` no `3`-clique cuts the graph, so `CutTriangle` is
+  a hypothesis and not a theorem (the `K_4`/`K_5` obstruction of rounds 44 and 63, machine-checked
+  at the level of the new predicate).  `erdos73_of_triangleFree_of_allTrianglesCut` closes the
+  reduction unconditionally on the class of graphs whose `3`-cliques all cut.
+* **The constant `f k = 4 ^ k` planned in rounds 62–63 is impossible**: the proved instance costs
+  `3 + k * f (k - 1)`, and `3 + k * 4 ^ (k - 1) > 4 ^ k` for `k ≥ 5`.  The recurrence actually
+  forced by the instance is `f (k + 1) = 3 + (k + 1) * f k`, i.e. `cutBound`.
+
+### Not proved
+
+`TriangleFreeErdős73` and `CutTriangleErdős73`, and nothing else.

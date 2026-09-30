@@ -343,6 +343,35 @@ deliberately not declared.
   - `JSP90.hitsOddCycles_of_bipartite_outer` and `JSP90.closeToBipartite_of_bipartite_outerLayer` —
     the local absorption statement: if the part of `G` at distance `≥ 2` from a shortest odd cycle is
     bipartite, then `G` is `1 + |boundary|` close to bipartite;
+* `JSPProblem.CutTriangle` — the **cut triangle**, and **the reduction of Erdős #73 to two local
+  statements** (round 64, 26 declarations).  It closes the two gaps left by
+  `JSPProblem/Cut.lean` and then runs the induction on `k`:
+  - `JSP90.indepCard_induceFinset_inter_add_sdiff` — **α of an induced subgraph splits off the
+    vertices outside it**, `α(G[U], Y) = α(G[U], Y ∩ U) + |Y \ U|` (they are isolated in `G[U]`),
+    hence `JSP90.maxDef_eq_maxDefIn_induceFinset : MaxDef (induceFinset G U) = maxDefIn G U`:
+    the deficiency of a *piece* is the deficiency inside the piece, and an induction on Erdős's
+    parameter can be run over the pieces of a cut;
+  - `JSP90.anticoverCoverFamily_compPieces_sub` — the components of a subgraph, restricted to a
+    vertex set on which the two graphs agree, are pairwise anticomplete *in the ambient graph*;
+  - **`JSP90.CutTriangle G T`** (`T.card = 3` and no edge of `G` joins `T` to `V \ T`) and
+    `JSP90.cutPieces G T` = the components of `G[V \ T]` intersected with `V \ T`; with
+    `JSP90.anticoverCut_of_cutTriangle` they form the `AnticoverCut` of
+    `JSPProblem/Cut.lean`, and
+    **`JSP90.closeToBipartite_of_cutTriangle` is a new instance of the headline theorem at a
+    canonical cut** (`3 + k * m`, no bound on odd girth, packing weight or branch vertices);
+  - **`JSP90.maxDefIn_le_of_cutPiece` / `JSP90.locIndep_piece_of_cutTriangle`** — the descent:
+    at a cut triangle every piece satisfies `LocIndep (k - 1)`, the step of the classical
+    induction;
+  - **`JSP90.erdos73_of_triangleFree`: ERDŐS PROBLEM #73, IN
+    FULL, FROM `JSP90.TriangleFreeErdős73` (the triangle-free case) AND
+    `JSP90.CutTriangleErdős73` (a cut triangle, or already `cutBound k`-close to bipartite)**,
+    with the constant `JSP90.cutBound`, `cutBound 0 = 1`, `cutBound (k+1) = 3 + (k+1) * cutBound k`.
+    **A correction to rounds 62–63: the planned constant `4 ^ k` cannot work**, since the instance
+    of round 63 costs `3 + k * f (k-1)` and `3 + k * 4^(k-1) > 4^k` for `k ≥ 5`;
+  - `JSP90.not_cutTriangle_completeGraph_four` — a **machine-checked negative result**: in `K_4`
+    no `3`-clique cuts the graph, so `CutTriangle` is a hypothesis and not a theorem;
+    `JSP90.erdos73_of_triangleFree_of_allTrianglesCut` closes the reduction on the class of graphs
+    whose triangles all cut.
   - **`JSP90.erdos73On_of_bounded_boundary` — A NEW INSTANCE OF THE HEADLINE THEOREM**:
     `LocIndep k G` + `BoundedBoundary d G` gives `CloseToBipartite (k * (d + 1)) G`, by induction on
     `k` through the outer layer.  At `d = 0` the constant is the sharp `k` of
@@ -370,3 +399,4 @@ import JSPProblem.Deficiency
 import JSPProblem.OffCycle
 import JSPProblem.Boundary
 import JSPProblem.Cut
+import JSPProblem.CutTriangle
