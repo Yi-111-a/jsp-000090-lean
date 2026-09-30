@@ -398,6 +398,32 @@ deliberately not declared.
     degree axis**: if all of `G`'s edges touch a set of at most `m` vertices then `G` is `m`-close to
     bipartite, with no bound on the odd girth, the packing number, the packing weight or the number
     of branch vertices.
+* `JSPProblem.Petersen` — **the deficiency-one axis: the Petersen graph with one vertex deleted, and
+  the improved lower bound `f(k) >= 2 k`** (round 76, the twenty-fourth attack family).  This is the
+  first file that *improves a quantitative statement about the headline theorem* rather than
+  reformulating it.  `JSPProblem/Sharp.lean` proved `f(k) >= k` with `kTriangles k`; here the witness
+  is `p9`, the nine-vertex Petersen graph with one outer vertex deleted, whose deficiency is exactly
+  one and whose least odd cycle transversal is exactly two:
+  - `p9`, `p9Edge`, `p9_adj`, `cyc5`, `isOddCycle_Ca/Cb/Cc/Cd`: the witness and four of its 5-cycles;
+  - **`JSP90.locIndep_one_p9`** (`LocIndep 1 p9`, i.e. maximum deficiency at most one, by exhaustive
+    decision over the `512` vertex sets), **`JSP90.not_locIndep_zero_p9`** (its deficiency is exactly
+    one) and **`JSP90.triangleFree_p9`** (the improved lower bound already holds for triangle-free
+    graphs, the class of rounds 61-74);
+  - **`JSP90.exists_oddCycle_av` / `exists_oddCycle_data_av`**: every vertex of `p9` is avoided by one
+    of the four 5-cycles, and **`JSP90.exists_oddCycle_delete_av`**: the residue of `p9` at any single
+    vertex still carries an odd cycle, whence
+    **`JSP90.not_closeToBipartite_one_p9`**;
+  - **`JSP90.closeToBipartite_two_p9`**: `p9` is `2`-close to bipartite, with the explicit
+    transversal `{2, 6}` and the explicit 2-colouring `{0,7,8} | {1,3,4,5}` of the residue, so the
+    least odd cycle transversal of `p9` is **exactly two**;
+  - `p9Family k` on `Fin 9 x Fin k`, the disjoint union of `k` copies, with
+    **`JSP90.locIndep_p9Family`: `LocIndep k (p9Family k)`** (fibre-wise counting), and
+    **`JSP90.closeToBipartite_p9Family_iff`: `CloseToBipartite m (p9Family k) <-> 2 * k <= m`**, the
+    *exact* value of the conclusion on that class of graphs;
+  - **`JSP90.erdos73_lower_bound_two` / `JSP90.no_constant_below_two_k`: `f(k) >= 2 k`**, which
+    *strictly improves* `JSP90.erdos73_lower_bound` (`f(k) >= k`) of `JSPProblem/Sharp.lean`: for every
+    `k` and every `m < 2 k` there is a finite graph satisfying `LocIndep k` which is not `m`-close to
+    bipartite.
 -/
 import JSPProblem.Definitions
 import JSPProblem.Reed
@@ -428,3 +454,4 @@ import JSPProblem.Class
 import JSPProblem.Book
 import JSPProblem.Double
 import JSPProblem.Touch
+import JSPProblem.Petersen

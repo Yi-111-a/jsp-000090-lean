@@ -730,3 +730,10 @@ on the size of the boundary.
   classical **"no short cut" lemma** `JSP90.not_adj_of_attach_far` (two fan vertices of a shortest
   odd cycle whose attachment points are `4` to `m - 5` steps apart are never adjacent — no
   triangle-free hypothesis needed).
+* `JSPProblem.Petersen`: `p9`, the Petersen graph with one vertex deleted, and **the improved lower
+  bound `f(k) >= 2 k`** (`JSP90.erdos73_lower_bound_two`, `JSP90.no_constant_below_two_k`), which
+  strictly improves `JSPProblem/Sharp.lean`'s `f(k) >= k`: `JSP90.locIndep_one_p9` (deficiency of
+  `p9` is exactly one, by exhaustive decision), `JSP90.triangleFree_p9`, `JSP90.not_closeToBipartite_one_p9`,
+  `JSP90.closeToBipartite_two_p9` (least odd cycle transversal of `p9` is exactly two),
+  `JSP90.locIndep_p9Family` and `JSP90.closeToBipartite_p9Family_iff`
+  (`CloseToBipartite m (p9Family k) <-> 2 * k <= m`).

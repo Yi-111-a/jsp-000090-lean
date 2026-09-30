@@ -1773,3 +1773,77 @@ claim is made.
   `c * (k - 1) ≤ c * k` (`omega` cannot, because `k - 1` is opaque to it);
 * `Fin` of an unknown length has **no `OfNat (Fin m) 0` instance** at the pinned revision: write
   `have h0 : Fin m := ⟨0, by omega⟩` instead of `(0 : Fin m)`.
+
+---
+
+## Round 76 — the deficiency-one axis, and the improved lower bound `f(k) >= 2 k`
+
+New file `lean/JSPProblem/Petersen.lean` (24th attack family, 47 declarations, 631 lines, 0 sorry,
+0 admit).  The witness is **`p9`, the Petersen graph with one outer vertex deleted** — nine
+vertices, twelve edges, triangle-free (the outer path `0-1-2-3`, the four spokes `0-5`, `1-6`,
+`2-7`, `3-8`, and the inner star `4-6-8-5-7-4`).
+
+### What is proved
+
+| result | content |
+|---|---|
+| `JSP90.locIndep_one_p9` | `LocIndep 1 p9`: the maximum deficiency of `p9` is at most one (exhaustive decision over the 512 vertex sets) |
+| `JSP90.not_locIndep_zero_p9` | its deficiency is **exactly** one (so `LocIndep 0 p9` fails) |
+| `JSP90.triangleFree_p9` | `p9` has no triangle: the improved lower bound already holds in the triangle-free class of rounds 61-74 |
+| `JSP90.exists_oddCycle_av`, `exists_oddCycle_data_av` | every vertex of `p9` is avoided by one of four explicit 5-cycles `Ca, Cb, Cc, Cd` |
+| `JSP90.isOddCycle_delete_cyc5`, `exists_oddCycle_delete_av` | the residue of `p9` at any single vertex still carries an odd cycle |
+| `JSP90.not_closeToBipartite_one_p9` | no single vertex meets every odd cycle of `p9` |
+| `JSP90.closeToBipartite_two_p9` | `{2, 6}` meets every odd cycle, with the explicit 2-colouring `{0,7,8} \| {1,3,4,5}` of the residue — the least odd cycle transversal of `p9` is **exactly two** |
+| `JSP90.p9Family`, `p9Fibre`, `mem_p9Fibre`, `card_p9Fibre`, `p9Fibre_disjoint`, `pairwiseDisjoint_fibre_pieces`, `inter_biUnion_fibre` | the disjoint union of `k` copies on `Fin 9 x Fin k` and its fibres |
+| `JSP90.locIndep_p9Family` | `LocIndep k (p9Family k)`, by fibre-wise counting (`2 |I_i| + 1 >= |X cap fibre i|` summed over the `k` disjoint fibres) |
+| `JSP90.isOddCycle_p9Family_cyc5`, `isOddCycle_p9Family_Ca` | a 5-cycle of `p9` inside a fibre is an odd cycle of `p9Family k` |
+| `JSP90.card_inter_fibre_two`, `card_le_two_k_of_hitsOddCycles` | every odd cycle transversal of `p9Family k` meets each fibre in at least two vertices, so `2 * k <= |X|` |
+| `JSP90.closeToBipartite_p9Family_two`, `closeToBipartite_p9Family_iff` | **`CloseToBipartite m (p9Family k) <-> 2 * k <= m`** — the exact value of the conclusion on that class |
+| **`JSP90.erdos73_lower_bound_two`, `JSP90.no_constant_below_two_k`** | **`f(k) >= 2 k`**: for every `k` and every `m < 2 k` there is a finite graph with `LocIndep k G` and `not CloseToBipartite m G`.  This **strictly improves** `JSPProblem/Sharp.lean`'s `JSP90.erdos73_lower_bound` (`f(k) >= k`) |
+
+Nothing is assumed: the only hypothesis used is Erdős's `LocIndep`, the witness is explicit, and
+`#print axioms` on each of the results above shows only
+`[propext, Classical.choice, Quot.sound]` (the two `decide` proofs are kernel `of_decide_eq_true`, so
+neither `sorryAx` nor `Lean.ofReduceBool` appears).
+
+### How the lower bound was found
+
+An exhaustive search over all graphs on `n <= 7` vertices (in C, `2^21` graphs for `n = 7`) shows that
+`max { tau(G) : MaxDef G <= 1 } = 2` for `n <= 7`; the Petersen graph has `MaxDef 2, tau 3`, and
+deleting any vertex of it gives `MaxDef 1, tau 2`.  Random search up to `n = 8` found nothing with
+`tau >= 3` at deficiency one, so the expected sharp value of the `k = 1` case is `2`.
+
+### Status
+
+`lake build` OK (1231 jobs); `harness/score.py problems/JSP-000090` reports
+`build_ok = true, sorry = 0, admit = 0, placeholder_total = 0, partial_ok = true`,
+`missing_theorems = ["jsp_000090_main"]`.  The headline theorem (the full statement for all `k`) is
+still open — the missing input is unchanged, `JSP90.OddCycleErdosPosa r` for all `r`, equivalently
+`JSP90.TouchCriticalErdos73 c` for some `c` (round 74).  `prize_ready` remains `false`.
+
+### Environment notes (each cost several build iterations)
+
+* `LocIndep`, `CloseToBipartite` and `HitsOddCycles` are *instance-free* in their statements, so
+  `decide` works on them directly, but any statement that mentions a **finset literal** is not:
+  `C n X` and the like freeze the `DecidableEq` of the importing file (`Transversal.lean` installs
+  `Classical.decEq V`, whose auto-generated name shows up as `instDecidableEq_jSPProblem_2` in
+  error messages).  To apply such a hypothesis one must build it with the same instance, e.g.
+  `@Inter.inter (Finset _) (@Finset.instInter _ (Classical.decEq _)) s t = empty`;
+* `Finset.image` and `Finset.inter` depend *computationally* on the `DecidableEq` instance (the
+  deduplication), so two finsets of the same vertex set built with different instances are not
+  defeq — mix one instance per file, and use `Finset.card_biUnion` / `Finset.card_image_iff` rather
+  than rewriting a sum into a card;
+* `SimpleGraph.IsIndepSet s` is `s.Pairwise (fun v w => not G.Adj v w)`, i.e. six binders
+  (`v`, `v in s`, `w`, `w in s`, `v != w`, `not Adj v w`); `intro v hv w hw hvw hne` is the shape to
+  use, and `intro` **pushes negations in**, so naming the last binder yields a *positive* `Adj`
+  hypothesis;
+* `IsBipartite G` is `Colorable 2 G` and has **no `Decidable` instance**; for a finite graph the
+  search over the 2-colourings can be run with
+  `decidable_of_iff (exists d : V -> Fin 2, forall v w, G.Adj v w -> d v != d w) ...`;
+* `decide` needs a *computable* `DecidableEq`, so `Classical.decEq` (the convention of the imported
+  lemmas) must be replaced by a `local instance` for the file; `haveI` inside a proof is not enough
+  for `Finset.univ` enumerations of `Finset`s;
+* `Finset.mem_product` is `p in s x*s t <-> p.1 in s and p.2 in t` (Mathlib at this revision), while
+  the `Set` version of a product needs `Set.mem_prod` — mixing them fails;
+* `Finset.card_image_of_injective` needs injectivity on the **whole** type, not just on the image, so
+  for `image Prod.fst` on a fibre use `Finset.card_image_iff.mpr` (`InjOn`).

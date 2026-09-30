@@ -63,3 +63,18 @@ is proved.  Round 44 localised it further: the unconditional absorption step is 
 shortest odd cycle of length `≥ 5`, together with a bound on the number of 2-cuts of `G` as a
 function of the **odd girth** (round 43's reduction, whose hypothesis (ii) cannot be a function of
 the packing number). See `ACCEPTANCE.md` and `discovery/JSP-000090/policy.json`.
+
+**Round 76 (`lean/JSPProblem/Petersen.lean`) — the deficiency-one axis and the improved lower
+bound `f(k) ≥ 2 k`.**  The witness `kTriangles k` of `Sharp.lean` gives the lower bound `f(k) ≥ k`.
+A better witness is the **Petersen graph with one vertex deleted** (`p9`, nine vertices, twelve
+edges, triangle-free): its maximum deficiency is exactly one (`JSP90.locIndep_one_p9`,
+`JSP90.not_locIndep_zero_p9`) and its least odd cycle transversal is exactly two
+(`JSP90.not_closeToBipartite_one_p9`, `JSP90.closeToBipartite_two_p9`).  The disjoint union of `k`
+copies satisfies `LocIndep k` (`JSP90.locIndep_p9Family`) and has least odd cycle transversal exactly
+`2 k` (`JSP90.closeToBipartite_p9Family_iff`), so
+
+> **`JSP90.erdos73_lower_bound_two` / `JSP90.no_constant_below_two_k`: `f(k) ≥ 2 k`** — no constant
+> below `2 k` works — which *strictly improves* `JSP90.erdos73_lower_bound` (`f(k) ≥ k`).
+
+The upper-bound side is unchanged: the missing statement is still `JSP90.OddCycleErdosPosa r` for all
+`r` (equivalently `JSP90.TouchCriticalErdős73 c` for some `c`, per round 74).
