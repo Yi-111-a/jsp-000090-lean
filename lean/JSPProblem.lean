@@ -498,3 +498,4 @@ import JSPProblem.Subcubic
 import JSPProblem.Cover
 import JSPProblem.Cactus
 import JSPProblem.Sun
+import JSPProblem.Ring

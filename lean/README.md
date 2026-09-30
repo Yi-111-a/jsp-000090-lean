@@ -882,3 +882,42 @@ statement implies the `k = 1` level of the headline theorem on the class of Part
   inside the enclosing `section` (`by decide` itself is fine once the section options are set).
 * `OfNat`-annotated numerals (`(2 : Fin 3)`) keep `by decide` well-typed; `⟨2, by omega⟩` inside the
   *type* of a `have` makes the type contain a free variable and `decide` refuses it.
+
+---
+
+## `JSPProblem/Ring.lean` (round 82) — the three-arc cycle constructor and the ring lemma
+
+The file develops, from scratch and with no Mathlib input beyond what earlier files use:
+
+* `JSP90.arcOf` / `JSP90.arcRev` — an arc of a cycle as a **directed** path and the same path
+  traversed backwards, both as maps `ℕ → V`;
+* `JSP90.exists_oddPath` — between two distinct vertices of an odd cycle there is a simple path of
+  **odd** length lying on the cycle (directedness matters: the three arcs of a ring need not be
+  oriented consistently, cf. the three-sun of `JSPProblem/Sun.lean`);
+* `JSP90.arcCat3`, `arcCat3_inj`, `arcCat3_adj`, `isOddCycle_of_ring3` — the **three-arc cycle
+  constructor**, the "closing path" generalisation of `JSP90.arc_isOddCycle_of_notMem`;
+* `JSP90.twoHelly_of_linearOddCycles` — the **ring lemma** — and with it
+  `JSP90.oddCactus_iff_linear` (`OddCactus G ↔ LinearOddCycles G`) and the two instances of the
+  headline theorem `JSP90.erdos73On_linear_one` (constant `1`, optimal) and `JSP90.erdos73On_linear`
+  (constant `k * (k + 1)`) for the **weaker** hypothesis `LinearOddCycles G`.
+
+Toolchain facts learned here (they cost most of the round):
+
+* **A `def` whose branches use a hypothesis of their own `if` in a proof (e.g. `by omega`) elaborates
+  to a `dite`, and `if_pos` / `if_neg` then do not rewrite it.**  Hence `JSP90.arcCat3` is defined on
+  `ℕ` (a total map) with *proof-free* branches: every later `simpa only [arcCat3, if_pos h, …]` works.
+  Defining it on `Fin (d₁ + d₂ + d₃)` instead, with `⟨j.val, by omega⟩` in the branches, costs a
+  `dite` per entry and defeats every later rewrite.
+* `+` is **left**-associative in Lean 4 terms, so `a + b + c - 1` is `((a + b) + c) - 1`; several
+  index computations below are stated in that shape on purpose.
+* `omega` **refuses to split a trailing `- 1` inside a sum** (`d₁ + d₂ + d₃ - 1 ≤ d₁` is not provable
+  for it).  Feed it the decomposition first: `Nat.add_sub_assoc (h : 1 ≤ d₃) (d₁ + d₂)` rewrites
+  `n + d₃ - 1` to `n + (d₃ - 1)`, after which the goal is linear in the atom `d₃ - 1`.  Likewise
+  `Nat.sub_pos_iff_lt` is stated with `k < n`, so `0 < d₃ - 1` needs `1 < d₃`, not `0 < d₃`.
+* `Nat.sub_sub : n - m - p = n - (m + p)` and `Nat.add_sub_cancel_left : n + m - n = m` do the
+  remaining index arithmetic; `Nat.add_sub` does **not** exist (it is `Nat.add_sub_assoc`).
+* `rcases h with h' | h'` then `exact absurd h'.1 (by omega)` is the robust way to kill a case: the
+  hypotheses `1 ≤ x` and the goal `¬x = 0` do not unify syntactically, and `Nat.ne_of_gt` will not
+  take `1 ≤ x` either.
+* `if_pos h` / `if_neg h` are deprecated at the pinned toolchain (use `ite_eq_left` / `ite_eq_right`)
+  but still work; `simp only [Fin.val_mk]` is frequently an unused simp argument in this development.

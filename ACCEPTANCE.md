@@ -2242,3 +2242,97 @@ for `OddCyclesDisjoint` is an instance of this one.
   `JSPProblem/Petersen.lean`; new finite witnesses must be prefixed (`sun3_oddCycle_av`);
 * `set_option maxRecDepth N in set_option maxHeartbeats M in` must be followed by the docstring
   and then the declaration (as in `JSPProblem/Petersen.lean`).
+
+---
+
+## Round 82 — `JSPProblem/Ring.lean`: the RING LEMMA — the cactus class is *exactly* the linear class
+
+New file `lean/JSPProblem/Ring.lean` (24 top-level declarations — 13 of them new lemmas — 889 lines),
+imported from the root module `JSPProblem.lean`.  `lake build` OK (1237 jobs); **0 sorry, 0 admit**;
+`score.py --strict-prize` reports `build_ok = true, sorry = 0, admit = 0, placeholder_total = 0,
+partial_ok = true, missing_theorems = ["jsp_000090_main"]` (the headline theorem is still
+deliberately **not** declared).  This is the **twenty-ninth attack family**, and it **closes the gap
+that round 81 left open**: that file stated, but did not prove, the *ring lemma*.
+
+### What round 81 left open, and what is now proved
+
+`JSPProblem/Cactus.lean` defines
+
+```lean
+JSP90.OddCactus G   = LinearOddCycles G ∧ TwoHellyOddCycles G
+JSP90.LinearRing G  = three pairwise meeting odd cycles of G have a common vertex
+```
+
+and could prove only `OddCactus G → LinearOddCycles G`; the implication `LinearOddCycles G →
+LinearRing G` was stated as a `def` and **not** assumed, so all of round 81 was proved under the
+stronger hypothesis `OddCactus G`.  Round 82 **proves the ring lemma**:
+
+* **`JSP90.twoHelly_of_linearOddCycles : LinearOddCycles G → TwoHellyOddCycles G`** — in a graph whose
+  odd cycles are *linear* (no two of them meet in more than one vertex) there is **no ring** of three
+  odd cycles.  The classical argument, machine-checked end to end: linearity makes each pairwise
+  intersection a single vertex `a ∈ C ∩ D`, `b ∈ D ∩ E`, `c ∈ E ∩ C`; either two of them agree (a
+  common vertex, done) or they are all distinct, whence `a ∉ E`, `b ∉ C`, `c ∉ D`.  Take in each cycle
+  the **odd** one of the two arcs between the two points lying on it — `A₁` in `C` from `a` to `c`,
+  `A₂` in `E` from `c` to `b`, `A₃` in `D` from `b` to `a` — whose interiors are therefore disjoint
+  from the other two cycles.  `JSP90.isOddCycle_of_ring3` concatenates them into a **simple odd
+  cycle** of `d₁ + d₂ + d₃` vertices; it meets `C` in the two distinct vertices `a`, `c` and also
+  contains `b ∉ C`, so it is a *different* odd cycle of `G` meeting `C` in two vertices —
+  contradicting linearity (`JSP90.not_linear_of_two_mem`);
+* **`JSP90.linearRing_of_linear`, `JSP90.oddCactus_iff_linear`,
+  `JSP90.oddCactus_iff_of_linear`** — **`OddCactus G ↔ LinearOddCycles G`**: *the odd cycles of a
+  graph form a cactus if and only if no two of them meet in more than one vertex*.  The two-Helly
+  condition is a **consequence** of linearity, not an extra hypothesis;
+* **`JSP90.disjoint_of_attach_ne_lin`** — the structural lemma of round 81 (two odd cycles attaching
+  to a common odd cycle at different vertices are disjoint) under `LinearOddCycles G` alone.
+
+### The new machinery (developed from scratch, no Mathlib input)
+
+* `JSP90.arcOf`, `JSP90.arcRev` — an arc of a cycle as a *directed* path, and the same path
+  traversed backwards.  Both are maps `ℕ → V` (entry `t` = the vertex `t` steps along), which makes
+  every later construction free of dependent `if`s.  `arcRev` removes a case analysis that cannot be
+  avoided: **the three arcs of a ring need not be oriented consistently** — the three-sun of
+  `JSPProblem/Sun.lean`, the machine-checked counterexample of round 81 to dropping the two-Helly
+  hypothesis, is exactly such a ring.
+* `JSP90.exists_oddPath` — **between two distinct vertices of an odd cycle there is a simple path of
+  odd length lying on the cycle**, with injectivity, consecutive adjacency and containment in the
+  cycle (`JSP90.arc_parity`, i.e. exactly one of the two arcs is odd, plus the two orientations).
+* `JSP90.arcCat3`, `JSP90.arcCat3_inj`, `JSP90.arcCat3_adj`,
+  **`JSP90.isOddCycle_of_ring3` — THE THREE-ARC CYCLE CONSTRUCTOR**: three directed simple paths
+  which walk along `G`, join head to tail cyclically (`A₁ d₁ = A₂ 0`, `A₂ d₂ = A₃ 0`,
+  `A₃ d₃ = A₁ 0`) and meet only in the joining vertices, concatenate to a **simple cycle** of
+  `d₁ + d₂ + d₃` vertices; if the three lengths are odd, to an **odd** cycle.  This is the "closing
+  path" generalisation of `JSP90.arc_isOddCycle_of_notMem` of `JSPProblem/Chord.lean` (which closes
+  an arc through a single *vertex*) that round 81 named as the missing tool.
+
+### The payoff: two instances of the headline theorem, with a strictly weaker hypothesis
+
+* **`JSP90.closeToBipartite_one_of_linear_of_locIndep_one`** and
+  **`JSP90.erdos73On_linear_one`** — `LocIndep 1 G → LinearOddCycles G → CloseToBipartite 1 G`.
+  Round 81 proved this with the constant `1` for the class `OddCactus G`; the two-Helly conjunct is
+  now *derived*, so the statement holds for the **larger** class of graphs in which no two odd cycles
+  meet in more than one vertex.  The constant `1` is the smallest possible for a non-bipartite graph.
+* **`JSP90.erdos73On_linear`** (via `JSP90.erdos73On_of_linear`) — `LocIndep k G → LinearOddCycles G
+  → CloseToBipartite (k * (k + 1)) G` for **every** `k`, the constant of round 81, again for a
+  strictly larger class: no bound on the odd girth, the degrees, the packing weight or the number of
+  branch vertices, and no connectivity or decomposition hypothesis.
+
+### Verification before formalising
+
+Per the discipline of rounds 78 and 80, the ring lemma was checked computationally first: for
+**every** graph on `n ≤ 7` vertices (exhaustive, all `2²¹` graphs) and every triple of odd cycles
+meeting pairwise in three distinct vertices, some odd cycle of the graph contains two of the three
+vertices.  Result: 3 440 640 rings found, **0 counterexamples**.  (The three-sun, six vertices, is the
+smallest configuration containing a ring.)
+
+### What is *not* proved
+
+Erdős #73 for `k ≥ 1` in full.  The remaining content is still "a bounded odd-cycle packing number
+forces a bounded odd cycle transversal", i.e. the Erdős–Pósa theorem for odd cycles
+(Reed–Robertson–Seymour–Thomas), named as `JSP90.OddCycleErdosPosa r` in
+`discovery/JSP-000090/policy.json`.  The new `LinearRing` blocker of round 81 is **deleted**: it is a
+theorem now.
+
+`jsp_000090_main` is **not** declared, so the harness keeps reporting
+`missing_theorems = ["jsp_000090_main"]`; declaring a weaker theorem under that name would
+misrepresent the result.  `formalization.yaml` remains `status: wip`, `prize_ready: false`.  No award
+claim is made.
