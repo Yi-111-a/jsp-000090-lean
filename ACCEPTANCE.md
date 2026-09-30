@@ -755,3 +755,103 @@ decidable membership of that identity cost more than the transversal form is wor
   `DecidableEq` instances (the round-53 pitfall) **and** `Finset.image` picks the use-site instance
   while the goal uses the definition-site one — a concrete witness on `Fin n` must avoid
   `Finset.image`.
+
+---
+
+## Round 62 — `JSPProblem/Cut.lean`: the cut descent of the deficiency
+
+Round 61 (the `BoundedBoundary` instance) leaves the parameter `d` and asks for the fan lemma.  Round 62
+takes a different route to the same place: **the separator itself**, in the *numerical* vocabulary of
+`MaxDef G = max {|X| - 2α(G[X])}` of `JSPProblem/Deficiency.lean`, where Erdős's hypothesis is the single
+number `LocIndep k G ↔ MaxDef G ≤ k`.  New file `lean/JSPProblem/Cut.lean` (14 declarations, 0 sorry,
+`lake build` OK, 1222 jobs), imported from the root module `JSPProblem.lean`.
+
+### What is proved
+
+* **`JSP90.indepCard_le_add (A B) : indepCard G (A ∪ B) ≤ indepCard G A + indepCard G B`** — the
+  independence number is *subadditive* over a union: the independent sets of `A ∪ B` split into an
+  independent subset of `A` and an independent subset of `B`.  This is the second half of the additivity
+  of the deficiency over a decomposition (the first half is round 54's `card_indepCard_anticover_add`),
+  and it is exactly what the classical "the deficiency splits at a cut" step needs.
+* **`JSP90.sum_card_inter_le_card`** — for a family of pairwise disjoint, pairwise anticomplete pieces
+  covering the vertices of `Y`, the cardinalities of the parts add up to **at most** that of `Y`:
+  `∑ |Y ∩ Q| ≤ |Y|` (in fact with equality, `Y = ⋃ᵩ (Y ∩ Q)`).
+* **`JSP90.AnticoverCoverFamily.sub` / `.notMem_inter` / `.disjoint'`** — subfamilies of an anticomplete
+  family are anticomplete, two distinct pieces are disjoint and share no vertex.
+* **`JSP90.defOf_inter_induceFinset`** — the deficiency of `Y ∩ Q` computed in `G` and in `G[Q]` agree (the
+  transport lemma the round-54 statements are missing).
+* **the `ℕ`-arithmetic of the deficiency**, which is the technical content of the whole line and is
+  where round 54 recorded a genuine obstruction:
+  * `JSP90.sum_sub_le : (∑ aᵢ) - (∑ bᵢ) ≤ ∑ (aᵢ - bᵢ)` — always true for `ℕ`;
+  * **`JSP90.sum_sub_eq_of_le : ∑ (aᵢ - bᵢ) = (∑ aᵢ) - (∑ bᵢ)` under `bᵢ ≤ aᵢ`** — **false without the
+    hypothesis**, and the failure is exactly round 54's counterexample (a triangle disjoint from one
+    isolated vertex: the deficiency of the whole is `0`, the parts give `1 + 0`).  So the deficiency is
+    subadditive for a fixed vertex set, and becomes *exactly* additive once no truncation occurs;
+  * `JSP90.sum_f_le_f_sum`, `JSP90.f_mono_of_succ_le`, `JSP90.add_le_mul_of_two_le`,
+    `JSP90.sup_pow_four`, `JSP90.step_pow_four` — the numerical hypotheses of the *intended* reduction
+    theorem (Erdős #73 in full follows from its restriction to triangle-free graphs, with
+    `f(k) = 4 ^ k`), discharged in advance: superadditivity on the positive integers, monotonicity, and
+    the two inequalities `4 ^ i + 4 ^ j ≤ 4 ^ (i+j)` and `3 + 4 ^ (k-1) ≤ 4 ^ k`.
+
+### The route this opens (and the single lemma this round stopped at)
+
+With `indepCard_le_add` (α subadditive over a union) and `sum_card_inter_le_card` (cards subadditive
+over a cover) in hand, the following chain would finish a **reduction of Erdős #73 to triangle-free
+graphs**, i.e. replace the primary blocker `OddCycleErdosPosa r` (Reed–Robertson–Seymour–Thomas) by the
+strictly weaker statement `∀ k, ∀ G, G.CliqueFree 3 → MaxDef G ≤ k → CloseToBipartite (f k) G`:
+
+1. `indepCard_le_sum_inter`: for a covered `X`, `α(G[X]) ≤ ∑_Q α(G[X ∩ Q])` — the *family* version of
+   `indepCard_le_add`; **this is the one lemma not proved this round**;
+2. `∑_Q MaxDef G[Q] ≤ MaxDef G` (superadditivity of the deficiency over a cover, using 1 together with
+   `sum_sub_eq_of_le`);
+3. `AnticoverCut G T 𝒬` = a cut `T` together with an anticomplete cover of the rest, and
+   `MaxDef G ≤ |T| + ∑_Q MaxDef G[Q]` (the subadditive direction);
+4. **the deficiency drops at a triangle**: for every piece `Q` of a cut at a triangle, `1 + MaxDef G[Q] ≤
+   MaxDef G` and `1 + ∑_{Q non-bipartite} MaxDef G[Q] ≤ MaxDef G` (uses `indepCard_le_add` with the
+   triangle, whose `α = 1`);
+5. `erdos73On_of_anticoverCut`: the new instance of the headline theorem over an arbitrary cut, constant
+   `|T| + k · m`;
+6. `erdos73On_of_triangleFree`: induction on `k` alone, using 4 (the pieces have deficiency `≤ k - 1`,
+   with total `≤ k - 1`), 2, the counting lemma `card_nonBipartiteParts_le_cover` of
+   `JSPProblem/Additive.lean` and the numerical facts above.
+
+Steps 1 and 4 are mechanical once step 1 is available; this round's budget went into step 1 (which is
+where the `IsIndepSet`/`Finset` coercion bookkeeping of this trimmed Mathlib is most expensive) and the
+budget ran out.  The exact statement, the two routes to it and the environment findings are in
+`discovery/JSP-000090/policy.json`.
+
+### Toolchain findings (they cost most of the round)
+
+* **`ring`, `norm_num`, `nlinarith` are ABSENT** from the pinned Mathlib; `omega` cannot do
+  distributivity, cannot eliminate `ℕ` subtraction from hypotheses, and cannot prove
+  `(a + c) - (b + c) = a - b` (it is true, and `Nat.add_sub_add_right` states it).
+* `Finset.sum_filter_neg_eq`, `Finset.eq_empty_iff_forall_not_mem`, `Finset.le_empty`,
+  `Set.mem_inter`, `Set.sdiff_subset_left`, `Finset.inter_subset_left/right` (as subset lemmas) are all
+  ABSENT; `Set.mem_inter` in particular is absent, so Set intersections must be handled with
+  `Finset.mem_inter` and explicit pinning `Finset.mem_inter (s₁ := S) (s₂ := T)`.
+* `Finset.coe_inter`, `Finset.coe_sdiff`, `Finset.card_biUnion`, `Finset.mul_sum s f a`,
+  `Nat.add_sub_cancel_left`, `Nat.add_sub_add_right`, `Finset.sum_add_distrib` are available.
+* **`G.IsIndepSet` takes a `Set`, not a `Finset`**, and `Finset.inter`/`Finset.sdiff` of two finsets
+  coerce *differently* (`↑(s ∩ t)` vs `↑s ∩ ↑t`): the two are **not** defeq-recognisable for the
+  elaborator in this revision.  Consequence: an `IsIndepSet` statement about a *compound* finset must be
+  built at the Set level (`Set.inter_subset_left` / `Finset.mem_inter` on the coerced hypothesis), and
+  to feed it to `le_indepCard_of_isIndepSet` (which wants the canonical `↑(s ∩ t)`) the compound finset
+  must be given a name with `set T := s ∩ t with hT` and transported with `hT.symm ▸`.
+* `G.IsClique` also takes a `Set` but a `Finset` argument coerces silently and the applied form takes
+  **finset** memberships (as in `JSPProblem/Reed.lean`).
+* `(A + B) - A = B` and `(A + B) - A + A = A + B` are provable by bare `omega`; `Nat.sub_le_sub_left`
+  (`k - m ≤ k - n` from `n ≤ m`) and `Nat.sub_le_sub_right` (`n - k ≤ m - k` from `n ≤ m`) are the two
+  usable subtraction lemmas; there is no "subtrahend monotone" lemma, which is why
+  `sum_sub_eq_of_le` needs its own induction.
+* `Finset.sup_le_iff` needs `OrderBot`, so it can only be applied to a goal in which the `sup` is
+  visible: `refine Finset.sup_le_iff.mpr fun S hS => ?_` leaves the type stuck when the goal is
+  `∑ … ≤ indepCard G Y`.  Use `exists_indepCard` (a witness for the sup) instead.
+* The cover hypotheses of `JSPProblem/Additive.lean` are stated as `∀ x ∈ s → ∃ X ∈ 𝒬, x ∈ X`; the
+  `Y ⊆ 𝒬.biUnion id` form is *not* destructible by `rcases` (Quot membership), exactly as recorded in
+  round 61's toolchain notes.
+* `lake build` is ~7 s incremental; `JSPProblem.Cut.lean` alone ~5 s.
+
+`jsp_000090_main` is still **not** declared, so the harness keeps reporting
+`missing_theorems = ["jsp_000090_main"]`; `score.py --strict-prize` reports
+`build_ok = true, sorry = 0, admit = 0, partial_ok = true`.  `formalization.yaml` remains
+`status: wip`, `prize_ready: false`.  No award claim is made.

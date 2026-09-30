@@ -369,3 +369,4 @@ import JSPProblem.Critical
 import JSPProblem.Deficiency
 import JSPProblem.OffCycle
 import JSPProblem.Boundary
+import JSPProblem.Cut
