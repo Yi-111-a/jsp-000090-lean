@@ -737,3 +737,37 @@ on the size of the boundary.
   `JSP90.closeToBipartite_two_p9` (least odd cycle transversal of `p9` is exactly two),
   `JSP90.locIndep_p9Family` and `JSP90.closeToBipartite_p9Family_iff`
   (`CloseToBipartite m (p9Family k) <-> 2 * k <= m`).
+* `JSPProblem/Layer`: the **internal-degree axis** (round 77).  `JSP90.InternalDegree G S r` asks
+  only that every vertex outside `S` has at most `r` neighbours outside `S` — strictly weaker than
+  the total-degree hypotheses of rounds 38 and 74 — and `JSP90.erdos73On_of_internalDegree_three`
+  is a new instance of the headline theorem from it, with the `k`-term sharp
+  (`JSP90.no_constant_below_internalDegree_three`).  The file also names the bounded-degree
+  localisation `JSP90.BoundedDegreeErdős73 g r` and the **subcubic** statement
+  `JSP90.SubcubicErdős73 g`, proves the levels `k = 0` and `r = 2`
+  (`JSP90.erdos73On_boundedDegree_zero`, `JSP90.boundedDegreeErdős73_two`), and the tight-witness
+  theory (`JSP90.exists_tight_of_maxDef_ne_zero`, `JSP90.indepCard_add_one_of_notMem_of_tight`).
+* `JSPProblem/Subcubic`: the **SUBCUBIC axis** (round 78, this file's newest module).  Everything
+  rests on one numerical fact: a vertex of an odd cycle already uses two of its at most three
+  neighbours.  Hence (i) a vertex of an odd cycle has at most **one** neighbour outside it, so
+  `|∂C| ≤ |C|` and `|N[C]| ≤ 2 |C|` (`JSP90.card_le_one_outerNeigh_oddCycle`,
+  `JSP90.card_boundary_le_card_oddCycle`, `JSP90.card_neighClosed_le_two_mul_card_oddCycle`); (ii)
+  **two odd cycles that meet share a cycle edge of the first**
+  (`JSP90.CycleOrder.exists_adj_mem_inter`, and `JSP90.exists_ne_two_mem_inter_oddCycle`), because
+  two `2`-subsets of the three edges at a common vertex intersect; (iii) for a cycle of odd length
+  the vertices at **even positions** meet every edge of the cycle
+  (`JSP90.evenIdx`, `JSP90.evenCover`, `JSP90.exists_mem_evenCover_of_cycleEdge`,
+  `JSP90.card_evenCover`), and combining (ii) and (iii):
+  **`JSP90.hitsOddCycles_of_inter`** — if every odd cycle of a subcubic graph meets one fixed odd
+  cycle `C`, some set of at most `(C.card + 1) / 2` vertices of `C` meets every odd cycle.  The
+  **new instance of the headline theorem** is
+  `JSP90.closeToBipartite_of_subcubic_of_shortOddCycles`: a subcubic graph of `LocIndep k` whose odd
+  cycles have at most `ℓ` vertices is `k * ((ℓ + 1) / 2)`-close to bipartite — better than the
+  constant `ℓ k` of `JSP90.erdos73On_of_bounded_odd_girth` — with the `k = 1` case free of `k`
+  (`JSP90.closeToBipartite_of_subcubic_of_locIndep_one_of_shortOddCycle`, and
+  `JSP90.closeToBipartite_of_subcubic_of_locIndep_one_of_three` = `CloseToBipartite 2 G` when every
+  odd cycle is a triangle).  The constant `1` at `k = 1` is **refuted**
+  (`JSP90.subcubic_constant_ne_one`, `JSP90.not_subcubicErdős73_one`, using
+  `JSP90.maxDegLe_p9` and round 76's `p9`), and the remaining statement is isolated as
+  `JSP90.SubcubicPackingOne` (two vertices suffice in a subcubic graph whose odd cycles pairwise
+  meet) with its reduction `JSP90.erdos73On_subcubic_one_of_packingOne`.  The file also re-proves
+  the `MaxDeg ≤ 2` level in the total-degree vocabulary, `JSP90.erdos73On_one_of_maxDegLe_two`.

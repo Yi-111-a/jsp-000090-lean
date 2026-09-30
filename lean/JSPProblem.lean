@@ -456,3 +456,4 @@ import JSPProblem.Double
 import JSPProblem.Touch
 import JSPProblem.Petersen
 import JSPProblem.Layer
+import JSPProblem.Subcubic

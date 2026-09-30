@@ -1963,3 +1963,83 @@ primary blocker.
 `#print axioms` on each of the thirteen headline results of the new file shows only
 `[propext, Classical.choice, Quot.sound]`.  `formalization.yaml` remains `status: wip`,
 `prize_ready: false`.  No award claim is made.
+
+---
+
+## Round 78 — `JSPProblem/Subcubic.lean`: the **SUBCUBIC axis**, the even cover of a cycle, and the `k = 1` instance
+
+New file `lean/JSPProblem/Subcubic.lean` (26th attack family, 33 declarations, 621 lines, **0
+sorry / 0 admit**, `lake build` OK with 1233 jobs), imported from the root module
+`JSPProblem.lean`.
+
+### What is proved
+
+| result | content |
+|---|---|
+| `JSP90.card_le_one_outerNeigh_oddCycle` | a vertex of an odd cycle of a subcubic graph has at most **one** neighbour outside the cycle |
+| `JSP90.card_boundary_le_card_oddCycle`, `JSP90.card_neighClosed_le_two_mul_card_oddCycle` | `\|∂C\| ≤ \|C\|` and `\|N[C]\| ≤ 2 \|C\|`: **the fan of a shortest odd cycle of a subcubic graph is a finite object of controlled size** |
+| `JSP90.card_le_two_outerNeigh_boundary` | a fan vertex has at most two neighbours outside `C` |
+| **`JSP90.CycleOrder.exists_adj_mem_inter`** | **two odd cycles of a subcubic graph that meet share a *cycle edge* of the first** (two `2`-subsets of the three edges at a common vertex always intersect; the shared edge is an edge of the cyclic order, not a chord) |
+| `JSP90.exists_ne_two_mem_inter_oddCycle` | hence the intersection of two meeting odd cycles has at least two vertices |
+| `JSP90.evenIdx`, `JSP90.evenCover`, `JSP90.exists_mem_evenCover_of_cycleEdge`, `JSP90.card_evenCover` | for a cycle of odd length `m`, the `⌈m/2⌉` vertices at **even positions** meet every edge of the cycle, and there are at most `(m + 1) / 2` of them |
+| **`JSP90.hitsOddCycles_of_inter`** | **if every odd cycle of a subcubic graph meets one fixed odd cycle `C`, then some set of at most `(C.card + 1) / 2` vertices of `C` meets every odd cycle of `G`** |
+| `JSP90.oddEvenCover`, `JSP90.inter_oddEvenCover_of_isOddCycle` | the same, phrased per finset (the even cover of the *chosen* cyclic order; `Classical.choose` on `∃ o, o.m % 2 = 1` only, no `Finset` of cyclic orders) |
+| **`JSP90.closeToBipartite_of_subcubic_of_shortOddCycles`** | **A NEW INSTANCE OF THE HEADLINE THEOREM**: subcubic + `LocIndep k` + every odd cycle has at most `ℓ` vertices ⟹ `CloseToBipartite (k * ((ℓ + 1) / 2)) G`, improving round 19's `ℓ * k` on the subcubic class. No bound on the packing weight, the odd girth, or the number of branch vertices |
+| `JSP90.closeToBipartite_of_subcubic_of_locIndep_one_of_shortOddCycle` | the `k = 1` case, whose constant does not mention `k` |
+| `JSP90.closeToBipartite_of_subcubic_of_locIndep_one_of_three` | every odd cycle of `G` is a triangle ⟹ `CloseToBipartite 2 G`: the **sharp** `k = 1` subcubic constant |
+| `JSP90.maxDegLe_p9`, **`JSP90.subcubic_constant_ne_one`**, `JSP90.not_subcubicErdős73_one` | **`p9` is subcubic, so the constant `1` at `k = 1` is impossible**: round 77's sub-goal (1) is **refuted**; any admissible `g` of `JSP90.SubcubicErdős73` satisfies `g 1 ≥ 2` |
+| `JSP90.inter_oddCycle_of_locIndep_one` | `LocIndep 1` ⟹ every two odd cycles meet (the packing bound for the family `{C, D}`) |
+| `JSP90.SubcubicPackingOne`, `JSP90.erdos73On_subcubic_one_of_packingOne` | **the remaining statement, isolated and not assumed**: in a subcubic graph whose odd cycles pairwise meet, two vertices meet all of them |
+| `JSP90.erdos73On_one_of_maxDegLe_two` | the `MaxDeg ≤ 2` level in the *total*-degree vocabulary: `LocIndep 1` + no degree `≥ 3` ⟹ `CloseToBipartite 1 G` (round 77's `boundedDegreeErdős73_two` with the set `B` and the branch-vertex count removed) |
+
+`#print axioms` on all nineteen headline results shows only
+`[propext, Classical.choice, Quot.sound]` — no `sorryAx`.
+
+### Computational finding behind Part 5 (not assumed, only recorded)
+
+Exhaustive enumeration of **all** subcubic graphs on `≤ 8` vertices (`10 355 376` of them): the
+largest odd cycle transversal number among graphs of maximum deficiency `≤ 1` is `2`; `1540` of the
+graphs have transversal number `≥ 3` and **none** of those has packing number `1`; random search
+up to `13` vertices found no counterexample to "subcubic + every two odd cycles meet ⟹
+transversal number `≤ 2`".  Hence `JSP90.SubcubicPackingOne` is the correct candidate, and the
+sharp value of the `k = 1` subcubic constant is `2` (`p9` attains it).
+
+### What is *not* proved
+
+`JSP90.SubcubicPackingOne` — the bounded odd girth hypothesis of Part 4 is **not** removable by the
+argument above: without it the even cover of `C` has `(m + 1) / 2` vertices with `m` the odd
+girth, and no argument here bounds the transversal without the girth bound.  Behind it stands
+`JSP90.SubcubicErdős73 g` and, further back, `JSP90.OddCycleErdosPosa r` (Reed–Robertson–Seymour–
+Thomas).  A subcubic graph of maximum deficiency `1` and transversal number `3` would refute
+`SubcubicPackingOne`; none exists up to `8` vertices.
+
+`jsp_000090_main` is deliberately **not** declared, so the harness keeps reporting
+`missing_theorems = ["jsp_000090_main"]`; `harness/score.py problems/JSP-000090` reports
+`build_ok = true, sorry = 0, admit = 0, placeholder_total = 0, partial_ok = true`.
+`formalization.yaml` remains `status: wip`, `prize_ready: false`.  No award claim is made.
+
+### Environment notes (each cost several build iterations)
+
+* `Finset.card_image_of_injective` takes the finset **first** in this Mathlib revision; named
+  arguments `(s := …) (f := …)` are the safe form (`Finset.card_image_of_injective _ h` misplaces
+  both arguments);
+* `Finset.nonempty_iff_ne_empty : s.Nonempty ↔ s ≠ ∅`, so a hypothesis written `s ≠ ∅` (i.e.
+  `Not (s = ∅)`) is turned into a witness with `.mpr`, and a `Nonempty` with `.mp`; and
+  `Finset.mem_biUnion.mp`/`Finset.mem_inter.mp` need a *membership*, not a `Nonempty` — go through
+  `Finset.nonempty_iff_ne_empty` first;
+* `rcases h with …` (and `obtain`) **clears** `h`, so a nested `rw [Finset.mem_insert] at h` on the
+  same hypothesis fails; restructure with `intro … ; rw [Finset.mem_insert, …] at hx ; rcases hx`;
+* `rw [h, ← k]` in one command does not chain as expected when the second rewrite targets a
+  subterm introduced by the first; split into two `rw`s;
+* `by_cases hCD : C = D` with a `Ne` hypothesis: `rw [hCD]` rewrites as if the proof were an
+  equation (it rewrote `C` into `D`); use `subst hCD`;
+* `ω` treats a hypothesis of the form `(fun t => 2 * t) a = (fun t => 2 * t) b` as *opaque*: first
+  `have h' : 2 * a = 2 * b := by simpa using h` and then `ω`; and `Nat.mul_right_cancel` at this
+  revision has signature `(n) (h : 0 < n) …`, so it does not apply to a plain equation;
+* `¬ p` is `p → False`, so to refute a hypothesis `h : P` with `¬ P` the *negation* must be applied
+  to `h` (`not_... (h …)`); writing `h … not_...` asks Lean to apply a `Prop`;
+* `dif`/`dite` on `IsOddCycle G D` needs a `Decidable (IsOddCycle G D)` instance — the pinned
+  Mathlib slice does not provide one, and `Classical.propDecidable` must be declared locally;
+* `cycSucc` is the JSP90-local `⟨(i.val + 1) % n, _⟩` of `JSPProblem/OddCycle.lean`, with
+  `cycSucc_val` a simp lemma, and `Fin.even_iff` does **not** exist at this revision: work with
+  `Even i.val` and `even_iff_two_dvd` / `dvd_def` instead.
