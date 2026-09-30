@@ -1233,3 +1233,136 @@ are that `SimpleGraph.IsClique`/`IsIndepSet` take **`Set`s** (so `insert a s` wr
 `missing_theorems = ["jsp_000090_main"]`; `score.py --strict-prize` reports
 `build_ok = true, sorry = 0, admit = 0, partial_ok = true`.  `formalization.yaml` remains
 `status: wip`, `prize_ready: false`.  No award claim is made.
+
+---
+
+## Round 69 — `JSPProblem/Free.lean`: the fan of an odd cycle in a triangle-free graph, and
+**Erdős #73 ≡ its fan statement**
+
+New file `lean/JSPProblem/Free.lean` (**33 declarations, 706 lines, 0 `sorry` / 0 `admit`, `lake build`
+OK with 1226 jobs**), imported from the root module `JSPProblem.lean`.  It is the **nineteenth attack
+family**.  Its headline is a **localisation**: the single statement left by round 68
+(`JSP90.TriangleFreeOnly`) is *equivalent* to a statement about **one odd cycle and the set of
+vertices that touch it** — and the proof of the equivalence needs no Menger theorem, no block-cut
+tree, and nothing from Mathlib beyond the pinned slice.
+
+### Part 1 — triangle-freeness made usable
+
+`G.CliqueFree 3` is a *hypothesis* in `JSP90.TriangleFreeOnly` and had never been used anywhere in
+the development.  This round turns it into usable content:
+
+* `JSP90.isNClique_three` (three mutually adjacent vertices are a `3`-clique; the three coincidences
+  are excluded by looplessness) and `JSP90.isNClique_three_of_isOddCycle` (a `3`-cycle *is* a
+  `3`-clique, via `JSP90.fin3_cycSucc_rel`: on `Fin 3` two distinct indices are consecutive around
+  the cycle);
+* **`JSP90.card_ge_five_of_cliqueFree3_of_isOddCycle` — in a triangle-free graph every odd cycle has
+  at least `5` vertices.**  This is what makes the local structure of `JSPProblem/Fan.lean` (stated
+  for `5 ≤ |C|`) available at *every* odd cycle of a triangle-free graph, not only under `LocIndep`;
+* `JSP90.not_adj_of_common_neigh_of_cliqueFree3`, `JSP90.indepSet_neighOf_singleton_of_cliqueFree3`
+  and **`JSP90.neighOf_insert_isBipartite_of_cliqueFree3` — the neighbourhood of a vertex is
+  independent, so the closed neighbourhood induces a bipartite graph.**  The difficulty of Erdős #73
+  is never *at* a vertex.
+
+### Part 2 — the complete local structure of a triangle-free graph at a shortest odd cycle
+
+* **`JSP90.not_adj_cycSucc_of_adj` — a vertex adjacent to `f i` is *not* adjacent to the successor of
+  `f i` on the cycle.**  The first genuine use of `CliqueFree 3` on the fan: the two attachments of a
+  fan vertex are never consecutive, so the fan is a book, not a web.
+* `JSP90.pairwise_not_adj_fan_of_cliqueFree3` and `JSP90.card_le_one_of_adj_of_fan_attach` — **the
+  fan vertices attached to one fixed vertex of the cycle are pairwise non-adjacent**, so the fan is a
+  disjoint union of independent classes and every edge inside the fan joins two *different* classes.
+* **`JSP90.localStructure_shortest_oddCycle_free` — the complete local structure of a triangle-free
+  graph at a shortest odd cycle**: an outside vertex meets the cycle in at most two vertices, two
+  steps apart (rounds 35/63), **and is not adjacent to the vertex in between** (new: the only place
+  `CliqueFree 3` enters).
+
+### Part 3 — the fan carries one unit less packing
+
+* **`JSP90.oddCycleFamily_card_le_of_boundary` — under `LocIndep k G`, no packing of `k` odd cycles
+  lives inside the boundary of an odd cycle**: such a packing together with the cycle itself would be
+  a packing of `k + 1` odd cycles of `G`.  This is the induction parameter of the classical
+  Erdős–Pósa argument, in the form the development consumes.
+* `JSP90.isBipartite_fan_of_locIndep_one` — `LocIndep 1` and an odd cycle force the fan to be
+  bipartite.
+
+### Part 4 — THE REDUCTION
+
+```lean
+JSP90.FanErdős73 f
+  := ∀ k W [Fintype W] G, LocIndep k G → G.CliqueFree 3 → ∀ C, IsOddCycle G C →
+       ∃ Z, Z.card ≤ f k ∧ ∀ D, IsOddCycle G D → D ∩ boundary G C ≠ ∅ → D ∩ Z ≠ ∅
+```
+
+* `JSP90.erdos73On_of_fanErdős73` with `JSP90.fanBound f` (0 at `k = 0`, and
+  `max (fanBound f k + f (k+1) + 1) (3 + (k+1) * fanBound f k)` at `k + 1`) — **Erdős #73 follows
+  from its fan statement.**  The induction uses, at a triangle, round 68's
+  `closeToBipartite_of_triangle`; at a shortest odd cycle `C` of a triangle-free graph it uses the
+  two transversality facts already proved: the outer layer inherits `LocIndep (k − 1)`
+  (`locIndep_outerLayer`) and the odd cycles avoiding the outer layer are caught by
+  `boundary G C ∪ {c} ∪ Y` (`hitsOddCycles_of_bipartite_outer`).
+* `JSP90.erdos73_of_fanErdős73` — **Erdős Problem #73 follows from a purely local statement about the
+  boundary of one odd cycle in a triangle-free graph.**
+* `JSP90.fanErdős73_of_triangleFreeOn` and **`JSP90.erdos73_iff_fanErdős73`** — the converse, so
+  **ERDŐS PROBLEM #73 IS EQUIVALENT TO ITS FAN STATEMENT.**  This replaces the policy's
+  "needs Menger / the block-cut tree" formulation of the blocker by a statement about a single pair
+  of vertex sets.
+
+### Part 5 — the statement is not a formality
+
+* `JSP90.fanErdős73_of_bounded_boundary` — the fan statement holds with `f k = d + 1` when every odd
+  cycle has at most `d` vertices in its boundary.  The instance of the headline theorem obtained this
+  way is *dominated* by round 61's `erdos73On_of_bounded_boundary`: the content of the fan statement
+  is the **unbounded**-fan case, which is what the equivalence isolates.
+* **`JSP90.not_fanErdős73_one_completeGraph_seven` — machine-checked negative result**: in `K_7`, at
+  the triangle `C = {0,1,2}` (`JSP90.triple7 0`), the two triangles `{3,4,5}` and `{6,0,1}` both meet
+  the boundary of `C` and are disjoint, so **no set of one vertex meets every odd cycle meeting the
+  boundary** (`isOddCycle_triple7`, `mem_triple7_three`, `mem_triple7_six`, `inter_triple7_empty`,
+  `mem_boundary_triple7`, `not_mem_triple7_six_of_mem_three`).  The constant of the fan statement is
+  a genuine parameter and the triangle-free hypothesis is not a formality.  Recorded **but not
+  machine-checked** in the file header: the analogous witness *inside* the triangle-free class (a
+  `13`-cycle with a `5`-cycle in the fan, `LocIndep 2`), so `n ≥ 2` is expected to be needed there.
+
+### What is *not* proved
+
+`JSP90.TriangleFreeOnly` and hence `JSP90.FanErdős73 f` for any `f`, and hence `jsp_000090_main`.
+The blocker is now stated as precisely as it can be without the classical theorem: **the boundary of
+a shortest odd cycle of a triangle-free graph can be killed with `f k` vertices**, `f k = O_k(1)`.
+
+`jsp_000090_main` is **not** declared, so the harness keeps reporting
+`missing_theorems = ["jsp_000090_main"]`; `score.py --strict-prize problems/JSP-000090` reports
+`build_ok = true, sorry = 0, admit = 0, partial_ok = true`.  `formalization.yaml` remains
+`status: wip`, `prize_ready: false`.  No award claim is made.
+
+### Toolchain findings of this round
+
+* **`omega` cannot see through `Finset.card` unless the parity is supplied** — and it *can* treat
+  `Finset.card` as an atom, but the goal `C.card = 3` from `3 ≤ C.card` and `C.card < 5` is simply
+  **false** (`C.card = 4` is possible); the parity `C.card % 2 = 1` (transported from the cycle) is
+  what closes it.  The failure mode is a misleading "no usable constraints";
+* `Finset.nonempty_iff_ne_empty` is `Nonempty ↔ ≠ ∅`: `.mp` proves `≠ ∅` **from** a witness and
+  `.mpr` extracts a witness **from** `≠ ∅`; `Finset.Nonempty` has **two** fields, so
+  `obtain ⟨x, hx⟩ := …` and never `⟨x, hmem, hcard⟩`;
+* `DisjointFamily C` unfolds to `∀ X ∈ C, ∀ Y ∈ C, X ≠ Y → X ∩ Y = ∅`; the last argument is the
+  **disequality**, and `absurd hXY e` then needs `e : ¬(X ≠ Y)`, i.e. an *equality*, not `X = Y`
+  (they are equivalent but not defeq);
+* `Finset.card_insert_of_notMem` (capital `M`) is the name at this revision,
+  `Finset.card_insert_of_not_mem` does not exist; `Finset.card_pair h : #({x,y} ∪ {y}) = 2`, so
+  `2 ≤ #{x, y}` is `(Eq.symm (Finset.card_pair hne)).le`;
+* `Finset.disjoint_sdiff_left`, `Finset.inter_eq_empty`, `Finset.not_mem_empty`,
+  `Finset.singleton_subset.mpr`, `Finset.Nonempty.elim` do **not** exist at this revision;
+  `Finset.eq_empty_iff_forall_notMem` and `Finset.eq_empty_iff_forall_not_mem` do;
+* `SimpleGraph.IsBipartite` at this revision is `∃ c : V → Fin 2, ValidColoring c` (not `Bool`); the
+  lambda for `ValidColoring` needs `intro x y h` (its two binders are *strict implicit*), and the
+  two cases of a 2-colouring by `if x = v then 0 else 1` are closed by `simp [hxv, hynv]`;
+* `SimpleGraph.IsClique` takes a **`Set`**, and a *finset* literal at that position is the coerced
+  `↑s`, so the membership is unfolded by `Finset.mem_coe` (not by `Set.mem_insert_iff`, which
+  applies to a *set* `insert`);
+* the `DecidableEq` instance in force in a file is baked into the *finsets* it builds, so a finset
+  produced by a lemma of another file (`isOddCycle_image` builds `Finset.image …` with
+  Transversal.lean's instance) is **not** syntactically the finset of a `def` in the current file
+  even when both are displayed as the same expression: build the structure directly (`⟨m, f, …⟩`)
+  when the target finset is a local `def`;
+* `interval_cases` is **not** available (the files import Mathlib modules, not `Mathlib`), but
+  `omega` proves the disjunction `i.val = 0 ∨ i.val = 1 ∨ i.val = 2` for `i : Fin 3` directly;
+* `obtain ⟨…⟩ := h` **clears** `h`, so a hypothesis destructed into components must be copied first
+  (`have hC' : IsOddCycle G C := hC`) if it is needed again.

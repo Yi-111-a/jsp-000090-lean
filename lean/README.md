@@ -17,6 +17,7 @@
 | `JSPProblem/Separator.lean` | the **2-cut decomposition** (round 42): a split `V = {a,b} ⊔ T₁ ⊔ … ⊔ T_t` with the parts pairwise anticomplete; odd cycles lie in a unique piece, transversals and the conclusion of Erdős #73 are additive over a 2-cut, and the 2-cut parity lemma — the reduction of the theorem to the 3-connected case |
 | `JSPProblem/Count.lean` | the **counting half of the 2-cut decomposition** (round 43): a cycle meeting exactly one vertex of the cut lies in a half-piece, the non-bipartite parts of a split number at most `k` under `LocIndep k G`, so the decomposition costs `2 + m * k` instead of `2 + m * t` (**new, strictly stronger instance of the headline theorem**), the full packing decomposition `card ≤ 2 + t * r`, and **the precise reduction of Erdős–Pósa for odd cycles to the 2-cut-free case plus a uniform bound on the number of 2-cuts** |
 | `JSPProblem/Weight.lean` | the **weighted Erdős–Pósa theorem** (round 44): the residue induction run to exhaustion — bounded *packing weight* forces a bounded odd cycle transversal, the transversal number is at most the weight of a maximum-weight packing, the residue of a maximum-weight packing is bipartite, a **new instance of the headline theorem** for graphs of bounded packing weight, the exact value of the conclusion on complete graphs, and the machine-checked **refutation of the naive `+1` absorption step** (`K_5`) |
+| `JSPProblem/Free.lean` | **the fan of an odd cycle in a triangle-free graph** (round 69): triangle-freeness made usable (a `3`-cycle is a `3`-clique, `N(v)` is independent, the closed neighbourhood is bipartite, every odd cycle has `≥ 5` vertices), the *complete local structure at a shortest odd cycle* of a triangle-free graph, the packing descent `oddCycleFamily_card_le_of_boundary` (the fan carries one unit less packing), and the reduction **`erdos73_iff_fanErdős73`: Erdős #73 is EQUIVALENT to the purely local statement that the boundary of one odd cycle of a triangle-free graph can be killed with `O_k(1)` vertices** — no Menger, no connectivity, no packing number, no odd girth |
 | `JSPProblem.lean` | root module |
 
 ## The statement
@@ -707,4 +708,9 @@ branch vertices; both are statements about a class of graphs.
 
 ### Not proved
 
-`TriangleFreeErdős73` and `CutTriangleErdős73`, and nothing else.
+`JSP90.TriangleFreeOnly` — Erdős #73 for triangle-free graphs — and nothing else.  Round 68 proved
+`JSP90.erdos73_iff_triangleFreeOnly`, so this single class-restricted statement is the whole
+remaining content, and round 69 localised it further: it is now equivalent
+(`JSP90.erdos73_iff_fanErdős73`) to a statement about **one odd cycle and the set of vertices that
+touch it** (`JSP90.FanErdős73`), with no connectivity, no packing number, no odd girth and no bound
+on the size of the boundary.
