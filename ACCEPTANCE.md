@@ -1574,3 +1574,86 @@ it, which the class structure does not control.
 `missing_theorems = ["jsp_000090_main"]`; `score.py --strict-prize` reports
 `build_ok = true, sorry = 0, admit = 0, partial_ok = true`.  `formalization.yaml` remains
 `status: wip`, `prize_ready: false`.  No award claim is made.
+
+---
+
+## Round 73 — `JSPProblem/Double.lean`: **the double book of the fan, and the critical-cycle counting
+in the book** (`|X| ≤ c · (k − 1)`)
+
+### The gap that is attacked
+
+Round 72's policy named two sub-goals.  This round took the first one in full: the
+**critical-cycle counting in the book**, i.e. the quantitative half of the half-integral argument.
+The tool needed is round 53's minimal-transversal apparatus (`JSPProblem/Critical.lean`), and the
+difficulty is that its private cycles are odd cycles *of `G`*, not cycles of the book, so the
+counting lemmas of the book do not apply to them.  The fix is to transport the apparatus to the
+family of odd cycles **contained in `∂C`**: then the private cycle of `z` is itself a book cycle,
+and the packing bound available is `k − 1` (round 69) rather than `k` (round 53).
+
+### Part 1 — the double book (NEW)
+
+`JSP90.doubleClass i` = the fan vertices whose attachment set is exactly the pair
+`{f i, f (cycSucc^[2] i)}` — the cells of the two-attachment part, which round 72 could only treat
+as one blob.  Three facts, all proved:
+
+* `JSP90.isIndepSet_doubleClass` — **a double class is an independent set** (common-neighbour
+  argument, `JSP90.not_adj_of_common_neigh_of_cliqueFree3`);
+* `JSP90.inj_pair_twoStep`, `JSP90.cycSucc_pow_four_ne'`, `JSP90.disjoint_doubleClass_of_ne` —
+  **the double classes are pairwise disjoint** (four steps around a cycle of length ≥ 5 never return
+  to the start);
+* `JSP90.disjoint_singleClass_doubleClass`, `JSP90.mem_singleClass_or_doubleClass` — together with
+  round 72's single classes, **the fan is a partition into `2m` independent cells**, named
+  `JSP90.fanCell G C f i b` with `b : Bool`.
+
+### Part 2 — parity and counting for cells of both kinds (NEW)
+
+`JSP90.not_isOddCycle_of_subset_two_cell`: a fan odd cycle meets at least **three** of the `2m`
+cells, now for cells of both kinds (round 72 had it for two single classes).
+`JSP90.card_le_boundary_sdiff_twoCell` and `JSP90.exists_fanTransversal_le_card_fanCell`: for
+**every** pair of cells, `∂C \ (cell_u ∪ cell_v)` is a transversal of the fan's odd cycles of size
+at most `|∂C| − |cell_u| − |cell_v|`, with the mixed and pure two-attachment cases as corollaries.
+
+### Part 3 — a new instance of the headline theorem along the two-cell axis
+
+`JSP90.erdos73On_of_fan_twoCell`: if any two of the `2m` cells, of any combination of kinds, form a
+transversal of the fan's odd cycles of combined size `q`, then `LocIndep k G` forces
+`CloseToBipartite (fanBound (fun _ => q) k) G`.  This **strictly subsumes** round 72's instance,
+which could not use a double class.
+
+### Part 4 — the critical-cycle counting in the book (NEW; round 72's concrete next lemma)
+
+* `JSP90.MinimalFanTransversal` = a minimal transversal of the odd cycles **contained in** `∂C`
+  (`JSP90.exists_minimalFanTransversal` by round 53's finitary argument applied to
+  `JSP90.boundary_hits_fanOddCycles`);
+* `JSP90.exists_criticalFanTransversal_of_minimal`: for each `z ∈ X` there is an odd cycle `D_z` of
+  `G` **contained in `∂C`** with `D_z ∩ X = {z}`;
+* `JSP90.criticalFanCycle_structure`: `D_z` is a book cycle and is not contained in any two cells;
+* `JSP90.FanIntGraph` + `JSP90.fanDisjoint_of_colour_eq`: inside one colour class the critical
+  cycles are pairwise vertex-disjoint, hence a family of odd cycles **inside** `∂C`;
+* `JSP90.card_fanTransversal_le_of_colouring`: **`|X| ≤ c · (k − 1)`** — round 53's counting with the
+  fan packing bound `JSP90.oddCycleFamily_card_le_of_boundary` in place of the global `k`, a strict
+  improvement; `JSP90.card_fanTransversal_le_one` is the `c = 1` case `|X| ≤ k − 1`.
+
+### Part 5 — the remaining statement, isolated
+
+`JSP90.FanCriticalErdős73 c` requires, for every `C`, a minimal transversal `X` of the odd cycles
+inside `∂C` whose critical intersection graph is `c`-colourable **and** which meets every odd cycle
+that *touches* `∂C`; `JSP90.erdos73_of_fanCritical` then derives `Erdős73 k` for every `k`, with the
+explicit constant `fanBound (fun j => c * (j − 1)) k`.
+
+### What is *not* proved
+
+Two things, both stated as hypotheses rather than assumed away:
+
+1. **The colouring.**  No bound on the chromatic number of `JSP90.FanIntGraph` in terms of `k` is
+   proved.  Everything downstream of it *is* proved, so this is the single remaining input of the
+   counting half.
+2. **The touching property.**  `JSP90.FanErdős73` asks for a set meeting every odd cycle `D` with
+   `D ∩ ∂C ≠ ∅`, while a minimal transversal of the odd cycles *contained* in `∂C` need not meet a
+   cycle that only touches the boundary.  Round 72's sub-goal (2) is therefore **not** solved; the
+   property is the last conjunct of `JSP90.FanCriticalErdős73`.
+
+`jsp_000090_main` is still **not** declared (`missing_theorems = ["jsp_000090_main"]`);
+`score.py` reports `build_ok = true, sorry = 0, admit = 0, partial_ok = true`, and `#print axioms`
+on the new headline results shows only `[propext, Classical.choice, Quot.sound]`.  `prize_ready`
+remains `false`; no award claim is made.

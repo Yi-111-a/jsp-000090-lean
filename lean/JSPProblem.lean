@@ -405,3 +405,4 @@ import JSPProblem.Triangle
 import JSPProblem.Free
 import JSPProblem.Class
 import JSPProblem.Book
+import JSPProblem.Double
