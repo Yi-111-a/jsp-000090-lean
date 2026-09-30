@@ -1078,3 +1078,79 @@ reports `build_ok = true, sorry = 0, admit = 0, partial_ok = true`.  `formalizat
 * `push_neg` is deprecated in this build (`push Not` instead), and it makes no progress on
   `¬ G.CliqueFree 3` (`CliqueFree n = ∀ t, ¬ G.IsNClique n t`), so a `by_contra` is the way to
   extract the `3`-clique.
+---
+
+## Round 65 — `JSPProblem/Attach.lean`: a clique and the vertices that complete it
+
+Round 64 closed the two gaps of the triangle descent and reduced Erdős #73 to **two local
+statements** (`JSP90.TriangleFreeErdős73` and `JSP90.CutTriangleErdős73`), and
+`discovery/JSP-000090/policy.json` named as the *first concrete lemma* of the attack on the latter:
+
+> for a triangle `T` with `LocIndep k G`, the number of vertices of `S = N(T) \ T` adjacent to
+> **all three** vertices of `T` is at most `k − 1`.
+
+**That lemma is false**, and round 65 proves the correct statement in its place.  New file
+`lean/JSPProblem/Attach.lean` (34 declarations, 578 lines, **0 sorry / 0 admit**, `lake build` OK
+with 1224 jobs), imported from the root module `JSPProblem.lean` — the **sixteenth attack family**,
+and the first one to attack the *local counting* of a clique rather than a decomposition or the
+Erdős–Pósa function.
+
+### Part 1 (positive) — a clique contributes at most one vertex to any independent set
+
+* **`JSP90.indepCard_le_one_add_of_isClique`** — `G.IsClique T → indepCard G (T ∪ X) ≤ 1 + indepCard G X`:
+  an independent set meeting `T` has all but one of its vertices in `X`.
+* **`JSP90.maxDef_ge_card_add_card_sub_two_add`** — the additive form
+  `|T| + |X| − 2 − 2 α(G[X]) ≤ MaxDef G` for a clique `T` disjoint from `X`: in the deficiency
+  bookkeeping a clique costs `|T|` vertices and buys **one** vertex of the independent set.
+* **`JSP90.maxDef_clique_add_two_le`** — a clique has at most `MaxDef G + 2` vertices (the
+  deficiency form of `JSP90.LocIndep.clique_card_le`).
+* **`JSP90.allNeighOf G T`** — the new quantity of the file: the vertices outside `T` adjacent to
+  *every* vertex of `T` (for `|T| = 2` the common neighbourhood of the edge; for a triangle the set
+  of `K_4`-completions).
+* **`JSP90.maxDef_allNeighOf_le`** and **`JSP90.maxDef_commonNeigh_le`** — the completion set of a
+  clique of size `≥ 2` is *deficiency-cheap*: its own deficiency is at most `MaxDef G`.
+* **`JSP90.card_allNeighOf_of_isClique_le`** — **`|T| + |A| ≤ MaxDef G + 2` whenever `A` is a clique
+  of vertices each adjacent to every vertex of the clique `T`** (via
+  `isClique_union_allNeighOf`: `T ∪ A` is a clique).  **This is the counting lemma the triangle
+  descent actually needs**, and Part 2 shows why its shape is forced.
+
+### Part 2 (negative, machine-checked) — the completion sets are free in the deficiency
+
+The witness is `joinTriangle m = K_3 ∨ I` on `Fin 3 × Fin (m + 2)`: the fibre `Fin 3 × {0}` is a
+triangle, every vertex outside it is adjacent to all three of its vertices, and there are no other
+edges (`joinTriangle`, `joinTriangle_tri`, `joinTriangle_tail`, `isIndepSet_joinTriangle_tail`,
+`isIndepSet_joinTriangle_sdiff`, `isClique_tri_insert`).
+
+* **`JSP90.maxDef_joinTriangle : MaxDef (joinTriangle m) = 2` for every `m`**
+  (`maxDef_le_two_joinTriangle`, `maxDef_joinTriangle_two`), so `JSP90.locIndep_two_joinTriangle`
+  holds for every `m`.
+* **`JSP90.completion_card_unbounded`** — for every `n` there is a graph with `LocIndep 2` and a
+  triangle with more than `n` outside vertices adjacent to all three of its vertices: the
+  policy's proposed lemma is **false**.
+* **`JSP90.commonNeigh_card_unbounded`** — for every `n` there is a graph with `LocIndep 2` and an
+  edge whose common neighbourhood has more than `n` vertices: *"the common neighbourhood of an edge
+  has at most `k` vertices"* is **false** as well.
+
+The reason is the algebra `| T ∪ A | − 2 α(G[T ∪ A]) = | T | + | A | − 2 max (1, |A|)`: for
+independent `A` the deficiency is `| T | − | A |`, so **mutually non-adjacent completions cost
+nothing**; only the cliques *inside* the completion set cost something, which is exactly what
+`card_allNeighOf_of_isClique_le` bounds.  This is the same obstruction as
+`JSP90.absorption_step_fails` (`JSPProblem/Weight.lean`, witness `K_5`) in the transversal language.
+
+### What is *not* proved
+
+`MaxDef G ≤ k → CloseToBipartite (C · k) G` is unchanged, and so are the two remaining local
+statements `JSP90.TriangleFreeErdős73` and `JSP90.CutTriangleErdős73` (the latter is now known
+*not* to be provable by any cardinality count of the `K_4`-attachments, which is what this round
+removes).  `JSP90.OddCycleErdosPosa r` (Reed–Robertson–Seymour–Thomas) remains the primary blocker.
+
+Environment facts verified this round are recorded in the header of the new file; the important ones
+are that `SimpleGraph.IsClique`/`IsIndepSet` take **`Set`s** (so `insert a s` written at a
+`Set`-expected position is silently a *set* insert, `isClique_finset_insert` bridges the two), that
+`IsIndepSet_iff` leaves the goal `∀ x ∈ s, ∀ y ∈ s, x ≠ y → ¬ G.Adj x y`, and that `0 : Fin m` needs
+`NeZero m` (hence the vertex type `Fin 3 × Fin (m + 2)`).
+
+`jsp_000090_main` is **not** declared, so the harness keeps reporting
+`missing_theorems = ["jsp_000090_main"]`; `score.py --strict-prize` reports
+`build_ok = true, sorry = 0, admit = 0, partial_ok = true`.  `formalization.yaml` remains
+`status: wip`, `prize_ready: false`.  No award claim is made.
