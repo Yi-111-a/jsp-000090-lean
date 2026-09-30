@@ -457,3 +457,4 @@ import JSPProblem.Touch
 import JSPProblem.Petersen
 import JSPProblem.Layer
 import JSPProblem.Subcubic
+import JSPProblem.Cover

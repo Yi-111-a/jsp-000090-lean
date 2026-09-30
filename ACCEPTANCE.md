@@ -2043,3 +2043,96 @@ Thomas).  A subcubic graph of maximum deficiency `1` and transversal number `3` 
 * `cycSucc` is the JSP90-local `⟨(i.val + 1) % n, _⟩` of `JSPProblem/OddCycle.lean`, with
   `cycSucc_val` a simp lemma, and `Fin.even_iff` does **not** exist at this revision: work with
   `Even i.val` and `even_iff_two_dvd` / `dvd_def` instead.
+
+---
+
+## Round 80 (`lean/JSPProblem/Cover.lean`) — the **SHARED-EDGE axis**: attack family 27
+
+New module, 44 declarations, 687 lines, 0 `sorry`, 0 `admit`; `lake build` OK (1234 jobs);
+`harness/score.py`: `build_ok=true, sorry=0, admit=0, placeholder_total=0, partial_ok=true,
+missing_theorems=['jsp_000090_main']`.
+
+### What was proved
+
+1. **A degree-free hypothesis replacing round 78's degree bound.**  `JSP90.ShareCycleEdge G`: two odd
+   cycles of `G` that meet share a *cycle edge* of the first, in every cyclic ordering.  Every graph of
+   maximum degree `≤ 3` satisfies it
+   (`JSP90.ShareCycleEdge.lemma_of_maxDegLe_three`, from round 78's `CycleOrder.exists_adj_mem_inter`),
+   so the hypothesis is weaker than subcubicity; the structural content is
+   `JSP90.exists_ne_two_mem_inter_of_shareCycleEdge`.
+2. **A NEW INSTANCE of the headline theorem, with no degree bound.**
+   `JSP90.erdos73On_of_shareCycleEdge_of_shortOddCycles`:
+   `ShareCycleEdge G → LocIndep k G → (odd girth ≤ ℓ) → CloseToBipartite (k * ((ℓ + 1) / 2)) G`
+   (constant of round 78, better than the general `ℓ * k` of `erdos73On_of_bounded_odd_girth`, under a
+   strictly weaker hypothesis), plus the `k = 1` level
+   (`JSP90.closeToBipartite_of_shareCycleEdge_of_shortOddCycle_one`), the `ℓ = 3` level
+   `CloseToBipartite (2 * k) G` (`JSP90.closeToBipartite_of_shareCycleEdge_of_three`,
+   `JSP90.erdos73On_shareCycleEdge_of_three`) and the containment of round 78's instance
+   (`JSP90.closeToBipartite_of_maxDegLe_three_of_shortOddCycles`).
+3. **THE PACKING-NUMBER-ONE CASE, WITH NO LOCAL HYPOTHESIS.**
+   `JSP90.closeToBipartite_of_shareCycleEdge_of_packingOne`: every two odd cycles meet + odd girth `≤ ℓ`
+   ⇒ `CloseToBipartite ((ℓ + 1) / 2) G`.  Erdős's hypothesis appears nowhere; `LocIndep 1` enters only
+   through `JSP90.inter_oddCycle_of_locIndep_one`.  In particular
+   **`JSP90.closeToBipartite_of_shareCycleEdge_of_packingOne_of_three`**: a graph whose odd cycles are
+   triangles, pairwise meet and share a cycle edge whenever they meet, is `2`-close to bipartite — a new
+   instance on a class with **no degree bound and no local hypothesis**; the subcubic case is
+   `JSP90.closeToBipartite_of_maxDegLe_three_of_packingOne_of_three`.
+4. **The constant `2` is sharp, machine-checked.**  `K₄` satisfies all the hypotheses of (3)
+   (`JSP90.maxDegLe_completeGraph_four`, `JSP90.shareCycleEdge_completeGraph_four`,
+   `JSP90.card_le_three_of_oddCycle_completeGraph_four`, `JSP90.inter_oddCycle_completeGraph_four`) and
+   `JSP90.not_closeToBipartite_one_K4` says it is not one vertex away from bipartite; it is
+   `LocIndep 2` (`JSP90.locIndep_two_K4`), so the failure is inside the range of the theorem.
+5. **The active-edge apparatus and the cover criterion.**  `JSP90.ActiveEdges` (the cycle edges of `C`
+   lying in another odd cycle), `JSP90.evenCover_cover_activeEdges`,
+   `JSP90.hitsOddCycles_of_activeEdgeCover_of_shareCycleEdge`,
+   `JSP90.closeToBipartite_of_activeEdgeCover_of_shareCycleEdge` (a vertex cover of the active edges of
+   `C`, inside `C`, is a transversal of the whole graph),
+   `JSP90.hitsOddCycles_of_activeEdgeCover_evenCover`.
+
+### Machine-checked negative results
+
+6. **ROUND 78'S CONCRETE NEXT LEMMA IS FALSE.**  It was: *"for a shortest odd cycle `C` of a subcubic
+   graph, the edges of `C` lying in another odd cycle are covered by two vertices of `C`"*.  In `p9`
+   (subcubic, odd girth `5` by the new `JSP90.card_ge_five_of_oddCycle_p9`, so `Cb` is a shortest odd
+   cycle) **all five** cycle edges of `Cb` are active (`JSP90.each_activeCb_active`: they lie in `Ca`,
+   `Ca`, `Cc`, `Cd`, `Cd`; `JSP90.activeCb_eq_cycleEdges` puts this in the language of `ActiveEdges`),
+   no two vertices cover them (`JSP90.not_two_cover_of_Cb`, in the conjecture's own order-based
+   vocabulary `JSP90.TwoCoverCycleEdges`; and `JSP90.no_two_cover_activeCb`, a `decide` over all
+   `3 ^ 9 = 19 683` subsets), three are needed (`JSP90.card_vertexCover_activeCb`) and three suffice
+   (`JSP90.exists_cover_activeCb_three`).  Consequence: the `k = 1` subcubic constant `2` — which `p9`
+   does attain — cannot be obtained by covering the active edges of one odd cycle.
+7. **`¬ JSP90.ShareEdgePackingOne 1`** (`JSP90.not_shareEdgePackingOne_one`): `p9` satisfies that
+   statement's hypotheses (`shareCycleEdge_p9`, `locIndep_one_p9`) and is not one vertex away from
+   bipartite, so `r = 2` is the sharp candidate.
+
+### The remaining statement
+
+8. **`JSP90.ShareEdgePackingOne r`**, stated and not assumed: a graph in which two odd cycles that meet
+   share a cycle edge and whose odd cycles pairwise meet is `r`-close to bipartite.  It drops **both**
+   hypotheses that remain in the `k = 1` subcubic case (the degree bound and the odd-girth bound) and
+   therefore *generalises* round 78's `JSP90.SubcubicPackingOne`
+   (`JSP90.subcubicPackingOne_of_shareEdgePackingOne_two`); item 3 is its proved base level (triangle
+   class) and item 7 pins the constant.  The only consumer is
+   `JSP90.erdos73On_shareEdgePackingOne_one`.
+
+`#print axioms` on the eighteen headline results of the file shows only
+`[propext, Classical.choice, Quot.sound]` — no `sorryAx`.
+
+### Environment notes added this round
+
+* `Finset` operations build `DecidableEq α` into the *data*, so a finset built with the classical
+  instance and the same finset built with `instDecidableEqFin` are **not** defeq: the finite checks must
+  live in a section where the computable instance is in scope, and every statement shared across the two
+  sections must mention only `⊆` and element membership (hence the instance-free `TwoCoverCycleEdges`
+  and `activeCb_eq_cycleEdges`);
+* `rw [def, dif_pos h]` across files works iff the local `Decidable` instance is defeq to the baked-in
+  one — copy the declaration style of `JSPProblem/Subcubic.lean`;
+* `subst h` on `h : D = C` may eliminate `C` instead of `D`;
+* `Finset.mem_inter.mp` returns components in the order of the intersection;
+* `Finset.mem_pair`, `Finset.card_pair_of_ne` and `Finset.not_mem_empty` do **not** exist at the pinned
+  revision (`{a,b} = insert b {a}`, so use `Finset.mem_insert`/`Finset.mem_singleton`,
+  `Finset.card_insert_of_notMem`+`Finset.card_singleton`, and `Finset.not_nonempty_empty ⟨x, hx⟩`);
+* `by decide` over `Finset (Fin n)` needs `set_option maxRecDepth 100000` (and heartbeats) in the
+  enclosing section;
+* `(2 : Fin 3)` annotations keep `by decide` well-typed; `⟨2, by omega⟩` inside the *type* of a `have`
+  introduces a free variable and `decide` then refuses it.

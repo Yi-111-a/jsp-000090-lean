@@ -76,5 +76,33 @@ copies satisfies `LocIndep k` (`JSP90.locIndep_p9Family`) and has least odd cycl
 > **`JSP90.erdos73_lower_bound_two` / `JSP90.no_constant_below_two_k`: `f(k) ≥ 2 k`** — no constant
 > below `2 k` works — which *strictly improves* `JSP90.erdos73_lower_bound` (`f(k) ≥ k`).
 
+**Round 80 (`lean/JSPProblem/Cover.lean`) — the SHARED-EDGE axis: the odd-girth bound with no degree
+bound, and the refutation of round 78's closing plan.**  Round 78 proved
+`closeToBipartite_of_subcubic_of_shortOddCycles` under the *degree* hypothesis `MaxDegLe G 3`, and left
+as its concrete next lemma "the **active edges** (the edges of a shortest odd cycle that lie in another
+odd cycle) are covered by two vertices of that cycle".  That lemma is **false**, by machine check:
+in `p9` (subcubic, odd girth `5`) all five cycle edges of the pentagon `Cb` are active
+(`JSP90.each_activeCb_active`) and no two vertices cover them (`JSP90.not_two_cover_of_Cb`,
+`JSP90.no_two_cover_activeCb`), so the vertex-cover number is three
+(`JSP90.card_vertexCover_activeCb`).  Replacing the degree hypothesis by the degree-free local property
+`JSP90.ShareCycleEdge` ("two odd cycles that meet share a cycle edge of the first") gives
+
+> **`JSP90.erdos73On_of_shareCycleEdge_of_shortOddCycles`: `ShareCycleEdge G` + `LocIndep k G` + odd
+> girth `≤ ℓ` ⇒ `CloseToBipartite (k * ((ℓ + 1) / 2)) G`**
+
+— the constant of round 78 under a strictly weaker hypothesis (`JSP90.lemma_of_maxDegLe_three` shows
+every subcubic graph satisfies `ShareCycleEdge`) — and, with **no local hypothesis at all**,
+
+> **`JSP90.closeToBipartite_of_shareCycleEdge_of_packingOne`: every two odd cycles meet + odd girth
+> `≤ ℓ` ⇒ `CloseToBipartite ((ℓ + 1) / 2) G`**, whose triangle level
+> (`…_of_packingOne_of_three`) is a new instance of the headline theorem with no degree bound, sharp at
+> `2` (`JSP90.not_closeToBipartite_one_K4`).
+
+The remaining statement is now `JSP90.ShareEdgePackingOne r` (stated, not assumed), which drops **both**
+hypotheses of the `k = 1` subcubic case and generalises `JSP90.SubcubicPackingOne`; and
+`JSP90.not_shareEdgePackingOne_one` shows by machine check that `r = 1` is impossible (`p9`), so `r = 2`
+is the sharp candidate.
+
 The upper-bound side is unchanged: the missing statement is still `JSP90.OddCycleErdosPosa r` for all
-`r` (equivalently `JSP90.TouchCriticalErdős73 c` for some `c`, per round 74).
+`r` (equivalently `JSP90.TouchCriticalErdős73 c` for some `c`, per round 74, or
+`JSP90.ShareEdgePackingOne r` for some `r` per round 80).
