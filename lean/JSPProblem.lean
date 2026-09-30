@@ -455,3 +455,4 @@ import JSPProblem.Book
 import JSPProblem.Double
 import JSPProblem.Touch
 import JSPProblem.Petersen
+import JSPProblem.Layer

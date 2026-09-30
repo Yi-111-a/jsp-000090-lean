@@ -1847,3 +1847,119 @@ still open — the missing input is unchanged, `JSP90.OddCycleErdosPosa r` for a
   the `Set` version of a product needs `Set.mem_prod` — mixing them fails;
 * `Finset.card_image_of_injective` needs injectivity on the **whole** type, not just on the image, so
   for `image Prod.fst` on a fibre use `Finset.card_image_iff.mpr` (`InjOn`).
+
+---
+
+## Round 77 — `JSPProblem/Layer.lean`: the **INTERNAL-DEGREE axis**, and the bounded-degree
+localisation of the missing input
+
+New file `lean/JSPProblem/Layer.lean` (**25th attack family**: 40 declarations, 565 lines, **0
+placeholders**, `lake build` OK with 1232 jobs), imported from the root module `JSPProblem.lean`.
+
+### The new axis
+
+Rounds 38 and 74 both control the **total** degree of `G`:
+
+* `JSP90.erdos73On_of_bounded_branch` — the branch vertices of the residue `G - B` all lie in a set
+  `B` of at most `m` vertices ⟹ `CloseToBipartite (m + k) G`;
+* `JSP90.erdos73On_of_localDegreeOutside` / `erdos73On_of_edgelessOutside` — at most `m` vertices
+  carry all the degree ⟹ `CloseToBipartite m G`.
+
+This round replaces the total degree by the **internal degree**: `JSP90.InternalDegree G S r` says
+only that every vertex outside `S` has at most `r` neighbours **outside `S`**.  A vertex of
+arbitrarily large total degree is free as soon as all its neighbours lie in `S`, so the hypothesis
+is strictly weaker than either of the two above.  With it:
+
+| result | content |
+|---|---|
+| `JSP90.Neigh`, `OuterNeigh`, `InnerDeg`, `MaxDeg`, `MaxDegLe`, `InternalDegree` | the notions (the pinned slice exports neither `SimpleGraph.neigh` nor `SimpleGraph.degree`, so both are defined here) |
+| `JSP90.two_le_innerDeg_of_mem_oddCycle` | **a vertex of an odd cycle avoiding `S` has internal degree ≥ 2** (its two cycle-neighbours are distinct and lie in `C`) |
+| `JSP90.hitsOddCycles_of_internalDegree_one`, `closeToBipartite_of_internalDegree_one` | the level `r ≤ 1`: `S` meets every odd cycle, so `G` is `|S|`-close to bipartite |
+| **`JSP90.erdos73On_of_internalDegree_three`** | **A NEW INSTANCE OF THE HEADLINE THEOREM**: internal degree `≤ 3` off `S` ⟹ `LocIndep k G → CloseToBipartite (\|S ∪ OuterBranch G S\| + k) G`, where `OuterBranch G S` are the vertices outside `S` that are branch vertices of `G - S`.  No bound on the odd girth, the packing weight or the number of branch vertices of `G` |
+| `JSP90.erdos73On_of_internalDegree_three_le` | the same with the convenient constant `\|S\| + \|OuterBranch\| + k` |
+| `JSP90.branchVertex_mem_of_internalDegree_two`, `erdos73On_of_internalDegree_two` | the level `r = 2` **is** round 38's instance (`branchVertex_mem_of_internalDegree_two` machine-checks the direction that identifies the two hypotheses), so the ladder `r = 0, 1, 2, 3` is complete and the `r = 3` level is the first that is new |
+| `JSP90.internalDegree_kTriangles`, `outerBranch_kTriangles`, `no_constant_below_internalDegree_three` | the `k`-term is **exactly sharp**: `kTriangles k` satisfies the hypothesis with `S = ∅`, has `OuterBranch = ∅`, and its least odd cycle transversal has exactly `k` elements |
+
+### A new named missing statement, and the reduction that consumes it
+
+* **`JSP90.BoundedDegreeErdős73 g r`** — "every graph of maximum degree at most `r` satisfying
+  `LocIndep k` is `g r k`-close to bipartite";
+* `JSP90.maxDegLe_deleteFinset_of_internalDegree` — the residue of an internal-degree hypothesis
+  has the corresponding maximum degree;
+* **`JSP90.erdos73On_of_internalDegree_of_boundedDegree`** — *the levels of this family are
+  equivalent to that statement*: `BoundedDegreeErdős73 g r` forces
+  `CloseToBipartite (m + g r k) G` under the internal-degree-`r` hypothesis off a set of at most
+  `m` vertices;
+* `JSP90.erdos73On_boundedDegree_zero` (the level `k = 0` is free — it is `JSP90.erdos73On_zero`) and
+  `JSP90.boundedDegreeErdős73_two` (the level `r = 2` is round 38's instance);
+* **`JSP90.SubcubicErdős73 g`** — **the first time the development names the *bounded-degree* case of
+  Erdős–Pósa for odd cycles as the missing input**: every graph of maximum degree at most `3` with
+  `LocIndep k` is `g k`-close to bipartite.  It is strictly weaker than
+  `JSP90.OddCycleErdosPosa r`, and `JSP90.erdos73On_of_subcubic` /
+  `JSP90.erdos73On_of_internalDegree_of_subcubic` are the two reductions that consume it.  The
+  parameter is genuine: the Petersen graph has maximum degree `3`, `MaxDef 2` and transversal
+  number `3`, so any admissible `g` satisfies `g 2 ≥ 3`.
+
+### A **tight witness** of the maximum deficiency
+
+* `JSP90.Tight G X` (`|X| = 2 * α(G[X]) + MaxDef G`), `JSP90.defOf_eq_maxDef_of_tight`;
+* **`JSP90.exists_tight_of_maxDef_ne_zero`** — as soon as `MaxDef G ≠ 0` a tight witness exists: the
+  witness of `JSP90.exists_eq_maxDef` cannot have truncated;
+* **`JSP90.indepCard_add_one_of_notMem_of_tight`** — **adding any single vertex outside a tight
+  witness raises `α` by exactly one**, i.e. no vertex outside a maximum-deficiency witness is
+  blocked by the largest independent set of the witness; and
+  `JSP90.defOf_sub_one_of_notMem_of_tight`, its deficiency form.
+
+The linear form of `Tight` is *necessary*: `defOf` is a truncated subtraction, so in `K_2` with
+`X = {a}` one has `defOf G X = 0 = MaxDef G` but `α(G[X ∪ {b}]) = α(G[X]) = 1`.  This is a
+machine-checked obstruction to the more attractive formulation and is recorded in the file header.
+
+### Three attack routes examined and closed this round
+
+1. **The overlap of two odd cycles.**  The tempting counting argument "if two odd cycles share an
+   edge then their union has deficiency `≥ |C ∩ D|`" is **false**: the diamond `K_4` minus an edge
+   has two triangles sharing an edge and maximum deficiency `1`.  The reason is structural:
+   `α(G[C ∪ D])` can be `α(C) + α(D)`, because an independent set may avoid the intersection
+   entirely, so no saving is available from the overlap.
+2. **Averaging over random 2-colourings** (`τ(G) ≤ Σ_{v ∈ B} 2^{-deg v}`, `B` = vertices on odd
+   cycles).  Useless: in the *friendship graph* of `t` triangles sharing one vertex, `MaxDef = 1`,
+   `τ = 1` and `Σ_{v ∈ B} 2^{-deg v} ≥ t / 2`, which is unbounded.
+3. **The matching reformulation** of Erdős's hypothesis (`α(G[X]) ≥ (|X| - k)/2` ⟺ every induced
+   subgraph has matching number at most `(|X| + 1)/2`, by Gallai's theorem).  Not available: the
+   pinned Mathlib revision has **no `matchingCard` and no Gallai theorem** (`α + ν = |V|`) anywhere
+   in the source tree, and `Mathlib/Combinatorics/SimpleGraph/Matching.lean` is not even in the
+   prebuilt object slice, so importing it would mean rebuilding part of Mathlib.
+
+### Environment notes (each cost several build iterations)
+
+* the pinned slice exports **neither `SimpleGraph.neigh` nor `SimpleGraph.degree`**, and
+  `SimpleGraph.mem_neigh` does not exist: `Neigh`, `MaxDeg` and `mem_neigh` are defined here
+  (`neigh` is *also* absent from `Mathlib/Combinatorics/SimpleGraph/Matching.lean`'s imports);
+* `Finset.card_eq_zero` is an **iff** here (`s.card = 0 ↔ s = ∅`), so it must be used as `.mpr`;
+* `Finset.not_mem_empty` does not exist at this revision: use `by simp` or
+  `Finset.eq_empty_iff_forall_notMem.mpr`;
+* `Finset.mem_union_left` takes **both** sets explicitly (`Finset.mem_union_left s t h`), so
+  `Finset.mem_union_left _ h` mis-assigns; `Finset.mem_union.mpr (Or.inl h)` is the robust form;
+* `Nat.le_add_right n k : n ≤ n + k` and `Nat.le_add_left` are the usable forms;
+  `Nat.le_sub_iff_add_le (h : n ≤ m) : k ≤ m - n ↔ k + n ≤ m` takes the order hypothesis first;
+  `Nat.sub_pos_iff_lt : 0 < n - m ↔ m < n` and `Nat.sub_add_cancel (h : m ≤ n) : n - m + m = n` are
+  the two lemmas that convert a truncated subtraction into linear inequalities;
+* `omega` **cannot** prove `2 * b ≤ a` from `b ≤ a` when `b` is an application of a `noncomputable
+  def` (it tries to unfold `indepCard`): use `Nat.mul_le_mul_left 2 h`;
+* a `def` whose statement quantifies over `Type u` with `u` declared by `universe u` gets **no**
+  universe parameter (a universe *metavariable* error); write `def Foo.{v} ...` with a fresh name
+  and annotate the use sites.
+
+### What is *not* proved
+
+`JSP90.SubcubicErdős73 g` for some `g` — the level `r = 3` of
+`JSP90.BoundedDegreeErdős73`, equivalently the packing-number bound for graphs of maximum degree
+`3`.  Behind it stands `JSP90.OddCycleErdosPosa r` (Reed–Robertson–Seymour–Thomas), the unchanged
+primary blocker.
+
+`jsp_000090_main` is **not** declared, so the harness keeps reporting
+`missing_theorems = ["jsp_000090_main"]`; `harness/score.py problems/JSP-000090` reports
+`build_ok = true, sorry = 0, admit = 0, placeholder_total = 0, partial_ok = true`.
+`#print axioms` on each of the thirteen headline results of the new file shows only
+`[propext, Classical.choice, Quot.sound]`.  `formalization.yaml` remains `status: wip`,
+`prize_ready: false`.  No award claim is made.
