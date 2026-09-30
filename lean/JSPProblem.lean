@@ -403,3 +403,4 @@ import JSPProblem.CutTriangle
 import JSPProblem.Attach
 import JSPProblem.Triangle
 import JSPProblem.Free
+import JSPProblem.Class

@@ -714,3 +714,19 @@ remaining content, and round 69 localised it further: it is now equivalent
 (`JSP90.erdos73_iff_fanErdős73`) to a statement about **one odd cycle and the set of vertices that
 touch it** (`JSP90.FanErdős73`), with no connectivity, no packing number, no odd girth and no bound
 on the size of the boundary.
+
+* `JSPProblem.Class` — **the classes of the fan, the parity of two classes, and the "no short cut"
+  lemma** (round 70).  `JSP90.fanClass G C a` is the set of fan vertices attached to `a`, and
+  `JSP90.isIndepSet_fanClass` makes it an independent set.  The parity core of the class structure
+  is `JSP90.not_isOddCycle_of_subset_fanClass_union`: **an odd cycle of `G` is never contained in
+  two classes**.  With `JSP90.farFan G C a b` (the part of the fan attached to neither `a` nor `b`)
+  this gives `JSP90.hitsOddCycles_farFan` and the **counting lemma of the fan**
+  `JSP90.card_farFan_ge_of_disjoint_oddCycles`: a packing of `j` odd cycles inside the fan needs `j`
+  vertices of the far part, for *every* pair `a, b ∈ C` — the shape of the classical half-integral
+  argument, as a Lean theorem.  `JSP90.erdos73On_of_fan_twoClass` is a new instance of the headline
+  theorem along this axis.  The file also supplies the **two-vertex arc** constructor missing from
+  `JSPProblem.Fan`: `JSP90.arcFun2`, `JSP90.arc2_isOddCycle` (closing an even arc through two
+  adjacent outside vertices gives a simple odd cycle of exactly `arc + 3` vertices) and the
+  classical **"no short cut" lemma** `JSP90.not_adj_of_attach_far` (two fan vertices of a shortest
+  odd cycle whose attachment points are `4` to `m - 5` steps apart are never adjacent — no
+  triangle-free hypothesis needed).

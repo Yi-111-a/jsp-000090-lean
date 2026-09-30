@@ -1366,3 +1366,111 @@ a shortest odd cycle of a triangle-free graph can be killed with `f k` vertices*
   `omega` proves the disjunction `i.val = 0 ∨ i.val = 1 ∨ i.val = 2` for `i : Fin 3` directly;
 * `obtain ⟨…⟩ := h` **clears** `h`, so a hypothesis destructed into components must be copied first
   (`have hC' : IsOddCycle G C := hC`) if it is needed again.
+
+---
+
+## Round 70 — `JSPProblem/Class.lean`: **the classes of the fan, the parity of two classes, and the "no short cut" lemma**
+
+New file `lean/JSPProblem/Class.lean` (29 declarations, 673 lines, **0 sorry/admit**, `lake build` OK
+with 1227 jobs), imported from the root module `JSPProblem.lean`.  This is the **twentieth attack
+family**, and it attacks the residual statement of round 69 (`JSP90.FanErdős73 f`) on the **class
+axis** rather than along a new decomposition axis.
+
+### The gap that is attacked
+
+Round 69 reduced Erdős #73 to a single local statement — the fan statement — and proved the local
+structure of the fan at a shortest odd cycle (`card_inter_neigh_le_two`, `shortArc_of_shortest`,
+`not_adj_cycSucc_of_adj`, `pairwise_not_adj_fan_of_cliqueFree3`), but the fan was never *named*:
+there was no object "the set of fan vertices attached to `a`" and no statement about two such sets.
+`policy.json` asked for "the class decomposition of the fan … together with the half-integral
+counting".  **Both halves of that are now formalised, and the second one is proved:**
+
+### Part 1 — the classes
+
+`JSP90.fanClass G C a = (boundary G C).filter (G.Adj a)`.  `JSP90.isIndepSet_fanClass` (a class is
+independent, being contained in the independent neighbourhood of `a`),
+`JSP90.exists_mem_fanClass_of_mem_boundary` (every fan vertex lies in some class),
+`JSP90.subset_fanClass_boundary`, `JSP90.mem_fanClass_of_adj`,
+`JSP90.subset_fanClass_of_subset_boundary`.
+
+### Part 2 — the parity of two classes
+
+`JSP90.fanColour G a x = if G.Adj x a then 0 else 1` is a proper 2-colouring of any vertex set
+covered by two classes (same colour ⟹ both attached to `a`, or both attached to `b`, hence
+non-adjacent).  Hence
+
+* **`JSP90.isBipartite_of_subset_fanClass_union`** and
+* **`JSP90.not_isOddCycle_of_subset_fanClass_union`: AN ODD CYCLE OF `G` IS NEVER CONTAINED IN TWO
+  CLASSES** (parity read off by `JSP90.even_of_cycle_in_bipartition` of round 40), plus
+* `JSP90.not_subset_two_fanClass_of_isOddCycle`,
+  `JSP90.card_ge_three_of_isOddCycle_of_subset_boundary`.
+
+### Part 3 — the far part, and the counting lemma
+
+`JSP90.farFan G C a b = (boundary G C) \ (fanClass G C a ∪ fanClass G C b)`, with
+
+* **`JSP90.hitsOddCycles_farFan`: the far part meets every odd cycle of `G` contained in the fan**;
+* `JSP90.card_le_biUnion_of_disjoint_ne` (a disjoint family of nonempty sets is counted by its
+  union) and hence
+* **`JSP90.card_farFan_ge_of_disjoint_oddCycles`: a packing of `j` odd cycles inside the fan of `C`
+  needs `j` vertices of the far part, for EVERY pair `a, b ∈ C`.**  This is the *shape* of the
+  classical half-integral argument, now a Lean theorem;
+* **`JSP90.fanErdős73_of_fan_twoClass`, `JSP90.erdos73On_of_fan_twoClass` — a NEW INSTANCE OF THE
+  HEADLINE THEOREM along the class axis**: two vertices of `C` covering the fan and hitting every
+  odd cycle ⟹ `LocIndep k G → CloseToBipartite (fanBound (fun _ => 2) k) G`.  No packing number,
+  no odd girth, no packing weight, no bound on the number of branch vertices.
+
+### Part 4 — the two-vertex arc, and the "no short cut" lemma
+
+`JSP90.arc_isOddCycle` of `JSPProblem/Fan.lean` closes an arc through **one** outside vertex; a fan
+edge needs **two**.  New: `JSP90.arcFun2` (the walk `x → y → f i → … → f (cycSucc^[e] i) → x` as a
+map `Fin (e + 3) → V`), `arcFun2_zero/one/two/last`, **`JSP90.arcFun2_ne`** (simplicity),
+**`JSP90.arcFun2_adj`** (adjacency of consecutive entries), `JSP90.arc_card2`, and
+
+* **`JSP90.arc2_isOddCycle`: closing an EVEN arc through two adjacent outside vertices gives a
+  SIMPLE ODD CYCLE of exactly `arc + 3` vertices** — the two-vertex parity core of the fan argument;
+* **`JSP90.not_adj_fan_of_far_attach` — THE "NO SHORT CUT" LEMMA**: if `x, y` are distinct vertices
+  outside a *shortest* odd cycle, adjacent to each other, with attachment points `f i` and
+  `f (cycSucc^[d] i)`, then `d ≤ 3` or `d ≥ m - 3`; equivalently
+* **`JSP90.not_adj_of_attach_far`: two fan vertices whose attachment points are `4` to `m - 5`
+  steps apart around the cycle are NEVER adjacent.**  No triangle-free hypothesis is used: this is
+  a statement about shortest odd cycles in *any* graph.
+
+### What is *not* proved
+
+`JSP90.FanErdős73 f` for any `f`, hence `jsp_000090_main`, which is still **not** declared, so the
+harness keeps reporting `missing_theorems = ["jsp_000090_main"]`; `score.py --strict-prize` reports
+`build_ok = true, sorry = 0, admit = 0, partial_ok = true`.  The blocker is now stated as: **the
+quantitative half of the half-integral argument** — from "the far part is a transversal for every
+pair `a, b`" and "adjacent fan vertices are within three steps of each other" to a bound
+`t ≤ O_k(1)` on the least transversal of the fan.  Behind it stands `JSP90.OddCycleErdosPosa r`
+(Reed–Robertson–Seymour–Thomas).  `formalization.yaml` remains `status: wip`,
+`prize_ready: false`.  No award claim is made.
+
+### Environment facts verified this round (they cost most of the round)
+
+* `Finset.nonempty_iff_ne_empty` is `Nonempty ↔ ≠ ∅`; `Finset.not_mem_empty`,
+  `Finset.disjoint_sdiff_left`, `Finset.biUnion_subset_of_subset` do **not** exist; use
+  `Finset.eq_empty_iff_forall_notMem` and `h ▸ Finset.mem_inter.mpr ⟨h1, h2⟩`;
+* `Finset.card_biUnion` and `Finset.card_le_card_of_injOn` do **not** exist at this revision, and
+  `Finset.min'` needs a `LinearOrder` instance (so it cannot be used to inject a family of finsets
+  into a target finset); the counting step must go through `Finset.biUnion_insert` +
+  `Finset.card_union_of_disjoint` (`JSPProblem/Additive.lean`'s `card_biUnion_le_sum` is the other
+  direction);
+* `SimpleGraph.IsBipartite = Nonempty (G.Coloring (Fin 2))` and `Coloring.mk` takes
+  `color` and `valid : ∀ {v w}, G.Adj v w → color v ≠ color w`; `even_of_cycle_in_bipartition`
+  needs `IsBipartiteWith s t` (with the graph an explicit argument), so the bipartition must be
+  *built* from the colouring, and `Set.mem_sdiff` does not exist — use
+  `Set.disjoint_left`/`Set.mem_setOf_eq`;
+* `mod_inj_add` is JSP90-local (`JSPProblem/Fan.lean`) with `m a b b'` **all implicit**, so the
+  values must be given by name; `omega` treats `x - k` with a *variable* `k` as an opaque atom
+  (`Nat.le_sub_of_add_le` / `Nat.sub_succ` / `Nat.add_sub_cancel` are the workarounds), and it CAN
+  treat `x - (literal)`;
+* `Nat.mod_add_mod (m n k) : (m % n + k) % n = (m + k) % n` — note the argument order, and that
+  `rw` needs the `←` direction;
+* `SimpleGraph.IsIndepSet s = s.Pairwise (fun v w ↦ ¬ G.Adj v w)`, so the intro pattern is
+  `intro x hx y hy hxy` and the goal `¬ G.Adj x y`;
+* `Finset.inter_eq_empty`-style rewrites, `Nat.eq_zero_of_lt`, `Nat.eq_of_le`,
+  `Finset.biUnion_le_sum`-style names and `obtain` after a `?_`-`refine` all behave differently
+  from the older Mathlib: `obtain x := e` in a tactic block can raise a spurious "unexpected
+  identifier" parse error — use `rcases e with ⟨…⟩` instead.
