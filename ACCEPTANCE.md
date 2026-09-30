@@ -582,3 +582,64 @@ built in one file is not syntactically the one built in another when the two fil
 `missing_theorems = ["jsp_000090_main"]`; `score.py --strict-prize` reports
 `build_ok = true, sorry = 0, admit = 0, partial_ok = true`.  `formalization.yaml` remains
 `status: wip`, `prize_ready: false`.  No award claim is made.
+
+## Round 59 — `JSPProblem/OffCycle.lean`: the deficiency off an odd cycle
+
+### The new statement
+
+```lean
+theorem maxDef_ge_one_add_maxDef_of_oddCycle {C X : Finset V} (hC : IsOddCycle G C)
+    (hCX : Separated G C X) : 1 + MaxDef (induceFinset G X) ≤ MaxDef G
+```
+
+`Separated G A B` is `Disjoint A B ∧ (no edge of G joins A to B)`.  In words: **the part of `G`
+that hangs off an odd cycle has deficiency at most `MaxDef G - 1`**, so an induction on the
+deficiency **does** make progress at a separated odd cycle.  This is the equality direction of the
+anticomplete additivity recorded as a secondary blocker in round 54, and it holds at an odd cycle
+precisely because an odd cycle has deficiency at least `1`
+(`two_indepCard_add_one_le_card_of_oddCycle : 2 * α(G[C]) + 1 ≤ |C|`), so the `Nat` truncation in
+`defOf` never bites.  The general lemma is `defOf_separated_add_of_nonneg` and the underlying
+combinatorial fact is `indepCard_separated_add` (α is additive over separated unions).
+
+### What is proved
+
+* `indepCard_separated_add`, `card_sub_two_separated_add`, `defOf_separated_add_of_nonneg` — the
+  exact additivity of α and of `defOf` over separated pairs;
+* `two_indepCard_add_one_le_card_of_oddCycle`, `defOf_oddCycle_ge_one`,
+  **`maxDef_ge_one_add_maxDef_of_oddCycle`** — the main theorem;
+* `maxDef_offCycle_le`, `maxDef_deleteFinset_oddCycle_le`, `locIndep_offCycle`,
+  `locIndep_of_separated_oddCycle` — **the `MaxDef` induction step** (the parameter drops to
+  `k - 1`);
+* `isBipartite_offCycle_of_maxDef_le_one` — the `k = 1` case read locally: everything separated from
+  an odd cycle is bipartite; `card_clique_offCycle_le` — a separated clique has at most
+  `MaxDef G + 1` vertices;
+* `LayeredOddCycles` (with `OddCycleLayers`, `SeparatedLayers`, `DisjointLayers`,
+  `CoveredOddCycles`), `layeredOddCycles_erase`, `layered_inter_eq_empty`, `layered_separated_compl`,
+  `layered_eq_empty_of_isBipartite`, `oddCyclesMeet_of_not_disjoint` — the class on which the
+  induction closes;
+* **`erdos73On_of_layered`** — a new instance of the headline theorem, with the **sharp constant
+  `k`**: if the odd cycles of `G` are layers (pairwise vertex-disjoint, each separated from
+  `V \ C`, and every odd cycle of `G` being one of them) then `LocIndep k G → CloseToBipartite k G`.
+  This is the first instance in this development proved by an **induction on `MaxDef`**, and the
+  class is attained (`layeredOddCycles_kTriangles`: the `k` disjoint triangles are layered);
+* `IsOddCycle.delete_avoiding`, `notMem_of_isOddCycle_deleteFinset`, `isBipartite_iff_no_oddCycle` —
+  the missing local lemmas.
+
+### What is *not* proved
+
+The layer condition is a genuine extra hypothesis: a graph whose odd cycles **meet** (the "three
+triangles in a ring" on `6` vertices, or `K_5`) has **no** separated odd cycle, so the induction
+does not close there — this is exactly why the round-44 "absorption" argument fails at `K_5`, and it
+is recorded machine-checked as `oddCyclesMeet_of_not_disjoint`.  What is missing for the general
+case is a substitute for the separation hypothesis: a statement that every `LocIndep k` graph has
+*some* set `X` with `1 + MaxDef G[X] ≤ MaxDef G`.  `JSP90.OddCycleErdosPosa` remains the primary
+blocker, so `jsp_000090_main` is deliberately not declared.
+
+### Environment findings (important for future rounds)
+
+* The pinned Mathlib is **trimmed**: `Mathlib/Tactic/NativeDecide.lean` does **not** exist, so
+  `native_decide` is unavailable and kernel `decide` is far too slow for exhaustive verification over
+  `Finset`s.  Every value in this round is proved combinatorially.
+* `omega` in this build cannot eliminate `Nat` subtraction from hypotheses (`0 ≤ n - m` does **not**
+  prove `m ≤ n`) nor substitute atoms in equations; `JSP90.le_succ_of_sub_pos` and
+  `JSP90.le_pred_of_succ_le` were added for the two arithmetic steps that `omega` refuses.

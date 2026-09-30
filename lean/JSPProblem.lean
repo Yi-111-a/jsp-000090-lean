@@ -307,7 +307,18 @@ problem `JSP-000090`.
 The full theorem `Erdős73 k` for every `k ≥ 0` is Reed 1999, *Mangoes and Blueberries*, Combinatorica
 19 (1999) 267–296.  Everything except the Erdős–Pósa theorem for odd cycles
 (`JSP90.OddCycleErdosPosa`, Reed–Robertson–Seymour–Thomas 2002) is proved, and
-`JSP90.erdos73_of_erdosPosa` shows that this single statement is all that is missing.  Round 35
+`JSP90.erdos73_of_erdosPosa` shows that this single statement is all that is missing.
+Round 59 added a *twelfth* attack family, `JSPProblem/OffCycle.lean` (40 declarations): the
+deficiency **off an odd cycle**.  It proves the exact additivity of the deficiency between an odd
+cycle and a set separated from it (`JSP90.maxDef_ge_one_add_maxDef_of_oddCycle`:
+`1 + MaxDef G[X] ≤ MaxDef G`), which answers the secondary blocker recorded in
+`discovery/JSP-000090/policy.json` about the anticomplete additivity of `MaxDef`; it makes the
+induction measure decrease (`JSP90.maxDef_offCycle_le`, `JSP90.locIndep_of_separated_oddCycle`); and
+it turns this into **a new instance of the headline theorem proved by an induction on the
+deficiency**, `JSP90.erdos73On_of_layered`: for graphs whose odd cycles are *layers* (pairwise
+vertex-disjoint, each separated from everything outside it, and every odd cycle of `G` being one
+of them) Erdős #73 holds with the **sharp constant `k`**, and the class is attained
+(`JSP90.layeredOddCycles_kTriangles`).  Round 35
 added the local fan machinery of `JSPProblem/Fan.lean` (arcs, the odd-arc parity count, the fan
 lemma, the short-arc lemma at a shortest odd cycle, and the resulting 2-cut structure); what is
 still missing there is the *global* step from that local structure to a transversal bound.  Round 38
@@ -336,3 +347,4 @@ import JSPProblem.Additive
 import JSPProblem.Connect
 import JSPProblem.Critical
 import JSPProblem.Deficiency
+import JSPProblem.OffCycle
