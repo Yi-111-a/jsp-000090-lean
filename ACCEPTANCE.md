@@ -1657,3 +1657,119 @@ Two things, both stated as hypotheses rather than assumed away:
 `score.py` reports `build_ok = true, sorry = 0, admit = 0, partial_ok = true`, and `#print axioms`
 on the new headline results shows only `[propext, Classical.choice, Quot.sound]`.  `prize_ready`
 remains `false`; no award claim is made.
+
+---
+
+## Round 74 — `JSPProblem/Touch.lean`: the **TOUCHING AXIS** (attack family 23)
+
+New file `lean/JSPProblem/Touch.lean` (32 declarations, 0 sorry/admit, `lake build` OK with 1230
+jobs), imported from the root module `JSPProblem.lean`.
+
+### The gap that is closed
+
+Rounds 72–73 isolated the remaining statement as `JSP90.FanCriticalErdős73 c`
+(`lean/JSPProblem/Double.lean`), which has **two** conjuncts:
+
+1. a minimal transversal `X` of the odd cycles **contained in** `∂C` whose critical intersection
+   graph is `c`-colourable; and
+2. the **touching property**: `X` meets every odd cycle of `G` that **meets** `∂C`.
+
+Round 73 recorded conjunct 2 as *not automatic* — a minimal transversal of the contained cycles need
+not meet a cycle that only touches the boundary — and left it as an open secondary lemma, because
+minimality of the *contained* family says nothing about the touching family.
+
+**Round 74 removes that conjunct by changing the family, not by proving it.**  Working with a
+minimal transversal of the *touching* family instead, the touching property is the **definition** of
+the family being hit:
+
+* `JSP90.Touches G C D := D ∩ boundary G C ≠ ∅`, `JSP90.HitsTouching G C X`,
+  `JSP90.MinTouching G C X`;
+* `JSP90.hitsTouching_boundary` (`∂C` itself is a transversal of the touching family),
+  `JSP90.exists_minTouching_of_transversal`, `JSP90.exists_minTouching`,
+  `JSP90.eq_of_touchTransversal_of_minimal`;
+* **`JSP90.exists_criticalTouchCycle_of_minimal`** — for every `x` of a minimal transversal `X` of
+  the touching family there is an odd cycle `D` with `Touches G C D` and `D ∩ X = {x}`.  This is
+  the statement round 73 could not make: `JSP90.exists_criticalFanCycle_of_minimal` produces a
+  critical cycle *contained in* `∂C`, this one *touches* `∂C`;
+* `JSP90.TouchCritical`, `JSP90.exists_criticalTouchTransversal_of_minimal`;
+* **`JSP90.minTouching_hits`** — a minimal transversal of the touching family meets every odd cycle
+  meeting `∂C`, *by definition*.  Round 73's second conjunct is discharged.
+
+### The price, and the counting
+
+The critical cycles are no longer known to lie in `∂C`, so (i) the packing bound available is `k`
+rather than round 73's `k − 1`, and (ii) the cell structure of `JSPProblem/Double.lean` no longer
+applies to them.  Everything else is transported:
+
+* `JSP90.TouchInt X crit`, `JSP90.TouchIntGraph d`, `JSP90.touchDisjoint_of_colour_eq`;
+* **`JSP90.card_critTransversal_le_of_colouring_pack`** — the counting lemma in its general form
+  (a set `X` carrying critical cycles, a packing bound `r`, a proper `c`-colouring of the critical
+  intersection graph ⟹ `|X| ≤ c * r`), separated from the data structure so that it serves both
+  families;
+* `JSP90.card_touchTransversal_le_of_colouring_pack`, `card_touchTransversal_le_of_colouring`
+  (`|X| ≤ c * k`), **`card_touchTransversal_le_one`** (`c = 1`, the classical shape `|X| ≤ k`).
+
+### The remaining statement, with ONE conjunct instead of two
+
+* `JSP90.TouchColourable H c` — "`H` is `c`-colourable", as a `Prop`;
+* **`JSP90.TouchCriticalErdős73 c`** — for every triangle-free `G` with `LocIndep k G` and every odd
+  cycle `C`, a minimal transversal `X` of the touching odd cycles with critical data `d` such that
+  the critical intersection graph of `d` is `c`-colourable and `X.card ≤ c * k`.  **No touching
+  conjunct**: it is the definition of the family;
+* `JSP90.fanErdős73_of_touchCritical` (`f k = c * k`), `JSP90.erdos73On_of_touchCritical`
+  (`fanBound (fun _ => c * k)`), **`JSP90.erdos73_of_touchCritical`** (Erdős #73 in full);
+* **`JSP90.TouchCriticalErdős73.of_fanCritical`** — round 73's `JSP90.FanCriticalErdős73 c` implies
+  this round's statement: take a minimal transversal of the touching family *inside* round 73's `X`
+  (it is smaller, `hX'`), transport the critical data, and the fan packing bound `c * (k − 1) ≤ c * k`
+  covers the size.  **The two statements are the same missing lemma**; round 73's extra conjunct was
+  an artefact of choosing the wrong family of odd cycles.
+
+### A new instance of the headline theorem on the DEGREE axis
+
+* `JSP90.EdgelessOutside G m` — there is `H` with `|H| ≤ m` and **no edge of `G` with both ends
+  outside `H`** (a hypothesis about the degree distribution of `G` alone);
+* `JSP90.hitsOddCycles_of_edgelessOutside` — every odd cycle carries an edge, so every odd cycle
+  meets `H`;
+* `JSP90.closeToBipartite_of_edgelessOutside`, and
+  **`JSP90.erdos73On_of_edgelessOutside (m k)`**: `LocIndep k G` + `EdgelessOutside G m` ⟹
+  `CloseToBipartite m G` — the constant `m` does not involve `k`, and beats round 38's `m + k` on
+  this (narrower) class;
+* **`JSP90.erdos73On_of_bounded_neighbourhood k`**: all of `G`'s edges touch a set of at most `k`
+  vertices ⟹ `CloseToBipartite k G`, a constant that is a function of Erdős's parameter alone.  No
+  bound on the odd girth, on the packing number, on the packing weight or on the number of branch
+  vertices.
+
+### What is *not* proved
+
+`JSP90.TouchCriticalErdős73 c` for some `c` — that the critical intersection graph of a minimal
+transversal of the touching odd cycles has **bounded chromatic number in terms of `k` alone**.
+Behind it stands `JSP90.OddCycleErdosPosa r` (Reed–Robertson–Seymour–Thomas, JCTA-B 2003).  No
+colouring bound is claimed or assumed anywhere, and the touching property is neither assumed nor
+smuggled in.
+
+`jsp_000090_main` is deliberately **not** declared, so the harness keeps reporting
+`missing_theorems = ["jsp_000090_main"]`; `harness/score.py problems/JSP-000090` reports
+`build_ok = true, sorry = 0, admit = 0, placeholder_total = 0, partial_ok = true`, and
+`#print axioms` on every new headline result shows only
+`[propext, Classical.choice, Quot.sound]` — no `sorryAx`.  `prize_ready` remains `false`; no award
+claim is made.
+
+### Environment notes (each cost several build iterations)
+
+* A `def` whose parameters are taken from a `variable` block has them **implicit**; if the parameter
+  is only mentioned inside the body (`EdgelessOutside`, `boundary G C` inside `Touches`) it must be
+  declared **explicitly** (`(G : SimpleGraph V) (m : ℕ)`), otherwise the use sites cannot infer it;
+* `by_cases h : s = ∅` gives `h : s = ∅`, which is *not* a function; to refute it from a witness use
+  `Finset.not_nonempty_iff_eq_empty.mpr h` (the pattern used throughout `JSPProblem/Double.lean`),
+  not `by_contra` (which yields the double negation);
+* `by_contra` on `x ∈ s` gives `h : ¬ (x ∈ s)`, so it cannot be fed to anything expecting `x ∈ s`;
+  use `by_cases` when the hypothesis is needed positively in the other branch;
+* `⟨_, _⟩` does not elaborate for `a ∈ s ∩ t` or for goals mentioning a `Finset` built with a
+  `Classical.decEq` instance: introduce the `And` with a `have h : a ∈ s ∧ a ∈ t := ⟨_, _⟩` and then
+  apply `Finset.mem_inter.mpr h`;
+* `Finset.ne_empty_of_mem` is more robust than `ne_inter_of_mem` when the two finsets are not both
+  syntactically fixed;
+* `Ne` in `Ω`-unfriendly positions: `Nat.mul_le_mul_left c (Nat.sub_le _ _)` proves
+  `c * (k - 1) ≤ c * k` (`omega` cannot, because `k - 1` is opaque to it);
+* `Fin` of an unknown length has **no `OfNat (Fin m) 0` instance** at the pinned revision: write
+  `have h0 : Fin m := ⟨0, by omega⟩` instead of `(0 : Fin m)`.

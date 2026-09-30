@@ -377,6 +377,27 @@ deliberately not declared.
     `k` through the outer layer.  At `d = 0` the constant is the sharp `k` of
     `JSP90.erdos73On_of_layered`; at `d = 2` it applies to `K_5`, the witness that no earlier
     instance reaches.
+* `JSPProblem.Touch` — the **touching axis** (round 74), the twenty-third attack family.  Round 73
+  had to state, as a second conjunct of `JSP90.FanCriticalErdős73 c`, that a minimal transversal of
+  the odd cycles *contained* in `∂C` also meets every odd cycle that merely *touches* `∂C` — and
+  recorded that this is **not** automatic.  This file removes that conjunct by changing the family:
+  - **`JSP90.Touches`, `JSP90.HitsTouching`, `JSP90.MinTouching`** — the touching family of odd
+    cycles, its transversals and its minimal transversals;
+  - **`JSP90.exists_criticalTouchCycle_of_minimal`** — for every vertex of a minimal transversal of
+    the *touching* family there is an odd cycle **touching** `∂C` and meeting `X` in exactly that
+    vertex; the touching property is then the definition, not a conjunct
+    (`JSP90.minTouching_hits`);
+  - **`JSP90.card_touchTransversal_le_of_colouring` / `card_touchTransversal_le_one`** — the
+    counting: `|X| ≤ c * k` (round 73's `k − 1` becomes `k`, the price of the touching property);
+  - **`JSP90.TouchCriticalErdős73 c`, `erdos73_on_of_touchCritical`,
+    `JSP90.erdos73_of_touchCritical`** — the remaining statement of JSP-000090 with **one** conjunct,
+    and **`JSP90.TouchCriticalErdős73.of_fanCritical`**, which shows round 73's hypothesis implies it:
+    the two are the same missing lemma;
+  - **`JSP90.EdgelessOutside`, `erdos73On_of_edgelessOutside`,
+    `JSP90.erdos73On_of_bounded_neighbourhood` — a new instance of the headline theorem on the
+    degree axis**: if all of `G`'s edges touch a set of at most `m` vertices then `G` is `m`-close to
+    bipartite, with no bound on the odd girth, the packing number, the packing weight or the number
+    of branch vertices.
 -/
 import JSPProblem.Definitions
 import JSPProblem.Reed
@@ -406,3 +427,4 @@ import JSPProblem.Free
 import JSPProblem.Class
 import JSPProblem.Book
 import JSPProblem.Double
+import JSPProblem.Touch
