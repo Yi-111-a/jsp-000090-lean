@@ -2136,3 +2136,109 @@ missing_theorems=['jsp_000090_main']`.
   enclosing section;
 * `(2 : Fin 3)` annotations keep `by decide` well-typed; `⟨2, by omega⟩` inside the *type* of a `have`
   introduces a free variable and `decide` then refuses it.
+
+---
+
+## Round 81 (`lean/JSPProblem/Cactus.lean`, `lean/JSPProblem/Sun.lean`) — the **ODD CACTUS axis**: attack family 28
+
+New modules, 58 declarations, 765 lines, 0 `sorry`, 0 `admit`; `lake build` OK (1236 jobs);
+`harness/score.py`: `build_ok=true, sorry=0, admit=0, placeholder_total=0, partial_ok=true,
+missing_theorems=['jsp_000090_main']`.
+
+### The class
+
+`JSP90.OddCactus G` — the odd cycles of `G` form a **cactus**: they are *linear* (two distinct odd
+cycles meet in at most one vertex, `JSP90.LinearOddCycles`) and *two-Helly* (three pairwise meeting
+odd cycles have a common vertex, so there is no **ring** of three odd cycles meeting in three
+distinct vertices, `JSP90.TwoHellyOddCycles`).  This is a **purely local intersection-pattern
+hypothesis**: no degree bound, no odd-girth bound, no connectivity hypothesis, no decomposition.
+It **contains** round 39's class (`JSP90.OddCactus.of_oddCyclesDisjoint`), so every instance proved
+for `OddCyclesDisjoint` is an instance of this one.
+
+### What is proved
+
+1. **THE STRUCTURAL LEMMA** `JSP90.disjoint_of_attach_ne`: two odd cycles that meet a common odd
+   cycle at *different* vertices are **disjoint**.  If `D` meets `C` at `a`, `E` meets `C` at
+   `a' ≠ a` and `D`, `E` meet at `b`, linearity gives `C ∩ D = {a}`, `C ∩ E = {a'}`, hence `a ∉ E`
+   and `C ∩ D ∩ E = ∅` — a ring, contradicting two-Helly.
+2. **A NEW INSTANCE OF THE HEADLINE THEOREM AT `k = 1`, WITH THE OPTIMAL CONSTANT `1`**:
+   `JSP90.closeToBipartite_one_of_oddCactus_of_locIndep_one` and, in the `Erdős73On` form,
+   `JSP90.erdos73On_oddCactus_one`: `LocIndep 1 G → OddCactus G → CloseToBipartite 1 G`.  Erdős's
+   hypothesis enters **only** through the packing bound at `k = 1` ("every two odd cycles meet",
+   `JSP90.inter_oddCycle_of_locIndep_one`); the key step is
+   `JSP90.exists_commonVertex_oddCactus_of_locIndep_one` — in an odd cactus with `LocIndep 1` all
+   the odd cycles have a *common vertex*.  The constant `1` is the smallest possible for a graph
+   with an odd cycle, and it is strictly better than the constant `2` of
+   `JSPProblem/Cover.lean`, whose class `ShareCycleEdge` is a different one (and which admits `p9`).
+3. **A NEW INSTANCE AT EVERY `k`**, `JSP90.erdos73On_oddCactus`, with the constant `k * (k + 1)`: a
+   maximum packing of odd cycles has at most `k` members and meets every odd cycle, and by (1) the
+   *attachment points* of a member — the vertices at which another odd cycle meets it — are at most
+   `k` in number; the union of those, plus one vertex per packed cycle, is a transversal of size at
+   most `k * k + k`.
+4. **THE CONSTANT `1` IS EXACT.**  `K₃` is an `OddCactus` graph
+   (`JSP90.oddCactus_completeGraph_three`; every odd cycle of `K₃` is the whole vertex set, so both
+   halves of the class are vacuous there), it satisfies `LocIndep 1`
+   (`JSP90.completeGraph_locIndep 1`), and it is not bipartite
+   (`JSP90.not_closeToBipartite_zero_completeGraph_three`).  So `f(1) = 1` **exactly** on this class.
+   `JSP90.oddCactus_kTriangles` puts round 39's sharp witness `kTriangles k` (transversal number
+   exactly `k`) into the class, so the class is attained.
+5. **THE TWO-HELLY HYPOTHESIS IS NECESSARY: THE 3-SUN** (`sun3`, six vertices: a triangle
+   `0 – 2 – 5` with a degree-2 vertex on each edge).  `JSP90.locIndep_one_sun3` (exhaustive decision
+   over its 64 vertex sets) and `JSP90.not_closeToBipartite_one_sun3` (for every vertex, one of the
+   four triangles avoids it) say it satisfies `LocIndep 1` and needs **two** vertices; but its three
+   peripheral triangles `T₁ = {0,1,2}`, `T₂ = {2,3,5}`, `T₃ = {0,4,5}` pairwise meet in the three
+   distinct vertices `2, 5, 0` with empty triple intersection, so
+   `JSP90.not_twoHelly_sun3` and `JSP90.not_oddCactus_sun3` hold, and `JSP90.not_linear_sun3` holds
+   too (`T₁ ∩ T₀ = {0,2}`).  The class is therefore cut exactly where it must be.  `sun3` is also a
+   **six-vertex** witness for the lower bound `f(1) ≥ 2` of `JSPProblem/Petersen.lean` (which uses the
+   nine-vertex `p9`).
+
+### The remaining statement (stated as a `def`, not assumed)
+
+6. **`JSP90.LinearRing G`, THE RING LEMMA**: in a graph whose odd cycles are linear, three pairwise
+   meeting odd cycles have a common vertex.  A ring `C`, `D`, `E` meeting pairwise in three distinct
+   vertices `a`, `b`, `c` gives — by concatenating one arc of each of the three cycles — an **odd**
+   cycle meeting `C` in `a` and `c`, contradicting linearity; the parity step is the elementary
+   "the two arcs of an odd cycle have opposite parity" (`JSP90.arc_parity`, already proved in
+   `JSPProblem/Fan.lean`).  `JSP90.OddCactus G` is exactly `LinearOddCycles G ∧ LinearRing G`
+   (`JSP90.oddCactus_iff`, `JSP90.twoHelly_of_linearRing`), so Parts 1–4 are proved with the ring
+   lemma **assumed**; with it, Parts 1–3 are available under `LinearOddCycles G` alone.  The proof
+   needs a three-arc concatenation, i.e. a "closing path" generalisation of
+   `JSP90.arc_isOddCycle_of_notMem` (`JSPProblem/Chord.lean`, which closes an arc through a single
+   *vertex*); that was not attempted this round.
+
+### Machine-checked negative results (from the exhaustive search run **before** formalising)
+
+7. **THE `f(1) ≥ 3` ROUTE IS DEAD.**  An exhaustive, incremental and parallel search over **all**
+   `2 ^ 28 = 268 435 456` graphs on 8 vertices (`/tmp/opencode/jsp90/search4.c`) gives: the maximum
+   odd cycle transversal number over graphs with `MaxDef ≤ d` is `0, 1, 2, 3` for `n = 5, 6, 7, 8`
+   respectively, and among the `52 256 816` graphs with `MaxDef ≤ 1` **none** needs `3` vertices.
+   So no `LocIndep 1` graph on `≤ 8` vertices is a witness for `f(1) ≥ 3`, and the ratio
+   `OCS / MaxDef = 2` — hence `f(k) ≥ 2k` of round 76 — is sharp at the level of the constant `2`:
+   it is already attained on **six** vertices, by the 3-sun.  A search to `n = 9` was started and
+   did not finish within the round.
+
+`#print axioms` on nineteen results of the two files shows only
+`[propext, Classical.choice, Quot.sound]` — no `sorryAx`.
+
+### Environment notes added this round
+
+* `Finset.mem_inter.mp` / `.mpr` take the components **in the order of the intersection**: for
+  `hx : x ∈ C ∩ D`, `.1` is `x ∈ C` and `.2` is `x ∈ D`;
+* a finset built by a `Finset` operation (`inter`, `filter`, `image`, `deleteFinset`) carries the
+  `DecidableEq` instance **in scope where it was built**, so a statement shared between the
+  classical section of `Cactus.lean` and the finite section of `Sun.lean` must be phrased with
+  **element memberships only** — hence the bridge lemmas `JSP90.exists_mem_inter3`,
+  `JSP90.mem_of_mem_inter3`, `JSP90.twoHelly_of_three_ne`, `JSP90.not_linear_of_two_mem`,
+  `JSP90.exists_oddCycle_deleteFinset`;
+* `Finset.card_image_of_injOn` takes its hypothesis as `Set.InjOn f (s)`: parenthesise, or
+  `Set.InjOn gr Y i` parses as an application of the result to `i`;
+* `Finset.card_image_le`, `Finset.sum_const_nat` and `Finset.eq_univ_of_card` take the finset
+  **first** (named arguments are the safe form);
+* `Finset.singleton_ne_empty : ∀ a, ({a} : Finset α) ≠ ∅` is a `∀`, not an `iff`, and
+  `Finset.ne_empty_of_nonempty` does not exist (use `Finset.nonempty_iff_ne_empty.mp`);
+* `Y i.card` parses as `Y (i.card)` — write `(Y i).card`;
+* `exists_oddCycle_av` and `exists_oddCycle_delete_av` are already declared in
+  `JSPProblem/Petersen.lean`; new finite witnesses must be prefixed (`sun3_oddCycle_av`);
+* `set_option maxRecDepth N in set_option maxHeartbeats M in` must be followed by the docstring
+  and then the declaration (as in `JSPProblem/Petersen.lean`).

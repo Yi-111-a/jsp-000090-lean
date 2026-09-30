@@ -103,6 +103,34 @@ hypotheses of the `k = 1` subcubic case and generalises `JSP90.SubcubicPackingOn
 `JSP90.not_shareEdgePackingOne_one` shows by machine check that `r = 1` is impossible (`p9`), so `r = 2`
 is the sharp candidate.
 
+**Round 81 (`lean/JSPProblem/Cactus.lean`, `lean/JSPProblem/Sun.lean`) — the ODD CACTUS axis: a new
+class on which Erdős #73 holds at `k = 1` with the OPTIMAL constant `1`.**  The class
+`JSP90.OddCactus G` says the odd cycles of `G` form a cactus: two *distinct* odd cycles meet in at
+most one vertex (`JSP90.LinearOddCycles`) and three pairwise meeting odd cycles have a common vertex
+(`JSP90.TwoHellyOddCycles` — no "ring").  It is a purely local intersection-pattern hypothesis: no
+degree bound, no odd-girth bound, no connectivity, no decomposition; and it contains round 39's
+class (`JSP90.OddCactus.of_oddCyclesDisjoint`).  The structural content is
+`JSP90.disjoint_of_attach_ne` — two odd cycles meeting a common odd cycle at *different* vertices are
+disjoint — and from it
+
+> **`JSP90.erdos73On_oddCactus_one`: `LocIndep 1 G → OddCactus G → CloseToBipartite 1 G`** — a new
+> instance of the headline theorem at `k = 1` with the **optimal** constant `1` (Erdős's hypothesis
+> enters only through "every two odd cycles meet"),
+
+together with `JSP90.erdos73On_oddCactus` at every `k` with the constant `k * (k + 1)`.  The constant
+`1` is **exact** (`K₃` is an `OddCactus` `LocIndep 1` graph and is not bipartite) and the hypothesis
+is **necessary**: the 3-sun `sun3` (six vertices, a triangle with a degree-2 vertex on each edge)
+satisfies `LocIndep 1` and needs two vertices, and its three peripheral triangles form a ring — so
+`sun3` is a six-vertex witness for `f(1) >= 2`, against the nine-vertex `p9` of round 76, and
+`JSP90.not_oddCactus_sun3` shows the class cannot be enlarged.  An exhaustive search over **all**
+`2^28` graphs on eight vertices (run *before* formalising, as the policy of rounds 76–80 requires)
+shows that among the `52 256 816` graphs with `MaxDef <= 1` **none** needs three vertices, so the
+route `f(1) >= 3` is dead and `f(k) >= 2k` is sharp at the level of the constant `2`.
+
+The remaining statement of this attack is `JSP90.LinearRing` — the **ring lemma** (in a linear graph
+three pairwise meeting odd cycles have a common vertex), stated as a `def` and *not* assumed;
+`JSP90.OddCactus G` is exactly `LinearOddCycles G ∧ LinearRing G`.
+
 The upper-bound side is unchanged: the missing statement is still `JSP90.OddCycleErdosPosa r` for all
 `r` (equivalently `JSP90.TouchCriticalErdős73 c` for some `c`, per round 74, or
 `JSP90.ShareEdgePackingOne r` for some `r` per round 80).

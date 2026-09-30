@@ -424,7 +424,45 @@ deliberately not declared.
     *strictly improves* `JSP90.erdos73_lower_bound` (`f(k) >= k`) of `JSPProblem/Sharp.lean`: for every
     `k` and every `m < 2 k` there is a finite graph satisfying `LocIndep k` which is not `m`-close to
     bipartite.
+
+* `JSPProblem.Cactus` — **the ODD CACTUS axis** (round 81), the twenty-eighth attack family: the
+  class on which Erdős #73 holds at `k = 1` with the **optimal** constant `1`, on graphs of unbounded
+  degree and unbounded odd girth.
+  - `JSP90.OddCactus G` = `JSP90.LinearOddCycles G ∧ JSP90.TwoHellyOddCycles G`: two *distinct* odd
+    cycles of `G` meet in at most one vertex, and three pairwise meeting odd cycles have a common
+    vertex (no **ring** of three odd cycles meeting in three distinct vertices).  The hypothesis is
+    purely about how the odd cycles intersect — no degree, no odd girth, no connectivity, no
+    decomposition — and it **contains** round 39's class
+    (`JSP90.OddCactus.of_oddCyclesDisjoint`);
+  - `JSP90.disjoint_of_attach_ne`: **the structural lemma** — two odd cycles that meet a common odd
+    cycle at *different* vertices are disjoint;
+  - **`JSP90.closeToBipartite_one_of_oddCactus_of_locIndep_one`** and, in the `Erdős73On` form,
+    **`JSP90.erdos73On_oddCactus_one`**: `LocIndep 1 G → OddCactus G → CloseToBipartite 1 G`, a
+    **new instance of the headline theorem with the optimal constant `1`**; Erdős's hypothesis
+    enters only through the packing bound at `k = 1`, the key step being
+    `JSP90.exists_commonVertex_oddCactus_of_locIndep_one` (in an odd cactus with `LocIndep 1` all the
+    odd cycles have a common vertex);
+  - **`JSP90.erdos73On_oddCactus`**: a new instance at every `k`, with the constant `k * (k + 1)`;
+  - `JSP90.LinearRing`, `JSP90.twoHelly_of_linearRing`, `JSP90.oddCactus_iff`: **the remaining
+    statement**, the classical *ring lemma*, stated as a `def` and *not* assumed
+    (`JSP90.OddCactus G` is exactly `LinearOddCycles G ∧ LinearRing G`).
+
+* `JSPProblem.Sun` — **the sharpness half of the ODD CACTUS axis** (round 81), all by machine check:
+  - `K₃` is an `OddCactus` graph (`JSP90.oddCactus_completeGraph_three`), satisfies `LocIndep 1`, and
+    is not bipartite (`JSP90.not_closeToBipartite_zero_completeGraph_three`): **so `f(1) = 1`
+    exactly on the new class**, against the constant `2` of `JSPProblem/Cover.lean`;
+  - `JSP90.oddCactus_kTriangles`: the class contains round 39's sharp witness `kTriangles k`, whose
+    least odd cycle transversal is exactly `k`;
+  - `sun3`, the **3-sun** (six vertices: a triangle with a degree-two vertex on each edge), with
+    `JSP90.locIndep_one_sun3` and `JSP90.not_closeToBipartite_one_sun3`: it satisfies `LocIndep 1`
+    and its least odd cycle transversal is exactly **two** — a six-vertex witness for `f(1) >= 2`,
+    against the nine-vertex `p9` of round 76 — while `JSP90.not_twoHelly_sun3`,
+    `JSP90.not_linear_sun3` and `JSP90.not_oddCactus_sun3` show its three peripheral triangles form a
+    ring, so **the two-Helly hypothesis cannot be dropped** and the class is cut exactly where it
+    must be.
+
 -/
+
 import JSPProblem.Definitions
 import JSPProblem.Reed
 import JSPProblem.OddCycle
@@ -458,3 +496,5 @@ import JSPProblem.Petersen
 import JSPProblem.Layer
 import JSPProblem.Subcubic
 import JSPProblem.Cover
+import JSPProblem.Cactus
+import JSPProblem.Sun
