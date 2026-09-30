@@ -643,3 +643,115 @@ blocker, so `jsp_000090_main` is deliberately not declared.
 * `omega` in this build cannot eliminate `Nat` subtraction from hypotheses (`0 ≤ n - m` does **not**
   prove `m ≤ n`) nor substitute atoms in equations; `JSP90.le_succ_of_sub_pos` and
   `JSP90.le_pred_of_succ_le` were added for the two arithmetic steps that `omega` refuses.
+
+---
+
+## Round 61 — `JSPProblem/Boundary.lean`: the boundary of an odd cycle, and a new instance of the
+headline theorem
+
+Round 59 proved the exact additivity of the deficiency between an odd cycle and a **separated**
+vertex set, and with it a first instance of the headline theorem by an induction on the deficiency,
+`JSP90.erdos73On_of_layered`, for the class of graphs whose odd cycles are *layers*.  Its recorded
+blocker is exact: a graph whose odd cycles **meet** (`K_5`, the "three triangles in a ring") has no
+separated odd cycle, so the induction does not close there.
+
+**This round removes the separation requirement in the right way.**  Instead of asking for a vertex
+set separated from an odd cycle, it uses the vertex set that is separated from one *by construction*:
+
+```lean
+outerLayer G C = V \ (C ∪ neighOf G C)          -- the vertices at distance ≥ 2 from C
+boundary  G C = neighOf G C \ C                 -- the vertices outside C that touch C
+```
+
+### The new instance
+
+```lean
+JSP90.erdos73On_of_bounded_boundary (d k : ℕ) :
+    ∀ W [Fintype W] (G : SimpleGraph W), LocIndep k G → BoundedBoundary d G →
+      CloseToBipartite (k * (d + 1)) G
+```
+
+where `BoundedBoundary d G` says that **every odd cycle of `G` has at most `d` vertices outside it
+that touch it**.  This is a *new axis* — a local two-connectivity condition, not a length condition
+(round 39), not a packing condition (round 40), not a number of branch vertices (round 38), not a
+decomposition (rounds 42–48), not a separation condition (round 59) — and the class it defines is not
+covered by any of them:
+
+* it is **hereditary** (`JSP90.boundedBoundary_induceFinset`), which is what makes the induction on
+  `k` legitimate;
+* its parameter is **exact on complete graphs**: `JSP90.boundary_completeGraph` gives
+  `|boundary K_n C| = n - |C|`, so `JSP90.boundedBoundary_completeGraph_five_two` puts `K_5` in the
+  class with `d = 2` and `JSP90.boundedBoundary_completeGraph_four_one` puts `K_4` in it with `d = 1`.
+  `JSP90.erdos73On_of_bounded_boundary_completeGraph_five` concludes `LocIndep 3 (K_5) →
+  CloseToBipartite 9 (K_5)`; `K_5` is precisely the graph that
+  `JSP90.class_hypothesis_is_necessary` isolates as the obstruction to every earlier instance (its
+  odd cycles meet, it is not layered, it has no anticomplete decomposition, it is full of branch
+  vertices);
+* at `d = 0` the constant is the **sharp `k`**, the constant of `JSP90.erdos73On_of_layered`
+  (`JSP90.erdos73On_of_bounded_boundary_zero`, `JSP90.closeToBipartite_of_layered_via_boundary`).
+
+### What else is proved
+
+* the **descent**: `JSP90.maxDef_outerLayer_le` (and `JSP90.locIndep_outerLayer`,
+  `JSP90.maxDef_ge_one_add_maxDef_outerLayer`) — `MaxDef (G[outerLayer G C]) ≤ k - 1` for the
+  canonical separated set, with no hypothesis on `G` near `C`; and
+  `JSP90.union_outerLayer` / `JSP90.card_outerLayer` — the complement of the outer layer is exactly
+  the cycle plus its boundary;
+* the **local structure at a shortest odd cycle**: `JSP90.eq_of_isOddCycle_subset_shortest` (no
+  proper odd cycle inside a shortest odd cycle), `JSP90.exists_adj_of_mem_isOddCycle` (every vertex
+  of an odd cycle has a neighbour on it) and
+  `JSP90.exists_bipartite_delete_of_shortest_oddCycle` (**a shortest odd cycle is bipartite after
+  *any* one of its vertices is deleted**, so the odd cycle costs one vertex and not `|C|`);
+* the **transversality lemma** `JSP90.hitsOddCycles_of_bipartite_outer`: every odd cycle of `G`
+  either meets the outer layer's transversal, or meets the shortest odd cycle or its boundary; and
+  its consequence `JSP90.closeToBipartite_of_bipartite_outerLayer` — **local absorption**: if the
+  part of `G` at distance `≥ 2` from a shortest odd cycle is bipartite, then `G` is
+  `1 + |boundary|` close to bipartite, i.e. the whole content of the problem sits in the *far* part of
+  the graph, the part to which the deficiency descent applies;
+* the **recursion** in its exact form, `JSP90.bounded_boundary_recursion`;
+* the gluing lemmas `JSP90.isBipartite_of_separated_bipartite` (bipartiteness glues over a separated
+  pair) and `JSP90.closeToBipartite_on` (a `CloseToBipartite` bound can be read on a vertex set);
+* a machine-checked **negative result**, `JSP90.not_boundedBoundary_zero_of_mem_boundary`: an odd
+  cycle with a vertex of `G` attached to it from outside is not in the class `BoundedBoundary 0`, so
+  the round-59 class is a genuine restriction and the new class is strictly larger.
+
+### What is *not* proved
+
+The parameter `d` is not removed.  At a shortest odd cycle the boundary is the *fan* of the classical
+argument — every outside vertex meets the cycle in at most two vertices, two steps apart
+(`JSP90.card_inter_neigh_le_two`, `JSP90.shortArc_of_shortest`) — and the classical content of
+Reed–Robertson–Seymour–Thomas is to bound the transversal by a constant times the *packing* number
+with **no bound at all on the fan**.  That is the single remaining gap, now localised as: *the layer
+`G[boundary G C]` of a shortest odd cycle admits an odd cycle transversal of size at most the number
+of 2-attachment points*, so that the whole boundary can be replaced by one vertex per fan.
+
+The strong form of the local absorption statement (`deleteFinset G (boundary G C ∪ {c})` bipartite)
+was written and abandoned: it needs the finset identity
+`(Finset.univ) \ (boundary G C ∪ {c} ∪ Y) = (C \ {c}) ∪ (outerLayer G C \ Y)`, and unpacking the
+decidable membership of that identity cost more than the transversal form is worth.
+
+`jsp_000090_main` is still **not** declared, so the harness keeps reporting
+`missing_theorems = ["jsp_000090_main"]`; `score.py --strict-prize` reports
+`build_ok = true, sorry = 0, admit = 0, partial_ok = true` (1221 jobs).  `formalization.yaml` remains
+`status: wip`, `prize_ready: false`.  No award claim is made.
+
+### Toolchain facts found this round (they cost most of it)
+
+* `x ∈ s` for `s : Finset V` is a `Quot`/`Multiset` membership, so the goal produced by `ext` /
+  `constructor` is **not** destructible by `rintro`: every membership goal must first be converted
+  with `Finset.mem_sdiff` / `mem_union` / `mem_inter` / `mem_singleton`, and the direction of the two
+  sides of an `iff` must be read off the error message rather than assumed;
+* `by_cases` normalises its statement, so `by_cases` on a statement containing a locally defined finset
+  is fragile: use `have h1 : x ∈ C ∨ x ∈ N(C) := Finset.mem_union.mp h` and then `rcases h1`;
+* `SimpleGraph.neighFinset` does not exist at the pinned revision, so `neighOf` has to be defined by
+  hand (`filter` + `Finset.mem_filter`);
+* `Finset.mem_inter`'s binders are `s₁ s₂`, and `Finset.mem_union.mpr` is `Iff.mpr`, so the finsets
+  must be pinned on the `Iff`, never on `.mpr`;
+* `omega` of this build cannot do distributivity: `k * (d + 1) + d + 1 = (k + 1) * (d + 1)` needs three
+  explicit `Nat.mul_succ` / `Nat.succ_mul` facts, and a product by a variable is an opaque atom;
+* `SimpleGraph.Adj` is a `Prop` at this revision, so `False` comes from `G.loopless.irrefl` and
+  symmetry from `G.adj_symm`;
+* for a concrete `Fin n` witness, `Finset` literals built in different files use different
+  `DecidableEq` instances (the round-53 pitfall) **and** `Finset.image` picks the use-site instance
+  while the goal uses the definition-site one — a concrete witness on `Fin n` must avoid
+  `Finset.image`.

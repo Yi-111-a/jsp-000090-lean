@@ -328,6 +328,26 @@ function there), which gives the new instances `erdos73On_of_bounded_branch` and
 `erdos73On_of_no_branch` of the headline theorem.  The research statement itself
 (`OddCycleErdosPosa r` for arbitrary `r`) is **not** proved here, so `jsp_000090_main` is
 deliberately not declared.
+* `JSPProblem.Boundary` — **the boundary of an odd cycle, and a new instance of the headline
+  theorem** (round 61):
+  - `JSP90.neighOf` / `JSP90.boundary G C = N(C) \ C` — the *fan* of the classical argument, and
+    the class `JSP90.BoundedBoundary d G` (every odd cycle has at most `d` vertices outside it that
+    touch it), which is hereditary (`JSP90.boundedBoundary_induceFinset`) and has the exact value
+    `n - 3` on complete graphs;
+  - `JSP90.outerLayer G C = V \ (C ∪ N(C))` — the vertices at distance `≥ 2` from `C`,
+    **separated from `C` by construction**, so the deficiency induction drops there
+    (`JSP90.maxDef_outerLayer_le`, `JSP90.locIndep_outerLayer`) with *no* hypothesis on `G` near `C`;
+  - `JSP90.eq_of_isOddCycle_subset_shortest` and `JSP90.exists_bipartite_delete_of_shortest_oddCycle`
+    — the local structure at a shortest odd cycle: it contains no proper odd cycle, and it becomes
+    bipartite after **any** one of its vertices is deleted;
+  - `JSP90.hitsOddCycles_of_bipartite_outer` and `JSP90.closeToBipartite_of_bipartite_outerLayer` —
+    the local absorption statement: if the part of `G` at distance `≥ 2` from a shortest odd cycle is
+    bipartite, then `G` is `1 + |boundary|` close to bipartite;
+  - **`JSP90.erdos73On_of_bounded_boundary` — A NEW INSTANCE OF THE HEADLINE THEOREM**:
+    `LocIndep k G` + `BoundedBoundary d G` gives `CloseToBipartite (k * (d + 1)) G`, by induction on
+    `k` through the outer layer.  At `d = 0` the constant is the sharp `k` of
+    `JSP90.erdos73On_of_layered`; at `d = 2` it applies to `K_5`, the witness that no earlier
+    instance reaches.
 -/
 import JSPProblem.Definitions
 import JSPProblem.Reed
@@ -348,3 +368,4 @@ import JSPProblem.Connect
 import JSPProblem.Critical
 import JSPProblem.Deficiency
 import JSPProblem.OffCycle
+import JSPProblem.Boundary
