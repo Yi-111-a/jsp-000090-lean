@@ -1474,3 +1474,103 @@ pair `a, b`" and "adjacent fan vertices are within three steps of each other" to
   `Finset.biUnion_le_sum`-style names and `obtain` after a `?_`-`refine` all behave differently
   from the older Mathlib: `obtain x := e` in a tactic block can raise a spurious "unexpected
   identifier" parse error — use `rcases e with ⟨…⟩` instead.
+
+---
+
+## Round 72 — `JSPProblem/Book.lean`: the descent at the boundary of an odd cycle (**no separation
+hypothesis**) and the **disjoint book** of the fan
+
+New file `lean/JSPProblem/Book.lean` (30 declarations, 700 lines, **0 sorry, 0 admit**, `lake build`
+OK with 1228 jobs), imported from the root module `JSPProblem.lean`.  This is the **twenty-first**
+attack family.  It does two things, both on the critical path, and **no** Menger, **no** block-cut
+tree, **no** connectivity API and **no** new decomposition axis.
+
+### Part 1 — the descent at the boundary, with no separation hypothesis (NEW)
+
+Rounds 59 (`JSPProblem/OffCycle.lean`) and 44 (`JSPProblem/Weight.lean`) proved
+`1 + MaxDef G[X] ≤ MaxDef G` for vertex sets `X` **separated** from an odd cycle — the canonical
+such set being the outer layer.  The fan `∂C` is in general **not** separated from `C` (that is the
+whole point of the fan), so until now no descent was available at the fan.  This round proves it
+with **no hypothesis at all**:
+
+* **`JSP90.maxDef_ge_one_add_maxDef_boundary`** — for every odd cycle `C`,
+
+  ```lean
+  1 + MaxDef (G[boundary G C]) ≤ MaxDef G
+  ```
+
+* **`JSP90.locIndep_boundary`** — `LocIndep k G` + `1 ≤ k` ⟹ `LocIndep (k-1) (G[∂C])`, and
+  `JSP90.maxDef_boundary_le`.  This is the induction step of the classical argument at an odd
+  cycle, in its most local form, and it is the descent the fan statement of rounds 69–71 needs.
+* The ingredients are `JSP90.indepCard_union_le` (`α(G[s ∪ t]) ≤ α(G[s]) + α(G[t])` over a disjoint
+  union) and `JSP90.two_indepCard_add_one_le_card_oddCycle` (`2 α(G[C]) + 1 ≤ |C|`).
+* The statement is a statement about the **maximum** over `Y ⊆ ∂C`, not about each `Y`: the second
+  case of the proof (where `2 α(Y) > |Y|`, so the deficiency truncates at `0`) is exactly why, and
+  the docstring records a counterexample to the pointwise version — in the disjoint union of an
+  independent triple and a triangle, with `Y` the triple, both `defOf G Y` and `defOf G (Y ∪ C)`
+  are `0`.
+* **`JSP90.isBipartite_fan_of_locIndep_one'`** is a second, independent route to round 69's
+  `JSP90.isBipartite_fan_of_locIndep_one`, now read off `MaxDef = 0 ↔ bipartite`.
+
+### Part 2 — the disjoint book of the fan (NEW)
+
+`JSPProblem/Class.lean` named the *attachment classes* `fanClass G C a`; they **overlap** (a fan
+vertex attached to `{c−1, c+1}` is in the classes of both `c−1` and `c+1`).  This round refines them
+to a **disjoint** family — the classical "book, not web" picture:
+
+* `JSP90.attachSet`, `JSP90.mem_attachSet`, `JSP90.attachSet_nonempty_of_mem_boundary`;
+* **`JSP90.card_attachSet_le_two`** — `|N(x) ∩ C| ≤ 2` stated on attachment **vertices** rather
+  than indices (`JSP90.card_inter_neigh_le_two` transferred through `j ↦ f j`);
+* **`JSP90.attachSet_eq_singleton_or_pair`**: a fan vertex attaches to a *single* point of `C`, or to
+  a *pair* of points **two steps apart** — the classical content of the book, on vertices;
+* `JSP90.singleClass G C f i` = the fan vertices whose only attachment point is `f i`, and
+  `JSP90.doubleAttach G C` = the fan vertices with two attachment points;
+* **`JSP90.mem_singleClass_or_doubleAttach`**, `JSP90.disjoint_singleClass_of_ne`,
+  `JSP90.disjoint_singleClass_double` — the fan is the **disjoint** union of the `m` single classes
+  and of the double-attachment part;
+* `JSP90.subset_singleClass_fanClass`, **`JSP90.isIndepSet_singleClass`** — a single class is
+  contained in the attachment class of its own index and is an independent set;
+* `JSP90.cycSucc_pow_four_ne` — four steps around a cycle of length ≥ 5 never return to the start
+  (the arithmetic behind the disjointness of the double classes).
+
+### Part 3 — the parity of two single classes, and the counting lemma (NEW)
+
+* **`JSP90.not_isOddCycle_of_subset_two_singleClass`: an odd cycle of the fan meets at least three
+  single classes.**  The disjoint refinement of round 70's
+  `JSP90.not_isOddCycle_of_subset_fanClass_union`; the *disjointness* of the book is exactly what
+  is used here.
+* **`JSP90.hitsOddCycles_boundary_sdiff_two_singleClass`** — the fan with two single classes removed
+  is a transversal of the odd cycles inside the fan.  Because the classes are disjoint, this is a
+  **strictly smaller** transversal than round 70's `JSP90.hitsOddCycles_farFan`.
+* **`JSP90.card_le_boundary_sdiff_two_singleClass` — the counting lemma of the book**: a packing of
+  `j` odd cycles inside the fan of `C` needs `j` vertices outside **every** two single classes, for
+  *every* pair of indices `i, j`.  The content is that the bound holds for all `binom m 2` pairs
+  simultaneously, which is what forces a transversal of the fan to spread out over the classes.
+* **`JSP90.exists_fanTransversal_le_card`** — the explicit form,
+  `|S_i| + |S_j| + |Z| ≤ |∂C|` with `Z` the transversal above.
+
+### Part 4 — a new instance of the headline theorem along the book axis
+
+* **`JSP90.fanErdős73_of_fan_singleClassTwo`**, **`JSP90.erdos73On_of_fan_singleClassTwo`**,
+  **`JSP90.erdos73_of_fan_singleClassTwo`** — if every odd cycle `C` of a triangle-free `G` has two
+  single classes `S_i`, `S_j` of its book whose union is a transversal of all the odd cycles of `G`
+  meeting `∂C`, and whose combined size is at most `q`, then `LocIndep k G` forces
+  `CloseToBipartite (fanBound (fun _ => q) k) G`, and `Erdős73 k` for every `k`.  The transversal
+  now lives **in the fan** and is a union of two *disjoint* pieces of the book, so its size is
+  bounded; round 70's instance used a pair of vertices of `C` outside the fan.  No packing number,
+  no odd girth, no packing weight, no bound on the number of branch vertices.
+
+### What is *not* proved
+
+`JSP90.FanErdős73 f` for any `f`, and hence `jsp_000090_main`; behind it stands
+`JSP90.OddCycleErdosPosa r` (Reed–Robertson–Seymour–Thomas, JCTA-B 2003).  What this round adds is
+the descent at the fan (missing until now and required by rounds 59–71) and the *disjoint*
+counting system of the book.  Still open: the quantitative half of the half-integral argument
+(turning "a transversal of size `t` forces a packing of `≳ t / |C|` odd cycles" into a bound on the
+least transversal of the fan), and the odd cycles of `G` that merely *touch* the fan from outside
+it, which the class structure does not control.
+
+`jsp_000090_main` is **not** declared, so the harness keeps reporting
+`missing_theorems = ["jsp_000090_main"]`; `score.py --strict-prize` reports
+`build_ok = true, sorry = 0, admit = 0, partial_ok = true`.  `formalization.yaml` remains
+`status: wip`, `prize_ready: false`.  No award claim is made.
