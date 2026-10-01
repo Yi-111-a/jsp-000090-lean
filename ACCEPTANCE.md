@@ -2838,3 +2838,78 @@ reports `build_ok = true, partial_ok = true, prize_ready = false`, `missing_theo
 ["jsp_000090_main"]`.  What remains is `JSP90.OddCycleErdosPosa r` (behind it, Mader's structure
 theorem); see `discovery/JSP-000090/policy.json` (`next_bet`: the **full** girth ladder, and maximal
 packings).
+
+---
+
+## Round 101 — `JSPProblem/Stair.lean`: **THE FULL ODD-GIRTH LADDER**, `τ_odd(G) ≤ ∑_j g_j`
+
+New file `lean/JSPProblem/Stair.lean` (28 declarations, 456 lines, **0 sorry/admit**, `lake build` OK
+with 1251 jobs), imported from the root module `JSPProblem.lean` whose docstring was extended.  This
+is the **forty-second attack family**, and it is exactly option (A) of round 100's `policy.json`.
+
+### The statement
+
+A *chain of odd cycles* `C 0, …, C (n-1)` (`JSP90.IsOddCycleChain`) is a sequence of vertex sets
+such that `C j` is an **odd cycle of the residue of `H` after deleting `C 0, …, C j.succ`**
+(`JSP90.residueOf H C j`).  With `(C j).card ≤ g j` and packing number at most `n`:
+
+> **`JSP90.closeToBipartite_of_girthLadder`: `CloseToBipartite (g 0 + g 1 + … + g (n-1)) H`.**
+
+There is **no degree bound, no packing-weight bound, no bound on the number of branch vertices and no
+uniform bound on the length of an odd cycle**: each level pays exactly what it uses.
+
+### The machinery (where the work is)
+
+* `JSP90.residueOf`, `JSP90.deletedUpTo`, `JSP90.deletedUpTo_zero`;
+* **`JSP90.residueOf_succChain` — THE SHIFT IDENTITY**:
+  `residueOf (deleteFinset H (C 0)) (fun i => C i.succ) j = residueOf H C j.succ`, i.e. inside the
+  residue `H - C 0` the tail `C 1, …` walks *exactly* the tail of the original chain.  All the index
+  bookkeeping of the file lives in this lemma (its `deletedUpTo` form is
+  `JSP90.deletedUpTo_succChain`);
+* `JSP90.isOddCycleChain_succChain` — the shift of a chain of odd cycles is a chain of odd cycles;
+* `JSP90.isBipartite_of_oddCyclePackingLe_zero` — packing number `0` ⟹ bipartite, the base case of
+  every packing-number induction of this development in one line;
+* the induction itself uses round 100's `OddCyclePackingLe.succ_of_residue` (the strictly decreasing
+  quantity) and round 40's `closeToBipartite_of_residue`;
+* the arithmetic: `JSP90.girthSum`, `JSP90.girthSum_succ`, `JSP90.girthExtend`, `JSP90.sum_fin_val`.
+
+### The instances
+
+* **`JSP90.erdos73On_of_girthLadder` — a new instance of the headline theorem**, with the constant
+  `∑ j : Fin k, g j` and Erdős's own hypothesis `LocIndep k G` supplying the packing bound;
+* **`JSP90.closeToBipartite_of_girthLadder_uniform` / `JSP90.erdos73On_of_girthLadder_uniform`
+  re-derive `JSPProblem/Transversal.lean`'s `ℓ * k` instance *from* the ladder**, so that the
+  comparison of the two instances is machine-checked rather than asserted: the ladder is a strict
+  generalisation.  `JSP90.girthLadder_sum_le_mul` and `JSP90.girthLadder_sum_le_sub_one_mul` pin the
+  comparison of the constants (`∑ g_j ≤ ℓ * k`, and `∑ g_j ≤ (ℓ-1) * k < ℓ * k` if every level pays
+  at most `ℓ - 1`);
+* **`JSP90.erdos73On_of_girthLadder_staircase` — the closed-form instance**: a chain whose levels grow
+  like `3, 5, 7, …` gives `CloseToBipartite (k * k + 2 * k) G`, with the closed form proved
+  (`JSP90.girthSum_arith`, `JSP90.staircase_const`) and
+  **`JSP90.staircase_lt_uniform : k² + 2k < (2k + 1) * k` for `k ≥ 2`**, i.e. the ladder constant is
+  strictly cheaper than the uniform one.  This is the only bound in the development whose constant
+  depends on the *sequence* of level girths rather than on their maximum.
+
+### What is *not* proved
+
+`jsp_000090_main` is **not** declared, so the harness keeps reporting
+`missing_theorems = ["jsp_000090_main"]`; `score.py --strict-prize` reports
+`build_ok = true, sorry = 0, admit = 0, partial_ok = true`.  Behind it stands
+`JSP90.OddCycleErdosPosa r` (Reed–Robertson–Seymour–Thomas), the unchanged primary blocker.  The
+ladder *assumes* the chain (equivalently: that the residue chain has a short odd cycle at every
+level); the missing global statement is that one can always *find* such a chain, or find a
+transversal some other way.
+
+### Toolchain facts verified this round (they cost most of the round)
+
+`Fin.sum_univ_succ`, `Finset.range_succ` and `Finset.sum_univ_zero` are **not** in the pinned import
+slice; `Finset.sum_range_succ'`, `Finset.sum_fin_eq_sum_range`, `Fin.sum_univ_eq_sum_range` are.
+Consequently the ladder is phrased with `g : ℕ → ℕ` and `girthSum k g = ∑ i ∈ range k, g i`, whose
+step reindexing is literally `Finset.sum_range_succ'`; the `Fin`-indexed statement is recovered with
+`girthExtend`/`girthSum_extend`.  Further: `0 : Fin n` needs `[NeZero n]`, so a level index must be
+`Fin (n+1)` and never `Fin n`; `(Finset.range k).biUnion` needs an `ℕ`-indexed family, so the chain
+predicate is `((univ : Finset (Fin n)).filter (fun i => i.val < j.val)).biUnion C` rather than a
+`biUnion` over a `range`; `Finset.sum_le_sum` and friends do not unify against a `Fintype.sum`
+goal, so every sum is first moved to `range`-form; and `omega` is blind to `k * (k - 1)` versus
+`k * k - k` (both appear as distinct atoms), so `k ≤ k * k` and `k < k * k` are the two lemmas
+(`JSP90.nat_le_sq`, `JSP90.nat_lt_sq`) that the arithmetic needs.

@@ -2,21 +2,23 @@ jsp_id: JSP-000090
 catalog_url: https://github.com/TheJustinSunPrize/awards
 status: wip
 prize_ready: false
-last_round: 96
+last_round: 101
 last_round_summary: |
-  Round 96 -- the FINITE-SEARCH AXIS (attack family 38).  New module lean/JSPProblem/Finite.lean (0 sorry/admit, lake build OK
-  with 1247 jobs), imported from the root module JSPProblem.lean whose docstring was extended.  Bipartiteness of a finite graph is
-  the existence of one of the 2^|V| two-colourings (JSP90.isBipartite_iff_color2); an odd cycle of a finite graph is a cyclic ordering
-  of length <= |V| (JSP90.isOddCycle_iff_bounded); consequently Erdos #73 on a fixed finite vertex type is a finite decision problem
-  (JSP90.LocIndepSearch, JSP90.CloseToBipartiteSearch, JSP90.erdos73On_fin and two Decidable instances).  With that machinery the
-  round decided the exact constant of Erdos #73 on a six-vertex graph: for g6 = a triangle with one further vertex closing a triangle on
-  each of its three edges, JSP90.locIndep_one_g6 (exhaustive kernel decision over the 2^6 vertex sets), JSP90.not_locIndep_zero_g6
-  (maximum deficiency exactly 1), the four triangles, and JSP90.closeToBipartite_iff_g6 : CloseToBipartite m g6 <-> 2 <= m, i.e. the odd
-  cycle transversal number of g6 is exactly 2.  Hence JSP90.not_erdos73_fin6_one_one: f(1) >= 2 on six vertices, and g6 is the smallest
-  such witness (p9 has nine vertices).  An exhaustive check over all 2^15 graphs on six vertices was attempted and abandoned after
-  measuring about 25 s per graph in the kernel (no native_decide in the pinned slice).  jsp_000090_main is still not declared: the
-  remaining statement is JSP90.OddCycleErdosPosa r, the odd cycle Erdos-Posa theorem in its 3-connected case.  Zero-sorry partial result
-  (build_ok, partial_ok); no prize claim.
+  Round 101 -- THE ODD-GIRTH LADDER axis (attack family 42).  New module lean/JSPProblem/Stair.lean (28 declarations, 456 lines,
+  0 sorry/admit, lake build OK with 1251 jobs), imported from the root module JSPProblem.lean whose docstring was extended.  A
+  chain of odd cycles C 0..C (n-1) (JSP90.IsOddCycleChain: C j is an odd cycle of the residue after deleting C 0..C j.succ,
+  JSP90.residueOf) with (C j).card <= g j and packing number at most n gives
+  JSP90.closeToBipartite_of_girthLadder : CloseToBipartite (g 0 + ... + g (n-1)) H -- each level pays its own girth, with no degree
+  bound, no packing-weight bound and no uniform bound on odd cycle length.  The only new index lemma is the SHIFT IDENTITY
+  JSP90.residueOf_succChain (inside H - C 0 the tail C 1.. walks exactly the tail of the original chain); the base case is
+  JSP90.isBipartite_of_oddCyclePackingLe_zero (packing number 0 => bipartite).  New instance of the headline theorem:
+  JSP90.erdos73On_of_girthLadder; and JSP90.erdos73On_of_girthLadder_uniform RE-DERIVES JSPProblem/Transversal.lean's l*k instance
+  from the ladder, so the comparison of the two instances is machine-checked (the ladder strictly generalises it because its
+  constant sees the sequence of level girths, not only their maximum).  Closed-form staircase instance: for a chain whose levels
+  grow like 3, 5, 7, ... , JSP90.erdos73On_of_girthLadder_staircase gives CloseToBipartite (k*k + 2*k) G with the closed form proved
+  (JSP90.girthSum_arith, JSP90.staircase_const) and JSP90.staircase_lt_uniform machine-checks k*k + 2*k < (2*k+1)*k for k >= 2.
+  jsp_000090_main is still not declared: behind it stands JSP90.OddCycleErdosPosa r, and on this axis the existence of the chain.
+  Zero-sorry partial result (build_ok, partial_ok); no prize claim.
 github_owner: Yi-111-a
 lean_repository: https://github.com/Yi-111-a/jsp-000090-lean
 branch: main

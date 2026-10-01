@@ -732,6 +732,29 @@ deliberately not declared.
     `JSP90.not_oddGirth_bound_without_packing`, which pins the *direction*: an odd girth from **below**
     (`JSP90.OddGirthGe ℓ G`) bounds nothing, whereas the upper bound on odd cycle length used by
     `JSPProblem/Transversal.lean` is the one that works.
+* `JSPProblem.Stair` — **the ODD-GIRTH LADDER axis** (round 101, one new attack family).  Each
+  level of a residue chain pays *its own* girth, so the constant of Erdős #73 becomes a **sum**:
+  - `JSP90.residueOf H C j` — level `j` of a chain of odd cycles (the residue after deleting
+    `C 0, …, C j.succ`), `JSP90.residueOf_zero`, and the **shift identity**
+    `JSP90.residueOf_succChain`: inside `H - C 0` the tail `C 1, …, C (n-1)` walks exactly the tail of
+    the original chain, which is what makes the induction step go through;
+  - `JSP90.IsOddCycleChain` and `JSP90.isOddCycleChain_succChain`;
+  - **`JSP90.closeToBipartite_of_girthLadder` — THE ODD-GIRTH LADDER**: a chain of odd cycles of
+    length at most `g j` at level `j`, and packing number at most `n`, give
+    `CloseToBipartite (g 0 + g 1 + … + g (n-1)) G`, with **no degree bound, no packing-weight bound
+    and no uniform bound on odd cycle length** (`JSP90.closeToBipartite_of_girthLadder_fin` is the
+    `Fin`-indexed form, `JSP90.girthSum`/`JSP90.girthSum_succ` its arithmetic);
+  - **`JSP90.erdos73On_of_girthLadder` — a new instance of the headline theorem**, and
+    `JSP90.closeToBipartite_of_girthLadder_uniform` / `JSP90.erdos73On_of_girthLadder_uniform`
+    *re-derive* `JSPProblem/Transversal.lean`'s `ℓ * k` instance from the ladder, so that the
+    comparison is precise: the ladder is strictly stronger because its constant sees the sequence of
+    level girths, not only their maximum (`JSP90.girthLadder_sum_le_sub_one_mul`);
+  - **`JSP90.erdos73On_of_girthLadder_staircase` with the closed-form constant `k² + 2k`**
+    (`JSP90.girthSum_arith`, `JSP90.staircase_const`) for a chain whose levels grow like `3, 5, 7, …`,
+    and `JSP90.staircase_lt_uniform` machine-checks `k² + 2k < (2k + 1) * k` for `k ≥ 2`;
+  - `JSP90.isBipartite_of_oddCyclePackingLe_zero` — packing number `0` means bipartite, the base case
+    of every packing-number induction of this development in one line.
+
 -/
 import JSPProblem.Definitions
 import JSPProblem.Reed
@@ -782,3 +805,4 @@ import JSPProblem.Finite
 import JSPProblem.DegColour
 import JSPProblem.Sparse
 import JSPProblem.Pivot
+import JSPProblem.Stair
