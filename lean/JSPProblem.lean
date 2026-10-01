@@ -461,8 +461,33 @@ deliberately not declared.
     ring, so **the two-Helly hypothesis cannot be dropped** and the class is cut exactly where it
     must be.
 
--/
+- `JSPProblem.Helly` — **the HELLY axis** (round 83, attack family 30), the **thirtieth** attack family
+  and the first that does not add instances to an existing class but *characterises* one:
 
+  - `JSP90.HellyOddCycles G` — the odd cycles of `G` form a **Helly family**: every finite family of
+    pairwise meeting odd cycles has a common vertex.  This is the full Helly property, as opposed to
+    round 81/82's `JSP90.TwoHellyOddCycles G`, which asks only for the three-element case;
+  - **`JSP90.helly_of_linearOddCycles : LinearOddCycles G → HellyOddCycles G`** — **the Helly lemma**:
+    in a graph whose odd cycles are linear, the odd cycles form a Helly family.  Round 82's ring
+    lemma kills rings of *three*; this kills non-Helly families of *any* size, by strong induction on
+    `|𝒞|` whose inductive step consumes the ring lemma.  `JSP90.twoHelly_of_helly` then recovers
+    round 82's class;
+  - **`JSP90.closeToBipartite_one_of_helly_of_locIndep_one`, `JSP90.erdos73On_helly_one`** — a **new
+    instance of the headline theorem at `k = 1` with the optimal constant `1`, under the strictly
+    weaker hypothesis `HellyOddCycles G`**: Erdős's hypothesis enters only through the packing bound
+    at `k = 1`, and there is no bound on the odd girth, the degrees, the packing weight, the branch
+    vertices or the number of components;
+  - `JSP90.helly_completeGraph_three`, `JSP90.not_helly_attained_zero` — `K₃` attains the constant, so
+    `f(1) = 1` **exactly** on the Helly class;
+  - **`JSP90.HellyOfNonlinear`** — the **diamond** `K₄` minus an edge has the Helly property, satisfies
+    `LocIndep 1` and is one vertex away from bipartite, yet is **not** linear (its two triangles meet
+    in two vertices).  Hence the new instance is **not** a corollary of round 82's, and the Helly class
+    strictly contains round 82's;
+  - `JSP90.HellyErdős73 f` — **the remaining statement** for the Helly class at a general constant,
+    a `def`, **not** assumed; Part 3 is its proved base level.  Behind it stands
+    `JSP90.OddCycleErdosPosa r` (Reed–Robertson–Seymour–Thomas), the unchanged primary blocker.
+
+-/
 import JSPProblem.Definitions
 import JSPProblem.Reed
 import JSPProblem.OddCycle
@@ -499,3 +524,4 @@ import JSPProblem.Cover
 import JSPProblem.Cactus
 import JSPProblem.Sun
 import JSPProblem.Ring
+import JSPProblem.Helly

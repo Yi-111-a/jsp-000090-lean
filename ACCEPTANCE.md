@@ -2336,3 +2336,82 @@ theorem now.
 `missing_theorems = ["jsp_000090_main"]`; declaring a weaker theorem under that name would
 misrepresent the result.  `formalization.yaml` remains `status: wip`, `prize_ready: false`.  No award
 claim is made.
+
+---
+
+## Round 83 — `JSPProblem/Helly.lean`: the **HELLY axis** — attack family 30
+
+New module (31 declarations, 565 lines), imported from the root module `JSPProblem.lean`.
+**0 `sorry`, 0 `admit`**; `lake build` OK (1238 jobs);
+`harness/score.py problems/JSP-000090` reports `build_ok = true, sorry = 0, admit = 0,
+placeholder_total = 0, partial_ok = true, missing_theorems = ['jsp_000090_main']`.
+
+### The class
+
+```lean
+JSP90.HellyOddCycles G
+```
+
+— the odd cycles of `G` form a **Helly family**: every *finite* family of pairwise meeting odd
+cycles has a common vertex.  This is strictly stronger than round 81/82's
+`JSP90.TwoHellyOddCycles G`, which only asks for the three-element case, and strictly weaker than
+round 82's `JSP90.LinearOddCycles G`.
+
+### What is proved
+
+1. **THE HELLY LEMMA** — `JSP90.helly_of_linearOddCycles : LinearOddCycles G → HellyOddCycles G`:
+   **in a graph whose odd cycles are linear, the odd cycles form a Helly family**.  Round 82's ring
+   lemma kills *rings* (three cycles); this kills *every* non-Helly family of any size.  Proof: strong
+   induction on `|𝒞|`; for `|𝒞| ≥ 3` take three distinct members `C₁, C₂, C₃` and the induction
+   hypothesis on `𝒞.erase Cᵢ`, giving `vᵢ` common to all the *other* members.  If some `vᵢ ∈ Cᵢ` we
+   are done; otherwise `v₁ ∉ C₁`, `v₂ ∉ C₂`, `v₁ ∈ C₂ ∩ C₃`, `v₂ ∈ C₁ ∩ C₃`; with `C₁ ∩ C₂ = {a}`
+   (linearity) the ring lemma produces `a ∈ C₃`, so `v₁ ≠ a` are two vertices of `C₂ ∩ C₃` — a
+   contradiction.  `|𝒞| ≤ 2` is the nonemptiness of an odd cycle plus the pairwise-meeting hypothesis.
+2. `JSP90.twoHelly_of_helly`, `JSP90.exists_commonVertex_of_helly`,
+   `JSP90.exists_commonVertex_of_helly_three`, `JSP90.exists_three_mem_of_card_ge_three`.
+3. **A NEW INSTANCE OF THE HEADLINE THEOREM AT `k = 1`, WITH THE OPTIMAL CONSTANT `1`, FOR THE
+   STRICTLY LARGER HELLY CLASS** — `JSP90.closeToBipartite_one_of_helly_of_locIndep_one` and
+   `JSP90.erdos73On_helly_one`: `LocIndep 1 G → HellyOddCycles G → CloseToBipartite 1 G`.  Erdős's
+   hypothesis enters **only** through the packing bound at `k = 1`
+   (`JSP90.inter_oddCycle_of_locIndep_one`): the odd cycles pairwise meet, so the family of *all* odd
+   cycles is itself a Helly subfamily.  No bound on the odd girth, the degrees, the packing weight,
+   the branch vertices, the number of components, or the size of the odd cycles.
+   `JSP90.closeToBipartite_one_of_helly_of_linear` records round 82's instance as the specialisation.
+4. **THE CONSTANT `1` IS EXACT** on the Helly class — `JSP90.helly_completeGraph_three`,
+   `JSP90.helly_locIndep_one_K3`, `JSP90.helly_not_closeToBipartite_zero_K3`,
+   `JSP90.not_helly_attained_zero`: `K₃` has the Helly property, satisfies `LocIndep 1` and is not
+   bipartite, so `f(1) = 1` exactly here.
+5. **THE CLASS IS *STRICTLY* LARGER THAN ROUND 82'S — THE DIAMOND `K₄` MINUS AN EDGE** —
+   `JSP90.three_cycle_isClique`, `JSP90.mem_zero_of_oddCycle_diamond`, `JSP90.helly_diamond`,
+   `JSP90.locIndep_one_diamond`, `JSP90.closeToBipartite_one_diamond`, `JSP90.not_linear_diamond`, and
+   the summary **`JSP90.HellyOfNonlinear`**: `diamond` satisfies `HellyOddCycles`,
+   `LocIndep 1` and `CloseToBipartite 1` but **not** `LinearOddCycles` (its two triangles meet in two
+   vertices).  So Part 3 is a genuinely new instance, **not** a corollary of round 82's.
+6. **THE `k`-AXIS** — `JSP90.HellyErdős73 f`, the remaining statement for the Helly class at a
+   general constant, stated as a `def` and **not assumed**; Part 3 is its proved base level.
+
+### Verified computationally before formalising
+
+Exhaustive search over **all** graphs on `n ≤ 7` vertices (`2²¹`):
+`LinearOddCycles ⟹ HellyOddCycles` — **0** counterexamples; `HellyOddCycles ∧ LocIndep 1 ⟹ τ = 1` —
+**0** counterexamples (max transversal number `1` among the `870 530` Helly graphs on `n = 7`), against
+`13 020` graphs with `LocIndep 1`, packing number `1` and transversal number `2` that all **fail**
+`HellyOddCycles`; `643 006` graphs on `n = 7` are Helly, `LocIndep 1`, transversal number `1` and
+**not** linear, confirming the strictness machine-checked in Part 5.  Random search on `n = 10`
+(`4 · 10⁶` graphs): no `Helly ∧ LocIndep 1` graph needs `≥ 2` vertices; but `Helly ∧ LocIndep 2`
+**does** admit transversal number `3` (10-vertex witness), which is why Part 6 takes a general `f`.
+
+### What is *not* proved
+
+`JSP90.HellyErdős73 f` for any `f` — Erdős #73 for the Helly class at a general `k`.  Behind it
+stands `JSP90.OddCycleErdosPosa r` (Reed–Robertson–Seymour–Thomas), the unchanged primary blocker:
+the Helly property bounds the transversal number at `k = 1` and says nothing about larger packings.  No
+Helly, colouring or packing hypothesis is *assumed* anywhere in the file.
+
+`#print axioms` on all twenty headline results shows only
+`[propext, Classical.choice, Quot.sound]` — no `sorryAx`.
+
+`jsp_000090_main` is deliberately **not** declared, so the harness keeps reporting
+`missing_theorems = ["jsp_000090_main"]`; declaring a weaker theorem under that name would
+misrepresent the result.  `formalization.yaml` remains `status: wip`, `prize_ready: false`.  No award
+claim is made.

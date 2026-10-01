@@ -921,3 +921,72 @@ Toolchain facts learned here (they cost most of the round):
   take `1 ≤ x` either.
 * `if_pos h` / `if_neg h` are deprecated at the pinned toolchain (use `ite_eq_left` / `ite_eq_right`)
   but still work; `simp only [Fin.val_mk]` is frequently an unused simp argument in this development.
+
+---
+
+## Round 83 — `JSPProblem/Helly.lean`: the **HELLY axis** (attack family 30)
+
+`JSP90.HellyOddCycles G` says the odd cycles of `G` form a **Helly family**: every finite family of
+pairwise meeting odd cycles has a common vertex.  Round 81/82's `TwoHellyOddCycles` is only the
+three-element case.  The new file (31 declarations, 565 lines, 0 `sorry`, 0 `admit`, `lake build`
+OK with 1238 jobs) proves
+
+* **`JSP90.helly_of_linearOddCycles : LinearOddCycles G → HellyOddCycles G`** — the Helly lemma.
+  Strong induction on `|𝒞|`; for `|𝒞| ≥ 3` take three distinct members `C₁, C₂, C₃` and, for each
+  `i`, the induction hypothesis on `𝒞.erase Cᵢ`, which is common to all the *other* members.  If some
+  `vᵢ ∈ Cᵢ` it is common to `𝒞`.  Otherwise `v₁ ∉ C₁`, `v₂ ∉ C₂`, `v₁ ∈ C₂ ∩ C₃`, `v₂ ∈ C₁ ∩ C₃`;
+  write `C₁ ∩ C₂ = {a}` (linearity) and apply **round 82's ring lemma** to `C₁, C₂, C₃`: the common
+  vertex lies in `C₁ ∩ C₂ = {a}`, so `a ∈ C₃`; then `v₁ ≠ a` are two vertices of `C₂ ∩ C₃`,
+  contradicting linearity.  So round 82's ring lemma generalises to families of **any** size;
+* **`JSP90.twoHelly_of_helly`**, `JSP90.exists_commonVertex_of_helly`,
+  `JSP90.exists_commonVertex_of_helly_three`;
+* **`JSP90.closeToBipartite_one_of_helly_of_locIndep_one` / `JSP90.erdos73On_helly_one`** — a **new
+  instance of the headline theorem at `k = 1` with the optimal constant `1`, under the strictly weaker
+  hypothesis `HellyOddCycles G`**.  Erdős's hypothesis enters only through
+  `JSP90.inter_oddCycle_of_locIndep_one`;
+* **`JSP90.helly_completeGraph_three` / `helly_locIndep_one_K3` /
+  `helly_not_closeToBipartite_zero_K3` / `not_helly_attained_zero`** — `K₃` attains the constant, so
+  `f(1) = 1` **exactly** on the Helly class;
+* **the diamond `K₄` minus an edge** (`JSPProblem/Helly.lean`, `section Diamond`):
+  `three_cycle_isClique`, `mem_zero_of_oddCycle_diamond`, `helly_diamond`, `locIndep_one_diamond`,
+  `closeToBipartite_one_diamond`, `not_linear_diamond` and the summary **`JSP90.HellyOfNonlinear`** —
+  a graph with the Helly property, `LocIndep 1` and `CloseToBipartite 1` which is **not** linear.
+  Hence the new instance is **not** a corollary of round 82's;
+* **`JSP90.HellyErdős73 f`**, the remaining statement at a general constant, a `def`, **not**
+  assumed.
+
+### Environment notes added this round
+
+* `Finset.nonempty_iff_ne_empty` is stated **`s.Nonempty ↔ s ≠ ∅`** — `.mp` turns `≠ ∅` into a
+  witness, `.mpr` turns a `Nonempty` into `≠ ∅` — so `Finset.nonempty_iff_ne_empty.mpr h` with
+  `h : s.Nonempty` is the statement `s ≠ ∅` and **not** the other way round.  `Finset.ne_empty_of_mem`
+  is the least surprising form when the witness is in hand;
+* `Finset.mem_erase : a ∈ s.erase b ↔ a ≠ b ∧ a ∈ s`, so the *inequality* comes **first**; getting
+  the order wrong produces the misleading `C₂ ≠ C₁` / `C₁ ≠ C₂` mismatches;
+* `Finset.mem_insert.mp` will not fire on `h : x ∈ {a}` because the singleton is not displayed as
+  `insert a ∅`; use `Finset.mem_singleton.mp`, or give the set explicitly
+  (`Finset.mem_insert (s := (∅ : Finset _))`);
+* `refine ⟨x, h⟩` against a goal of the form `s ≠ ∅` fails (`⟨...⟩` expects an inductive type);
+  either `show ∃ z, z ∈ s` first, or convert with `Finset.nonempty_iff_ne_empty`;
+* `by_contra h` on `x ∈ s` gives `h : ¬ (x ∈ s)`, which **is** what `absurd hx h` wants; but
+  `Finset.mem_singleton.mp` on `h : x ∈ {a}` gives `x = a`, not `a = x`;
+* a statement quantifying over `Finset V` has **no** `Decidable` instance out of the box: there is no
+  `Fintype (Finset α)`, so `by decide` over `∀ C : Finset V, …` fails with *failed to synthesize
+  `Decidable`*.  Enumerate with `Finset.card_eq_three` / `Finset.card_eq_four` + `fin_cases`, or work
+  with `C = {a, b, c}` and prove a membership lemma instead (this is what `mem_zero_of_oddCycle_diamond`
+  does);
+* for a graph defined by an explicit `Finset (α × α)` edge set, `by decide` over a `∀` statement needs
+  an explicit `local instance : DecidableRel G.Adj := fun v w => inferInstanceAs (Decidable ((v, w) ∈ e))`
+  — the `Decidable` of a `∀ j : Fin 3, G.Adj …` does not appear automatically (the copy in
+  `JSPProblem/Sun.lean`);
+* `SimpleGraph.IsClique D := ∀ ⦃v w⦄, v ∈ D → w ∈ D → v ≠ w → G.Adj v w` — the vertices are
+  **implicit**, so call it as `hcl hm1 hm2 hne`;
+* `JSP90.not_linear_of_two_mem h hC hD hCne hx1 hx2 **hy1 hy2** hxy` — the two membership arguments
+  of the second vertex are `(y ∈ C)` then `(y ∈ D)`, not the other way round; and `C`, `D` are implicit,
+  so give them `(C := …) (D := …)` when the `IsOddCycle` proofs are stated with explicit finsets;
+* `Finset.two_lt_card_iff : 2 < s.card ↔ ∃ a b c, a ∈ s ∧ b ∈ s ∧ c ∈ s ∧ a ≠ b ∧ a ≠ c ∧ b ≠ c` is
+  `.mp`, not `.mpr`, to *extract* the three members from `3 ≤ s.card`;
+* `local instance` declared at namespace level is **not** reverted by a later `section … end`: it
+  stays in scope for the rest of the file and silently makes `by decide` fail (the classical
+  `DecidableEq` is noncomputable).  Put the classical instances **inside** the `section` that needs
+  them and open a fresh section for the finite (computable) part.
