@@ -672,6 +672,33 @@ deliberately not declared.
     Erdős #73**: one colour class meeting every odd cycle and of size `≤ q` gives
     `CloseToBipartite q G`.  This is the only form in which a colouring argument can be used, and
     properness alone is not a certificate (machine-checked at `JSP90.g6`).
+* `JSPProblem.Sparse` — **the EDGE-COUNTING axis** (round 99, one new attack family).  Every axis so
+  far counts *vertices*; this one counts **edges**, and gets the classical *local* bound that
+  `JSPProblem/MaxCut.lean` recorded as the missing one:
+  - `JSP90.degSum G = ∑ v |N(v)|` and `JSP90.edgeCount G = |E(G)|` (Mathlib's
+    `SimpleGraph.edgeFinset`), with `JSP90.two_mul_edgeCount : 2 * |E(G)| = degSum G`
+    (`SimpleGraph.sum_degrees_eq_twice_card_edges`);
+  - `JSP90.degSum_deleteFinset : degSum (G - v) + 2 * |N(v)| = degSum G` and
+    `JSP90.edgeCount_deleteFinset : |E(G - v)| = |E(G)| - |N(v)|` — the invariant of the induction;
+  - `JSP90.two_le_card_neigh_of_mem_oddCycle` — **every vertex of an odd cycle has at least two
+    neighbours** (the two cycle-neighbours), which is what makes such a vertex the right thing to
+    delete;
+  - **`JSP90.closeToBipartite_of_edgeCount_le : |E(G)| ≤ 2 * m + 1 → CloseToBipartite m G`**, i.e.
+    **`τ_odd(G) ≤ ⌊ |E(G)| / 2 ⌋`** — the classical max-cut counting bound — and its
+    `degSum`-only form `JSP90.closeToBipartite_of_degSum_le`;
+  - **`JSP90.erdos73On_of_edgeCount` — a NEW INSTANCE of the headline theorem** for the class of
+    graphs with a bounded number of edges, whose constant does **not** mention `k`: the local
+    hypothesis `LocIndep k G` is never used, and this file records *why* (`LocIndep 0` **is**
+    bipartiteness, `JSP90.locIndep_zero_of_isBipartite`, and bipartite graphs have arbitrarily many
+    edges), which is also recorded as the unproved statement `JSP90.LocIndepEdgeUnbounded`;
+  - `JSP90.edgeCount_le_card_mul_maxDeg` and `JSP90.closeToBipartite_of_maxDegLe_of_card_le`
+    (hence `JSP90.erdos73On_of_maxDegLe_of_card_le`) — the order-dependent instance `τ ≤ |V| Δ / 4`;
+  - **sharpness**: `JSP90.edgeCount_completeGraph_three`, `K_3` is not `0`-close to bipartite and
+    `JSP90.edgeCount_bound_tight_completeGraph_three`, so `⌊ |E| / 2 ⌋` is attained and cannot be
+    improved; `JSP90.closeToBipartite_kTriangles_of_edgeCount` shows the bound is loose in the
+    direction of the deficiency (`kTriangles k` needs `k`, the edge count gives `3 k`);
+  - the remaining statement of the axis, **stated and not assumed**:
+    `JSP90.BoundedOddGirthEdgeCount` (odd girth `ℓ` and degree `≤ d` ⟹ `f ℓ d`-close to bipartite).
 -/
 import JSPProblem.Definitions
 import JSPProblem.Reed
@@ -720,3 +747,4 @@ import JSPProblem.CutVertex
 import JSPProblem.MaxCut
 import JSPProblem.Finite
 import JSPProblem.DegColour
+import JSPProblem.Sparse

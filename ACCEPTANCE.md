@@ -2676,3 +2676,79 @@ seven vertices; these are measurements, not Lean theorems.
   degree part of this axis stops at `JSP90.SubcubicErdős73`, which is still *assumed* in
   `JSPProblem/Subcubic.lean`: the greedy colouring bounds cliques, not colour classes, so a degree
   bound does not by itself give a transversal bound.
+
+---
+
+## Round 99 — the edge-counting axis (new module `lean/JSPProblem/Sparse.lean`)
+
+Round 93 (`JSPProblem/MaxCut.lean`) recorded the missing item of the max-cut axis verbatim: *"a
+bound on the certificate in terms of `MaxDef G` **is** `JSP90.OddCycleErdosPosa r` again; what is
+still missing on this axis is a bound coming from a **local** quantity (e.g. the max-cut counting
+bound `τ(G) ≤ e(G)/2`, which needs a neighbourhood-counting apparatus that `SimpleGraph.degree` does
+not provide at the pinned revision)"*.  Round 98 built that apparatus on the Lean side
+(`JSPProblem/Layer.lean`: `JSP90.Neigh`, `JSP90.MaxDeg` as finsets), and the pinned Mathlib slice
+turns out to provide `SimpleGraph.edgeFinset`, `SimpleGraph.degree` and
+`SimpleGraph.sum_degrees_eq_twice_card_edges`.  Round 99 therefore closes the item.
+
+**Machinery (new, reusable).**
+
+| result | content |
+| --- | --- |
+| `JSP90.degSum G` | `∑ v, \|N(v)\|` — the degree sum |
+| `JSP90.edgeCount G` | `\|E(G)\|`, each edge once (Mathlib's `SimpleGraph.edgeFinset`) |
+| `JSP90.two_mul_edgeCount` | `2 * \|E(G)\| = degSum G` |
+| `JSP90.mem_neigh_deleteFinset'`, `neigh_deleteFinset`, `card_neigh_deleteFinset`, `card_neigh_deleteFinset_self`, `card_neigh_mono_deleteFinset` | the neighbourhood of `G - v`, exactly |
+| `JSP90.degSum_deleteFinset` | **`degSum (G - v) + 2 * \|N(v)\| = degSum G`** |
+| `JSP90.edgeCount_deleteFinset` | **`\|E(G - v)\| = \|E(G)\| - \|N(v)\|`** |
+| `JSP90.two_le_card_neigh_of_mem_oddCycle` | **every vertex of an odd cycle has at least two neighbours** |
+| `JSP90.three_le_card_of_isOddCycle`, `two_mul_card_le_edgeCount_of_isOddCycle`, `three_le_edgeCount_of_isOddCycle` | an odd cycle forces `2 * \|C\|` of the degree sum, hence `\|E\| ≥ 3` |
+
+**The bound (the classical max-cut counting bound).**
+
+* **`JSP90.closeToBipartite_of_edgeCount_le : edgeCount G ≤ 2 * m + 1 → CloseToBipartite m G`** —
+  i.e. **`τ_odd(G) ≤ ⌊ |E(G)| / 2 ⌋`** — by induction on the budget: if `G` is not bipartite, take a
+  vertex `v` of an odd cycle; it costs one vertex and, having two neighbours, removes at least two
+  edges (`edgeCount_deleteFinset`, `two_le_card_neigh_of_mem_oddCycle`).  With
+  `JSP90.HitsOddCycles.insert_v_of_deleteFinset` (a transversal of `G - v` together with `v`
+  transverses `G`).
+* `JSP90.closeToBipartite_of_degSum_le : degSum G ≤ 4 * m + 2 → CloseToBipartite m G` — the same
+  bound with no `edgeFinset` at all.
+
+**New instances of the headline theorem.**
+
+* **`JSP90.erdos73On_of_edgeCount`** — `LocIndep k G` and `|E(G)| ≤ 2 * m + 1` give
+  `CloseToBipartite m G`, with a constant that does **not** mention `k`: **the local hypothesis of
+  Erdős's problem is not used at all**, the statement being the classical local bound.  This is a new
+  instance for the class of graphs with a bounded number of edges (no degree bound, no odd-girth
+  bound, no connectivity, no decomposition).
+* `JSP90.edgeCount_le_card_mul_maxDeg`, `JSP90.closeToBipartite_of_maxDegLe_of_card_le`,
+  `JSP90.erdos73On_of_maxDegLe_of_card_le` — the order-dependent instance `τ_odd(G) ≤ ⌈ |V| Δ / 2 ⌉`
+  (`τ ≤ |V| Δ / 4`).
+
+**Sharpness and exactness.**
+
+* `JSP90.card_neigh_completeGraph_three`, `JSP90.edgeCount_completeGraph_three : |E(K_3)| = 3` and
+  `JSP90.edgeCount_bound_tight_completeGraph_three` — the odd cycle transversal number of `K_3` is
+  exactly `1 = ⌊ 3/2 ⌋`, so **the constant is attained and cannot be improved**.
+* `JSP90.closeToBipartite_kTriangles_of_edgeCount` — on `kTriangles k` (`MaxDegLe 2`, `|V| = 3 k`)
+  the counting bound gives `3 k` where the exact answer is `k`: the bound is a genuine bound but a
+  loose one in the direction of the deficiency.
+
+**Why this axis stops here (machine-checked part, stated part).**
+
+* `JSP90.locIndep_zero_of_isBipartite : G.IsBipartite → LocIndep 0 G` — `LocIndep 0` **is**
+  bipartiteness (`locIndep_iff_maxDef_le` with `maxDef_eq_zero_iff`), so the class allowed by
+  `LocIndep 0` is exactly the bipartite graphs, which have arbitrarily many edges.
+* `JSP90.LocIndepEdgeUnbounded` — *"no function of `k` bounds `|E(G)|` under `LocIndep k`"* — **stated,
+  not assumed** (the computable witness would need an edge count that `decide` cannot evaluate at
+  the pinned revision, since the `Classical.decRel` instance blocks it).  This is the precise reason
+  the local bound is delivered and no value of `f(k)` is.
+* `JSP90.BoundedOddGirthEdgeCount` — *odd girth `ℓ` and `MaxDegLe G d` ⟹ `f ℓ d`-close to
+  bipartite* — **stated, not assumed**: the induction above pays for a vertex of degree `≥ 2` and says
+  nothing about the higher degrees a shortest odd cycle would have to exhibit.
+
+`#print axioms` on the new results shows only `[propext, Classical.choice, Quot.sound]` — no
+`sorryAx`.  `lake build` succeeds (1249 jobs) with **0 `sorry`, 0 `admit`**; `score.py --strict-prize`
+reports `build_ok = true, partial_ok = true, prize_ready = false`, `missing_theorems =
+["jsp_000090_main"]` (behind it `JSP90.OddCycleErdosPosa r`).  See
+`discovery/JSP-000090/policy.json`.

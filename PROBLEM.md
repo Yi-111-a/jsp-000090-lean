@@ -266,3 +266,44 @@ The remaining statement of this attack is the *degree* part of the axis: `JSP90.
 *assumed* in `JSPProblem/Subcubic.lean`; the greedy theorem bounds cliques, not transversals, and a
 `(d+1)`-colouring of a `d`-degenerate graph does **not** bound the size of a colour class, so the
 degree axis needs the same kind of structural input as everything else.
+
+**Round 99 (`lean/JSPProblem/Sparse.lean`, 29 declarations, 0 sorry/admit) — the EDGE-COUNTING axis:
+the classical local bound `τ_odd(G) ≤ ⌊ |E(G)| / 2 ⌋`, and a new instance of the headline theorem in
+which Erdős's hypothesis is not used at all.**  Every axis so far (anticomplete decompositions,
+2-cuts, cut vertices, packings, fans, max-cuts, colourings) counts *vertices*; this one counts
+**edges**, which is what round 93 recorded as the missing item (*"a bound coming from a **local**
+quantity, e.g. the max-cut counting bound `τ(G) ≤ e(G)/2`, which needs a neighbourhood-counting
+apparatus that `SimpleGraph.degree` does not provide at the pinned revision"*).  The apparatus now
+exists on both sides: `JSPProblem/Layer.lean` supplies `JSP90.Neigh` and `JSP90.MaxDeg`, and the
+pinned slice does provide `SimpleGraph.edgeFinset`, `SimpleGraph.degree` and
+`SimpleGraph.sum_degrees_eq_twice_card_edges`.  With
+
+* `JSP90.degSum G = ∑ v |N(v)|`, `JSP90.edgeCount G = |E(G)|` and
+  `JSP90.two_mul_edgeCount : 2 * |E(G)| = degSum G`;
+* `JSP90.degSum_deleteFinset : degSum (G - v) + 2 * |N(v)| = degSum G` and
+  `JSP90.edgeCount_deleteFinset : |E(G - v)| = |E(G)| - |N(v)|` — the invariant of the induction;
+* `JSP90.two_le_card_neigh_of_mem_oddCycle` — **every vertex of an odd cycle has at least two
+  neighbours**, which is what makes such a vertex the right thing to delete,
+
+one gets by induction on the budget
+
+> **`JSP90.closeToBipartite_of_edgeCount_le : |E(G)| ≤ 2 * m + 1 → CloseToBipartite m G`**, i.e.
+> **`τ_odd(G) ≤ ⌊ |E(G)| / 2 ⌋`** — the classical max-cut counting bound, in the `degSum` form
+> `JSP90.closeToBipartite_of_degSum_le` as well;
+
+and hence
+
+> **`JSP90.erdos73On_of_edgeCount`** — a **new instance of the headline theorem** for the class of
+> graphs with a bounded number of edges, whose constant does **not** mention `k`: the local
+> hypothesis is never used — together with the order-dependent instance
+> `JSP90.erdos73On_of_maxDegLe_of_card_le` (`τ_odd(G) ≤ ⌈ |V(G)| * Δ(G) / 2 ⌉`, i.e. `τ ≤ |V| Δ / 4`).
+
+The constant is **machine-checked sharp** (`JSP90.edgeCount_completeGraph_three`,
+`JSP90.edgeCount_bound_tight_completeGraph_three`: `|E(K_3)| = 3` and the transversal number of
+`K_3` is exactly `1 = ⌊ 3/2 ⌋`) and **machine-checked loose in the direction of the deficiency**
+(`JSP90.closeToBipartite_kTriangles_of_edgeCount`: on `kTriangles k` the edge count gives `3 k`
+where the exact answer is `k`).  Why the axis stops here is also recorded: `LocIndep 0` **is**
+bipartiteness (`JSP90.locIndep_zero_of_isBipartite`), and bipartite graphs have arbitrarily many
+edges, so no function of `k` bounds `|E(G)|` — stated, not assumed, as
+`JSP90.LocIndepEdgeUnbounded`.  The next statement of the axis, `JSP90.BoundedOddGirthEdgeCount`
+(odd girth `ℓ` and degree `≤ d` ⟹ `f ℓ d`-close to bipartite), is stated and not assumed.
