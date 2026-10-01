@@ -213,3 +213,56 @@ not cross the cut with side `A`) and `JSP90.HitsMono G A Z`,
 A bound on the certificate in terms of `MaxDef G` *is* `JSP90.OddCycleErdosPosa r` again (the
 `iff` above), so what remains on this axis is a **local** bound — the classical max-cut bound
 `τ(G) ≤ e(G)/2`, which needs a neighbourhood-counting apparatus absent from the pinned Mathlib slice.
+**Round 98 (`lean/JSPProblem/DegColour.lean`, 26 declarations, 0 sorry/admit) — the DISJOINT-ODD-CYCLE
+and the DEGREE–COLOURING axes.**  Round 38 proved `erdos73On_of_no_branch` ("no vertex has three
+neighbours") with the *optimal* constant `k`; this round shows that the degree hypothesis is used
+for exactly one thing and replaces it, and it builds the greedy colouring theorem, which the pinned
+Mathlib slice does not have in any form (`JSPProblem/Layer.lean` has to define
+`SimpleGraph.degree` by hand for the same reason).
+
+* `JSP90.OddCycles G` is the family of *all* the odd cycles of `G`, and
+
+  > **`JSP90.erdos73On_of_disjointOddCycles : LocIndep k G → DisjointFamily (OddCycles G) →
+  > CloseToBipartite k G`** — a **new instance of the headline theorem with the optimal constant `k`
+  > and a strictly weaker hypothesis**: the hypothesis is only "two distinct odd cycles are
+  > vertex-disjoint" (no degree bound, no odd-girth bound, no connectivity, no decomposition), and
+  > `JSP90.disjointFamily_oddCycles_of_no_branch` shows round 38's "every vertex has at most two
+  > neighbours" is used for that one conclusion (`eq_of_mem_inter_of_no_branch`) and nothing else,
+  > with `JSP90.erdos73On_of_no_branch'` re-proving round 38's instance from the new one;
+
+* the class is **decided by a single count**, not merely bounded:
+  **`JSP90.closeToBipartite_iff_card_oddCycles_of_disjoint : DisjointFamily (OddCycles G) →
+  CloseToBipartite m G ↔ (OddCycles G).card ≤ m`** (upper bound: one vertex per odd cycle; lower
+  bound: `JSP90.card_le_of_hitsOddCycles_disjoint`, a transversal meets the pairwise disjoint odd
+  cycles in *different* vertices) — so the odd cycle transversal number of such a graph *equals* its
+  number of odd cycles, and `JSP90.erdos73On_of_disjointOddCycles` is the case `m = k` of it;
+
+* **the exact value of the constant on that class is `k`**:
+  `JSP90.erdos73On_disjointOddCycles_exact` (for every `k ≥ 1`, the upper bound `k` holds and `k - 1`
+  fails), the lower bound being the witness `kTriangles k` of `JSPProblem/Sharp.lean`, whose odd
+  cycles are exactly its `k` pairwise disjoint fibres — proved here by
+  `JSP90.exists_eq_tri_of_isOddCycle_kTriangles` (every edge of `kTriangles k` joins two vertices of
+  one fibre, so a cycle lies in one fibre, and the fibre has three vertices);
+  `JSP90.mem_oddCycles_tri`, `JSP90.disjointFamily_oddCycles_kTriangles`;
+
+* **the greedy colouring theorem** (new machinery, from scratch):
+  `JSP90.exists_colouringOn_of_degLe` is the greedy step by strong induction on the size of the
+  vertex set (with `JSP90.exists_not_mem_of_card_lt`, the "there is a free colour" step);
+  `JSP90.coloring_of_degLe` and `JSP90.coloring_of_maxDegLe`: a graph all of whose vertices have at
+  most `d` neighbours is `Fin (d + 1)`-colourable; `JSP90.card_clique_le_of_coloring` is the
+  converse *in the only form in which it is true* (a `(d+1)`-colouring bounds the size of a **clique**
+  — a degree bound would be false, a 3-regular bipartite graph being 2-colourable);
+
+* **`JSP90.OddColorClass`, `JSP90.closeToBipartite_of_oddColorClass`, `JSP90.erdos73On_of_oddColorClass`
+  — a colour class is a certificate for the conclusion of Erdős #73**: if one colour class of a
+  proper colouring meets every odd cycle and has at most `q` vertices, then
+  `CloseToBipartite q G`.  This is a new hypothesis form of the headline theorem and the only form in
+  which a colouring argument can be used; **properness alone is not a certificate**, and the
+  machine-checked counterexample is `JSP90.g6` of `JSPProblem/Finite.lean`, which is `2`-close and
+  not `1`-close to bipartite (`JSP90.not_closeToBipartite_one_g6'`).
+
+The remaining statement of this attack is the *degree* part of the axis: `JSP90.SubcubicErdős73`
+(3-connected case excluded, `LocIndep k G → MaxDegLe G 3 → CloseToBipartite g k G`) is still
+*assumed* in `JSPProblem/Subcubic.lean`; the greedy theorem bounds cliques, not transversals, and a
+`(d+1)`-colouring of a `d`-degenerate graph does **not** bound the size of a colour class, so the
+degree axis needs the same kind of structural input as everything else.

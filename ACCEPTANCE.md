@@ -2644,3 +2644,35 @@ exhaustive search outside Lean (`discovery/JSP-000090/s22.c`) shows that `f(0) =
 seven vertices; these are measurements, not Lean theorems.
 
 `jsp_000090_main` is still not declared; the remaining statement is `JSP90.OddCycleErdosPosa r`.
+
+## Status as of round 98 (the DISJOINT-ODD-CYCLE and the DEGREE–COLOURING axes)
+
+* `lake build` succeeds (1248 jobs); **0 `sorry`, 0 `admit`** (harness `partial_ok = true`).
+* New file `lean/JSPProblem/DegColour.lean` (26 declarations, 479 lines, 0 sorry/admit), imported
+  from the root module `JSPProblem.lean` whose docstring was extended:
+  * `JSP90.OddCycles G`, the family of *all* the odd cycles of `G`;
+  * **`JSP90.erdos73On_of_disjointOddCycles`** — a new instance of the headline theorem with the
+    **optimal constant `k`** and a strictly weaker hypothesis than
+    `JSPProblem/Branch.lean`'s `erdos73On_of_no_branch`: the hypothesis is only
+    `DisjointFamily (OddCycles G)`, i.e. "two distinct odd cycles of `G` are vertex-disjoint";
+  * `JSP90.disjointFamily_oddCycles_of_no_branch` and `JSP90.erdos73On_of_no_branch'` — round 38's
+    instance is a special case of this round's (its degree hypothesis is used for
+    `eq_of_mem_inter_of_no_branch` and nothing else);
+  * `JSP90.closeToBipartite_iff_card_oddCycles_of_disjoint` — **the class is decided by a single
+    count**: `CloseToBipartite m G ↔ (OddCycles G).card ≤ m`, so the odd cycle transversal number
+    of such a graph *equals* its number of odd cycles;
+  * `JSP90.erdos73On_disjointOddCycles_exact`, with `JSP90.exists_eq_tri_of_isOddCycle_kTriangles`
+    and `JSP90.disjointFamily_oddCycles_kTriangles`: the constant is **exactly `k`** on that class,
+    the lower bound being `kTriangles k` of `JSPProblem/Sharp.lean`;
+  * the **greedy colouring theorem** (absent from the pinned Mathlib slice):
+    `JSP90.exists_colouringOn_of_degLe` (the greedy step, strong induction on the size of the vertex
+    set), `JSP90.exists_not_mem_of_card_lt`, `JSP90.coloring_of_degLe`, `JSP90.coloring_of_maxDegLe`,
+    and `JSP90.card_clique_le_of_coloring` (the converse, in the only true form: cliques, not
+    degrees);
+  * `JSP90.OddColorClass`, `JSP90.closeToBipartite_of_oddColorClass`,
+    `JSP90.erdos73On_of_oddColorClass` — **a colour class is a certificate for the conclusion of
+    Erdős #73**; properness alone is not (machine-checked at `JSP90.g6`).
+* Still missing: `jsp_000090_main` (behind it `JSP90.OddCycleErdosPosa r` for arbitrary `r`).  The
+  degree part of this axis stops at `JSP90.SubcubicErdős73`, which is still *assumed* in
+  `JSPProblem/Subcubic.lean`: the greedy colouring bounds cliques, not colour classes, so a degree
+  bound does not by itself give a transversal bound.

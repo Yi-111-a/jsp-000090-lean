@@ -647,6 +647,31 @@ deliberately not declared.
   of its three edges) with `JSP90.closeToBipartite_iff_g6 : CloseToBipartite m g6 ↔ 2 ≤ m` and
   `JSP90.not_erdos73_fin6_one_one`, so the constant of Erdős #73 at `k = 1` is at least `2` on six
   vertices, a smaller witness than `JSPProblem/Petersen.lean`'s `p9`.
+* `JSPProblem.DegColour` — **the DISJOINT-ODD-CYCLE and the DEGREE–COLOURING axes** (round 98, two
+  new attack families):
+  - **`JSP90.OddCycles G`**, the family of *all* the odd cycles of `G`, and
+    **`JSP90.erdos73On_of_disjointOddCycles : LocIndep k G → DisjointFamily (OddCycles G) →
+    CloseToBipartite k G`** — **a new instance of the headline theorem with the *optimal* constant
+    `k` and a strictly weaker hypothesis than `JSPProblem/Branch.lean`'s**: the hypothesis is only
+    "two distinct odd cycles are vertex-disjoint" (no degree bound, no odd-girth bound, no
+    connectivity, no decomposition), and `JSP90.disjointFamily_oddCycles_of_no_branch` shows
+    round 38's "every vertex has at most two neighbours" is used for this one conclusion and nothing
+    else;
+  - **`JSP90.erdos73On_disjointOddCycles_exact`** — the constant is *exactly* `k` on that class: the
+    witness `kTriangles k` of `JSPProblem/Sharp.lean` has pairwise vertex-disjoint odd cycles
+    (`JSP90.exists_eq_tri_of_isOddCycle_kTriangles`, `JSP90.disjointFamily_oddCycles_kTriangles`)
+    and is not `(k - 1)`-close to bipartite;
+  - **the greedy colouring theorem**, which the pinned Mathlib slice does not have in any form
+    (`JSPProblem/Layer.lean` has to define `SimpleGraph.degree` by hand for the same reason):
+    `JSP90.exists_colouringOn_of_degLe` (the greedy step, by strong induction on the size of the
+    vertex set), `JSP90.coloring_of_degLe` (a graph of maximum degree `≤ d` is `Fin (d+1)`-
+    colourable), `JSP90.coloring_of_maxDegLe` and `JSP90.card_clique_le_of_coloring` (the converse,
+    in the only form in which it is true: a `(d+1)`-colouring bounds the size of a *clique*);
+  - **`JSP90.OddColorClass` / `JSP90.closeToBipartite_of_oddColorClass` /
+    `JSP90.erdos73On_of_oddColorClass`** — **a colour class is a certificate for the conclusion of
+    Erdős #73**: one colour class meeting every odd cycle and of size `≤ q` gives
+    `CloseToBipartite q G`.  This is the only form in which a colouring argument can be used, and
+    properness alone is not a certificate (machine-checked at `JSP90.g6`).
 -/
 import JSPProblem.Definitions
 import JSPProblem.Reed
@@ -694,3 +719,4 @@ import JSPProblem.Windmill
 import JSPProblem.CutVertex
 import JSPProblem.MaxCut
 import JSPProblem.Finite
+import JSPProblem.DegColour
