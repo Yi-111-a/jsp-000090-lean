@@ -552,6 +552,43 @@ deliberately not declared.
   - **`JSP90.c5`, `JSP90.sp5`, `JSP90.sp5_split_one_attained`** — the `+ 1` is **necessary and
     attained**: the 5-cycle has a 2-cut whose two pieces are both bipartite (transversal number
     `0`), yet `c5` needs one deleted vertex, so `1 + m * t` cannot be lowered to `m * t`.
+* `JSPProblem.HalfOne` — **the refined cut step: paying one cut vertex and only the cycles that
+  avoid it** (round 89, attack family 35).  Round 88 still assumed a transversal of every *piece*
+  `Tᵢ ∪ {a,b}`, i.e. of the odd cycles *through* `a` as well, which `a` itself already meets; this
+  file weakens that per-piece obligation and obtains the classical cut lemma counted by the
+  **packing number**:
+  - **`JSP90.VertexSplit.hitsOddCycles_one_avoid`** — **THE REFINED CUT STEP**: a set `X i` meeting
+    every odd cycle of the piece `Tᵢ ∪ {a,b}` which **avoids `a`** is enough, together with the
+    single vertex `a`, to be an odd cycle transversal of `G`.  Equivalently
+    (**`JSP90.VertexSplit.hitsOddCycles_half`**): a transversal of every **half-piece** `Tᵢ ∪ {b}`
+    suffices — a **strictly weaker** hypothesis than round 88's, of which round 88's step is a
+    corollary (`JSP90.VertexSplit.hitsOddCycles_half_of_hitsOddCycles_one`);
+  - **`JSP90.VertexSplit.exists_transversal_half`, `JSP90.erdos73On_of_split_one_avoid`** — **new
+    instances of the headline theorem** `CloseToBipartite (1 + m * t) G` from a hypothesis on the
+    *half-pieces*, strictly stronger than round 88's `erdos73On_of_split_one` (full pieces), in both
+    the `LocIndep k` and the Erdős–Pósa (`…_of_oddCycleErdosPosa`) forms;
+  - **`JSP90.VertexSplit.closeToBipartite_one_avoid_of_clean`,
+    `JSP90.erdos73On_of_split_one_avoid_of_clean`, `…_of_clean_pack`,
+    `…_of_clean_of_bounded_branch`, `…_of_clean_swap`** — **THE PACKING-COUNTED CUT LEMMA WITH THE
+    OPTIMAL `+1`**: `CloseToBipartite (1 + m * r) G` (`CloseToBipartite (1 + m * k) G` under
+    `LocIndep k`), i.e. the constant is a function of the **packing number**, not of the number of
+    pieces `t`, under the explicit *cleanliness* hypothesis "every **bipartite** part `Tᵢ` has a
+    bipartite half-piece `Tᵢ ∪ {b}`".  This beats round 43's `2 + m * p` by one vertex and round
+    88's `1 + m * t` by the counting, and is the step that turns the 2-cut decomposition into a
+    genuine induction on the Erdős–Pósa function;
+  - **`JSP90.plus_one_necessary_in_packing_form`, `JSP90.c5_closeToBipartite_one_from_clean_split`** —
+    the `+1` is still **necessary** in the packing-counted form: on the clean 2-cut `sp5` of the
+    5-cycle nothing is charged per piece and `c5` still needs one vertex.
+* `JSPProblem.Windmill` — **the negative result of round 89: the cleanliness of a 2-cut is NOT
+  automatic** (machine-checked).  The *windmill* `wf` (two triangles sharing one vertex, plus an
+  isolated vertex) satisfies `LocIndep 1` and hence has **packing number one**
+  (`JSP90.locIndep_one_wf`, `JSP90.packing_wf`, by exhaustive decision over the `2⁶` vertex sets),
+  while **both** half-pieces of its 2-cut are triangles
+  (`JSP90.not_isBipartite_half_wfs`).  So "the number of non-bipartite half-pieces is bounded by the
+  packing number" is **false** (`JSP90.windmill_counting_fails`): the counting of the cut step must
+  be done on the **parts** (`JSPProblem/Count.lean`) and the half-piece hypothesis of round 89 must
+  be kept.  Note the obstruction is only to the *counting*: `wf` itself is one vertex away from
+  bipartite (`JSP90.windmill_closeToBipartite_one`), as Erdős #73 predicts.
 
 -/
 import JSPProblem.Definitions
@@ -595,3 +632,5 @@ import JSPProblem.Descent
 import JSPProblem.Witness
 import JSPProblem.PackDescent
 import JSPProblem.SplitOne
+import JSPProblem.HalfOne
+import JSPProblem.Windmill
