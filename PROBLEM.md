@@ -131,6 +131,34 @@ The remaining statement of this attack is `JSP90.LinearRing` — the **ring lemm
 three pairwise meeting odd cycles have a common vertex), stated as a `def` and *not* assumed;
 `JSP90.OddCactus G` is exactly `LinearOddCycles G ∧ LinearRing G`.
 
+**Round 87 (`lean/JSPProblem/PackDescent.lean`) — the PACKING-WEIGHTED residue descent, and the
+SELF-PAY form of the blocker.**  Round 84's descent and round 86's blocker are statements about **one**
+odd cycle and **one** vertex; round 87 generalises the descent to a whole packing and weakens the
+blocker:
+
+* **`JSP90.maxDef_ge_card_add_maxDef_delete`: `|𝒦| + MaxDef (deleteFinset G (⋃ 𝒦)) ≤ MaxDef G` for
+  every family `𝒦` of pairwise vertex-disjoint odd cycles** — the deficiency of `G` pays for a whole
+  packing of odd cycles *at once*, one unit each; this is the quantity that decreases along the
+  classical Erdős–Pósa induction, and it strictly generalises round 84's `+1` residue descent
+  (`JSP90.maxDef_ge_one_add_maxDef_delete` is its one-cycle case, so nothing is lost).  With it,
+  `JSP90.defOf_biUnion_ge_card` (the union of `t` disjoint odd cycles has deficiency at least `t`),
+  `JSP90.card_inter_biUnion_ge_card_of_maxDef` (a maximum-deficiency witness meets a packing of `t`
+  odd cycles in at least `t` vertices) and the **tightness** results
+  `JSP90.maxDef_deleteFinset_eq_zero_of_card_eq_maxDef` /
+  `JSP90.hitsOddCycles_of_card_eq_maxDef` (a packing with as many members as the deficiency has its
+  union as an odd cycle transversal and a bipartite residue — exhibited on `kTriangles k` by
+  `JSP90.card_eq_maxDef_of_maxPacking_kTriangles`);
+
+* **`JSP90.SelfPay G d` / `JSP90.HellySelfPay`: a *self-pay* deletion** `MaxDef (G − Z) + |Z| ≤ d`.
+  `JSP90.selfPay_of_commonWitness` shows round 86's `JSP90.HellyCommonMaxWitness` implies it (so it is
+  **strictly weaker**), `JSP90.erdos73On_helly_of_selfPay` /
+  `JSP90.closeToBipartite_of_helly_of_selfPay` give **Erdős #73 with the optimal constant `f(k) = k`
+  on the Helly class** from it, and `JSP90.hellySelfPay_of_hellyErdős73` shows it is **equivalent to
+  the instance** `JSP90.HellyErdős73 id` itself.  Unlike the single-vertex descent it allows a whole
+  set to be deleted in one step, which is what an absorption argument needs (round 44 proved the
+  `+1` absorption step false).
+
 The upper-bound side is unchanged: the missing statement is still `JSP90.OddCycleErdosPosa r` for all
 `r` (equivalently `JSP90.TouchCriticalErdős73 c` for some `c`, per round 74, or
-`JSP90.ShareEdgePackingOne r` for some `r` per round 80).
+`JSP90.ShareEdgePackingOne r` for some `r` per round 80); behind it, on the Helly axis,
+`JSP90.HellySelfPay` (equivalently `JSP90.HellyErdős73 id`).

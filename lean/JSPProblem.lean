@@ -506,6 +506,29 @@ deliberately not declared.
     `f(k) = k` on the Helly class and on the strictly larger two-Helly class** from those single
     statements.  Two machine-checked results of round 84 are corrected here (its `tau_` was an upper
     bound, so its "König fails on the Helly class" was an artefact: König's property *holds* there).
+* `JSPProblem.PackDescent` — **the packing-weighted residue descent** (round 87, attack family 33).
+  Round 84's descent and round 86's blocker are statements about **one** odd cycle and **one** vertex;
+  this file generalises them to a whole packing and replaces the blocker by a strictly weaker one:
+  - **`JSP90.maxDef_ge_card_add_maxDef_delete`** — **THE PACKING-WEIGHTED RESIDUE DESCENT**: for a
+    family `𝒞` of pairwise vertex-disjoint odd cycles,
+    `|𝒞| + MaxDef (deleteFinset G (⋃ 𝒞)) ≤ MaxDef G`.  The deficiency of `G` pays for a whole
+    packing of odd cycles **at once**, which is the quantity that decreases along the classical
+    Erdős–Pósa induction, in the language of the deficiency.  The one-cycle case
+    (`JSP90.maxDef_ge_one_add_maxDef_delete`) is recovered, so nothing is lost;
+  - **`JSP90.defOf_ge_add_card_biUnion`, `JSP90.defOf_biUnion_ge_card`,
+    `JSP90.two_indepCard_biUnion_add_card_le_card`** — the union of `t` disjoint odd cycles has
+    deficiency at least `t`, the `t`-fold version of `JSP90.defOf_oddCycle_ge_one`;
+  - **`JSP90.card_inter_biUnion_ge_card_of_maxDef`** — a maximum-deficiency witness meets a packing
+    of `t` odd cycles in **at least `t` vertices** (the packing counterpart of round 84's
+    "a maximum-deficiency witness is an odd cycle transversal");
+  - **`JSP90.SelfPay G d`, `JSP90.HellySelfPay`** — the **self-pay** form of the missing statement: a
+    vertex set `Z` with `MaxDef (G − Z) + |Z| ≤ d`.  `JSP90.selfPay_of_commonWitness` shows it is
+    implied by round 86's `JSP90.HellyCommonMaxWitness` (so it is **strictly weaker**), while
+    `JSP90.erdos73On_helly_of_selfPay` / `JSP90.closeToBipartite_of_helly_of_selfPay` give **Erdős #73
+    with the optimal constant `f(k) = k` on the Helly class** from it, and
+    `JSP90.hellySelfPay_of_hellyErdős73` shows it is **equivalent to the instance** `HellyErdős73 id`
+    itself.  Unlike the single-vertex descent it allows a whole set to be deleted in one step, which
+    is what an absorption argument needs (round 44 proved the `+ 1` absorption step false).
 
 -/
 import JSPProblem.Definitions
@@ -547,3 +570,4 @@ import JSPProblem.Ring
 import JSPProblem.Helly
 import JSPProblem.Descent
 import JSPProblem.Witness
+import JSPProblem.PackDescent
