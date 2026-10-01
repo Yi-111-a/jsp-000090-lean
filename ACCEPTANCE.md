@@ -2601,3 +2601,46 @@ no `sorryAx`.  `jsp_000090_main` is **not** declared, so the harness keeps repor
 `missing_theorems = ["jsp_000090_main"]`; `score.py --strict-prize` reports
 `build_ok = true, sorry = 0, admit = 0, partial_ok = true`.  See
 `discovery/JSP-000090/policy.json`.
+
+---
+
+## Round 96 — the finite-search axis (new module `lean/JSPProblem/Finite.lean`)
+
+Rounds 76–95 attacked Erdős #73 structurally (packings, degrees, deficiency, separators, fans,
+2-cuts, max-cuts).  Round 96 changes the *nature* of the attack: the conclusion is a statement
+about **all** finite graphs, so the only way to be sure about a value of `k` is to check all
+graphs, and the only way to check all graphs in Lean is to make the statement **decidable**.
+
+**Machinery (new, reusable).**
+
+| result | content |
+| --- | --- |
+| `JSP90.isBipartite_iff_color2` | `G` is bipartite iff one of the `2 ^ \|V\|` maps `V → Fin 2` separates the ends of every edge |
+| `JSP90.OddCycleWitness`, `JSP90.isOddCycle_iff_witness` | an odd cycle is the image of a cyclic ordering witness |
+| `JSP90.isOddCycle_iff_bounded` | an odd cycle of a finite graph has length `≤ \|V\|`, so the odd cycle transversal can be **searched for** |
+| `JSP90.LocIndepSearch`, `JSP90.locIndep_iff_search` | Erdős's hypothesis with both `X` and `S` ranging over `Finset.powerset` |
+| `JSP90.CloseToBipartiteSearch`, `JSP90.closeToBipartite_iff_search` | the conclusion as a `\|X\| ≤ m` deletion plus one of the `2 ^ \|V\|` colourings |
+| `JSP90.erdos73On_fin` + two `Decidable` instances | on a fixed finite vertex type, **Erdős #73 is a finite decision problem** |
+
+**The exact constant on six vertices (new).**  Let `g6` be the triangle with one further vertex
+closing a triangle on each of its three edges (edges `{0,1}`, `{0,2}`, `{1,2}`, `{0,1,5}`,
+`{1,2,3}`, `{0,2,4}`).  Then
+
+* `JSP90.locIndep_one_g6` and `JSP90.not_locIndep_zero_g6` — the maximum deficiency of `g6` is
+  **exactly 1** (the first by exhaustive kernel decision over the `2 ^ 6` vertex sets);
+* `JSP90.isOddCycle_g6_012`, `..._015`, `..._123`, `..._024` and `JSP90.exists_oddCycle_g6_av` —
+  the four triangles, one of which avoids each vertex;
+* `JSP90.closeToBipartite_iff_g6 : CloseToBipartite m g6 ↔ 2 ≤ m` — the odd cycle transversal
+  number of `g6` is **exactly 2**;
+* `JSP90.not_erdos73_fin6_one_one` — `LocIndep 1 G → CloseToBipartite 1 G` is **false** for graphs
+  on six vertices, so the constant of Erdős #73 at `k = 1` is at least `2` there.  `g6` is the
+  smallest such graph; the previous witness `p9` has nine vertices.
+
+**Abandoned after measurement.**  The exhaustive `decide` over all `2 ^ 15` graphs on six vertices
+needs about 25 s per graph in the kernel (and `native_decide` is not in the pinned slice), so it was
+dropped; the machinery it would use is kept in the file for a future round.  An independent
+exhaustive search outside Lean (`discovery/JSP-000090/s22.c`) shows that `f(0) = 0`, that
+`f(1) = 2` holds for **every** graph on at most seven vertices, and that `f(2) = 3` first occurs at
+seven vertices; these are measurements, not Lean theorems.
+
+`jsp_000090_main` is still not declared; the remaining statement is `JSP90.OddCycleErdosPosa r`.

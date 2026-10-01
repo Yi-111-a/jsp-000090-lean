@@ -2,19 +2,22 @@ jsp_id: JSP-000090
 catalog_url: https://github.com/TheJustinSunPrize/awards
 status: wip
 prize_ready: false
-last_round: 93
-last_round_summary: ""
-  Round 93 -- the CUT AXIS.  New module lean/JSPProblem/MaxCut.lean (26 declarations, 501 lines,
-  0 sorry/admit, lake build OK with 1246 jobs).  Every odd cycle of G has a monochromatic edge
-  of every cut (JSP90.exists_monoEdge_of_isOddCycle); the odd cycle transversals of G are exactly
-  the monochromatic covers of some cut (JSP90.hitsOddCycles_iff_hitsMono); CloseToBipartite q G is a
-  q-vertex cut certificate (JSP90.closeToBipartite_iff_hitsMono, an iff); two new instances of the
-  headline theorem (JSP90.erdos73On_of_hasMonoCover, JSP90.erdos73On_of_monoCoverBetween); on K_n the
-  certificate is exactly optimal, n-2 (JSP90.hasMonoCover_completeGraph_of_split) and it depends on
-  the cut (JSP90.not_hasMonoCover_completeGraph_three).  jsp_000090_main is still not declared: the
-  remaining statement is JSP90.OddCycleErdosPosa r, the odd cycle Erdos-Posa theorem in its
-  3-connected case.  Zero-sorry partial result (build_ok, partial_ok); no prize claim.
-"github_owner: Yi-111-a
+last_round: 96
+last_round_summary: |
+  Round 96 -- the FINITE-SEARCH AXIS (attack family 38).  New module lean/JSPProblem/Finite.lean (0 sorry/admit, lake build OK
+  with 1247 jobs), imported from the root module JSPProblem.lean whose docstring was extended.  Bipartiteness of a finite graph is
+  the existence of one of the 2^|V| two-colourings (JSP90.isBipartite_iff_color2); an odd cycle of a finite graph is a cyclic ordering
+  of length <= |V| (JSP90.isOddCycle_iff_bounded); consequently Erdos #73 on a fixed finite vertex type is a finite decision problem
+  (JSP90.LocIndepSearch, JSP90.CloseToBipartiteSearch, JSP90.erdos73On_fin and two Decidable instances).  With that machinery the
+  round decided the exact constant of Erdos #73 on a six-vertex graph: for g6 = a triangle with one further vertex closing a triangle on
+  each of its three edges, JSP90.locIndep_one_g6 (exhaustive kernel decision over the 2^6 vertex sets), JSP90.not_locIndep_zero_g6
+  (maximum deficiency exactly 1), the four triangles, and JSP90.closeToBipartite_iff_g6 : CloseToBipartite m g6 <-> 2 <= m, i.e. the odd
+  cycle transversal number of g6 is exactly 2.  Hence JSP90.not_erdos73_fin6_one_one: f(1) >= 2 on six vertices, and g6 is the smallest
+  such witness (p9 has nine vertices).  An exhaustive check over all 2^15 graphs on six vertices was attempted and abandoned after
+  measuring about 25 s per graph in the kernel (no native_decide in the pinned slice).  jsp_000090_main is still not declared: the
+  remaining statement is JSP90.OddCycleErdosPosa r, the odd cycle Erdos-Posa theorem in its 3-connected case.  Zero-sorry partial result
+  (build_ok, partial_ok); no prize claim.
+github_owner: Yi-111-a
 lean_repository: https://github.com/Yi-111-a/jsp-000090-lean
 branch: main
 commit_sha: ""
@@ -28,3 +31,4 @@ attribution_basis: |
 build:
   toolchain_file: lean/lean-toolchain
   command: lake build
+

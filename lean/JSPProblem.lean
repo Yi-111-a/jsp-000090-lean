@@ -638,6 +638,15 @@ deliberately not declared.
     cut**: the trivial cut of `K_3` has no one-vertex certificate although `K_3` is `1`-close to
     bipartite).
 
+* `JSPProblem.Finite` — **a finite search form of Erdős #73** (round 96, a new attack family):
+  both the hypothesis and the conclusion of the statement are rewritten so that every quantifier
+  ranges over an explicitly listed collection, which makes them kernel decision problems
+  (`JSP90.LocIndepSearch`, `JSP90.CloseToBipartiteSearch`, `JSP90.erdos73On_fin`, plus
+  `JSP90.isOddCycle_iff_bounded`: an odd cycle of a finite graph is a cyclic ordering of length
+  `≤ |V|`); and with it the **six-vertex witness `g6`** (a triangle with one further vertex on each
+  of its three edges) with `JSP90.closeToBipartite_iff_g6 : CloseToBipartite m g6 ↔ 2 ≤ m` and
+  `JSP90.not_erdos73_fin6_one_one`, so the constant of Erdős #73 at `k = 1` is at least `2` on six
+  vertices, a smaller witness than `JSPProblem/Petersen.lean`'s `p9`.
 -/
 import JSPProblem.Definitions
 import JSPProblem.Reed
@@ -684,3 +693,4 @@ import JSPProblem.HalfOne
 import JSPProblem.Windmill
 import JSPProblem.CutVertex
 import JSPProblem.MaxCut
+import JSPProblem.Finite
