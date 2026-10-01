@@ -990,3 +990,128 @@ OK with 1238 jobs) proves
   stays in scope for the rest of the file and silently makes `by decide` fail (the classical
   `DecidableEq` is noncomputable).  Put the classical instances **inside** the `section` that needs
   them and open a fresh section for the finite (computable) part.
+
+---
+
+## Round 84 — `JSPProblem/Descent.lean`: the **deficiency descent**, and Erdős #73 on the Helly class with the *optimal* constant
+
+Attack family 31.  New file `JSPProblem/Descent.lean` (24 declarations, 0 `sorry`, 0 `admit`,
+`lake build` OK with 1239 jobs), imported from the root module.  `#print axioms` on all the headline
+results shows only `[propext, Classical.choice, Quot.sound]` — no `sorryAx`.
+
+Round 83 characterised the Helly class and left one statement open (`JSP90.HellyErdős73 f` for a
+general `f`).  This round computes, exhaustively, what the *best* constant on that class is, proves
+that the right invariant is the **maximum deficiency** `MaxDef G`, and reduces the whole instance to
+**one** statement about a single vertex deletion.
+
+### The statement
+
+```lean
+JSP90.erdos73On_helly_of_maxDefDescent :
+    JSP90.HellyMaxDefDescent → JSP90.HellyErdős73 id
+```
+
+i.e. **Erdős Problem #73 for the graphs whose odd cycles form a Helly family, with the *optimal*
+constant `f(k) = k`** (`LocIndep k G → HellyOddCycles G → CloseToBipartite k G`), from the single
+hypothesis `JSP90.HellyMaxDefDescent`, the *vertex descent*
+
+```lean
+JSP90.VertexDescent G : Prop :=
+  1 ≤ MaxDef G → ∃ (C : Finset V) (v : V), IsOddCycle G C ∧ v ∈ C ∧
+    MaxDef (deleteFinset G {v}) + 1 ≤ MaxDef G
+```
+
+— stated as a `def` and **not** assumed.  This is the residual content of the round.
+
+### What is proved
+
+* **`JSP90.isOddCycle_induceFinset`**, **`JSP90.helly_induceFinset`**, **`JSP90.helly_deleteFinset`** —
+  **the Helly property is hereditary**: the odd cycles of `G[s]` are odd cycles of `G`
+  (`IsOddCycle (induceFinset G s) C → IsOddCycle G C ∧ C ⊆ s`, proved from the definition), hence a
+  subfamily of a Helly family, hence Helly.  This is what makes an induction on `MaxDef G` possible
+  on the class at all.  Also `JSP90.helly_of_isBipartite`.
+* **`JSP90.defOf_oddCycle_ge_one'`**, **`JSP90.defOf_ge_succ_add`** and
+  **`JSP90.maxDef_ge_one_add_maxDef_delete_of_oddCycle`** — **the residue descent, with no
+  separation hypothesis**: `IsOddCycle G C → 1 + MaxDef (deleteFinset G C) ≤ MaxDef G`.  The
+  numerical heart is `α(G[A ∪ C]) ≤ α(G[A]) + α(G[C])` together with `2 α(G[C]) + 1 ≤ |C|`, i.e. an
+  odd cycle pays for at most `|C| - 1` of the deficiency, so **adding** it costs a unit.  This could
+  not be stated in `JSPProblem/OffCycle.lean`, whose version needs `Separated G C X`.
+* **The duality of a witness and a transversal** (Part 3):
+  * `JSP90.defOf_maxDef_inter_oddCycle_ne` — a vertex set of deficiency exactly `MaxDef G` **meets
+    every odd cycle**: *maximum-deficiency witnesses are odd cycle transversals* (the dual of
+    `JSP90.maxDef_le_of_hitsOddCycles`);
+  * `JSP90.exists_oddCycle_of_defOf_gt_zero` — a vertex set of positive deficiency **contains an odd
+    cycle**;
+  * `JSP90.mem_of_common_oddCycle`, `JSP90.vertexDescent_of_common_oddCycle` — hence a vertex on
+    every odd cycle lies in every witness, its deletion is bipartite, and **the vertex descent is
+    proved** in that situation.
+* **`JSP90.closeToBipartite_maxDef_aux` / `JSP90.closeToBipartite_maxDef_of_maxDefDescent`** — the
+  induction: `MaxDef G = 0` gives bipartiteness; otherwise delete one vertex `v` of an odd cycle,
+  the residue is Helly with deficiency one smaller, and a transversal of the residue is extended by
+  `v`.  **`JSP90.erdos73On_helly_of_maxDefDescent`** is the `Erdős73On`/`HellyErdős73` form.
+* **`JSP90.closeToBipartite_one_of_helly_of_pairwiseMeeting` /
+  `JSP90.erdos73On_helly_pairwiseMeeting`** — a **proved** instance: if the odd cycles pairwise meet
+  (packing number `≤ 1`) and `G` is Helly, then `LocIndep c G → CloseToBipartite c G` for **every**
+  `c` (round 83 had `c = 1` only).  No bound on the odd girth, degrees, packing weight, branch
+  vertices or components.
+* **`JSP90.helly_kTriangles`**, `JSP90.not_closeToBipartite_helly_kTriangles`,
+  `JSP90.helly_attained_sharp` — **the constant `k` cannot be lowered**: `kTriangles k` is Helly,
+  satisfies `LocIndep k` and is not `(k - 1)`-close to bipartite.
+
+### What is *not* proved
+
+`JSP90.HellyMaxDefDescent` — the vertex descent for every Helly graph.  It is proved in the
+situation of Part 5 and verified computationally for the whole class (below), and it is the *only*
+statement Part 4 uses.  `jsp_000090_main` remains **not** declared, so the harness keeps reporting
+`missing_theorems = ["jsp_000090_main"]`; `score.py --strict-prize` reports `build_ok = true,
+sorry = 0, admit = 0, placeholder_total = 0, partial_ok = true`.
+
+### Verification done before formalising (exhaustive, in C)
+
+Over **all** graphs on `n ≤ 7` vertices (`2²¹` graphs, `1 103 955` of them Helly):
+
+* `HellyOddCycles ∧ MaxDef ≤ 1 → τ = 1`, `∧ MaxDef ≤ 2 → τ ≤ 2`, and **no** Helly graph on `n ≤ 7`
+  has `τ > MaxDef` (0 counterexamples): `CloseToBipartite (MaxDef G) G` is the right statement;
+* **`VertexDescent` holds for every Helly graph** (0 counterexamples);
+* but it **fails without Helly**: 13020 counterexamples on `n = 7`, all with `MaxDef = 1`; the
+  smallest is the diamond `K₄ - e` (its two triangles share an edge, so deleting a vertex of one
+  leaves the other).  The Helly hypothesis is therefore *not* cosmetic;
+* **two candidate proofs of the instance are false**, recorded so later rounds do not retry them:
+  * **König's property fails on the Helly class**: Helly graphs with `τ > ν` exist (360
+    counterexamples on `n = 7`; the first has `MaxDef = τ = 3`, `ν = 2`), so the least odd cycle
+    transversal is *not* the packing number here — only the deficiency sees it;
+  * **the `+1` absorption step at a residue fails** on the Helly class too: there need not be an odd
+    cycle `C` and a transversal `X` of `G - C` with `|X| ≤ MaxDef (G - C)` that one vertex of `C`
+    extends (360 counterexamples on `n = 7`; the smallest is a 6-vertex graph with
+    `MaxDef = τ = 2`, `ν = 2` whose triangles `{0,2,4}` and `{1,3,5}` are met by no single vertex of
+    `C = {3,4,5}`).  This is the same step `JSPProblem/Weight.lean` refutes with `K₅` in general
+    graphs, and it is why the descent has to be about *single vertices* rather than residues.
+
+### Environment notes added this round
+
+* the deficiency is **sub**additive, never superadditive, over a disjoint decomposition: for
+  `A = {v}` (isolated) and `C` a triangle, `defOf G (A ∪ C) = 0 < 1 = defOf G A + 1`, so
+  `defOf G (A ∪ C) ≥ defOf G A + defOf G C` is **false** (this is the truncation at zero already
+  recorded in `JSP90.defOf_le_add_of_anticover`).  The lemma that *is* true needs
+  `1 ≤ defOf G A`; the case `defOf G A = 0` has to be split off, because then `MaxDef G ≥ 1` follows
+  from the odd cycle alone;
+* `Nat.le_sub_iff_add_le` at the pinned revision is stated as `?m ≤ ?m → (?m ≤ ?m - ?m ↔ …)`: it
+  needs a side-condition hypothesis *before* the `↔`, so `.mp`/`.mpr` do not apply to a bare
+  inequality.  `Nat.sub_le_iff_le_add` has the same problem.  The two conversions actually used are
+  `Nat.sub_eq_zero_of_le` + `omega` and `JSP90.le_sub_of_add_le'` (proved here by `by_contra`);
+* `defOf_induceFinset_le_inter` is stated for `induceFinset`, **not** for `deleteFinset`: rewriting
+  `deleteFinset G C` into `induceFinset G (univ \ C)` first (`simp [deleteFinset]`) is required;
+* a `set W := … with hW` definition is *definitionally* equal to its body but Lean will not unfold it
+  inside `Finset.mem_sdiff.mp`; write `have hwW' : w ∈ … := hwW` first;
+* `ih m hmt W G hle hH` for `Nat.strong_induction_on` on a motive that mentions the graph: the
+  `[Fintype W]` binder is *instance* implicit in the induction hypothesis, so `letI := inst` is
+  needed and `inst` must **not** be passed positionally;
+* `deleteFinset G ({v} ∪ Y) = deleteFinset (deleteFinset G {v}) Y` is proved by
+  `ext w x; simp only [deleteFinset_adj, Finset.mem_union, Finset.mem_singleton, not_or]; tauto`
+  — `tauto` does *not* unfold `Finset.mem_union` itself;
+* `omega` treats `a - b` as an **opaque atom**: every ℕ subtraction in a goal must first be
+  linearised (`Nat.sub_le_iff_le_add` / `Nat.sub_add_cancel` / `le_sub_of_add_le'`) or the goal will
+  fail even when the arithmetic is right; conversely `simp only [defOf]` inside a `have` proof
+  *creates* such an atom and breaks `omega`;
+* `helly_induceFinset (s := …) hH`: `s` is implicit, so a positional `Finset.univ \ X` is parsed as
+  the *result* and elaborates into a nonsensical `Finset (Finset V)`.

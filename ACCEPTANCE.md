@@ -2415,3 +2415,68 @@ Helly, colouring or packing hypothesis is *assumed* anywhere in the file.
 `missing_theorems = ["jsp_000090_main"]`; declaring a weaker theorem under that name would
 misrepresent the result.  `formalization.yaml` remains `status: wip`, `prize_ready: false`.  No award
 claim is made.
+
+---
+
+## Round 84 — `JSPProblem/Descent.lean`: the **deficiency descent** — Erdős #73 on the Helly class with the *optimal* constant `k`
+
+New file `lean/JSPProblem/Descent.lean` (23 declarations, 0 `sorry`, 0 `admit`, `lake build` OK with
+1239 jobs), imported from the root module.  Attack family 31.
+
+### The statement
+
+```lean
+JSP90.erdos73On_helly_of_maxDefDescent :
+    JSP90.HellyMaxDefDescent → JSP90.HellyErdős73 id
+```
+
+**Erdős Problem #73 for the graphs whose odd cycles form a Helly family, with the *optimal* constant
+`f(k) = k`** (`LocIndep k G → HellyOddCycles G → CloseToBipartite k G`), reduced to **one** statement
+about a single vertex deletion:
+
+```lean
+JSP90.VertexDescent G : Prop :=
+  1 ≤ MaxDef G → ∃ (C : Finset V) (v : V), IsOddCycle G C ∧ v ∈ C ∧
+    MaxDef (deleteFinset G {v}) + 1 ≤ MaxDef G
+```
+
+The invariant has changed from the packing number and the transversal number to the **maximum
+deficiency** `MaxDef G`, which is exactly Erdős's hypothesis (`LocIndep k G ↔ MaxDef G ≤ k`,
+`JSP90.locIndep_iff_maxDef_le`).
+
+### Proved
+
+* **Helly is hereditary**: `JSP90.isOddCycle_induceFinset` (the odd cycles of `G[s]` are odd cycles
+  of `G`), `JSP90.helly_induceFinset`, `JSP90.helly_deleteFinset` — the residue of a Helly graph is
+  Helly, which is what makes the induction on `MaxDef` possible;
+* **the residue descent with no separation hypothesis**:
+  `JSP90.maxDef_ge_one_add_maxDef_delete_of_oddCycle : IsOddCycle G C →
+  1 + MaxDef (deleteFinset G C) ≤ MaxDef G` (numerical heart:
+  `JSP90.defOf_ge_succ_add`, from `α(G[A ∪ C]) ≤ α(G[A]) + α(G[C])` and `2 α(G[C]) + 1 ≤ |C|`);
+* **the duality of a witness and a transversal**: a vertex set of deficiency exactly `MaxDef G` meets
+  every odd cycle (`JSP90.defOf_maxDef_inter_oddCycle_ne`), and a vertex set of positive deficiency
+  contains an odd cycle (`JSP90.exists_oddCycle_of_defOf_gt_zero`); hence
+  `JSP90.vertexDescent_of_common_oddCycle` — the descent **is** proved when one vertex lies on every
+  odd cycle;
+* the **reduction**: `JSP90.closeToBipartite_maxDef_aux` (strong induction on `MaxDef G`, deleting
+  one vertex of an odd cycle), `JSP90.closeToBipartite_maxDef_of_maxDefDescent`,
+  `JSP90.erdos73On_helly_of_maxDefDescent` — `HellyMaxDefDescent` is used in exactly one place;
+* a **proved instance at every `c`**: `JSP90.erdos73On_helly_pairwiseMeeting` —
+  `LocIndep c G → HellyOddCycles G → (the odd cycles pairwise meet) → CloseToBipartite c G`;
+* **optimality of the constant**: `JSP90.helly_kTriangles`, `JSP90.helly_attained_sharp` —
+  `kTriangles k` is Helly, satisfies `LocIndep k` and is not `(k - 1)`-close to bipartite.
+
+### Not proved
+
+`JSP90.HellyMaxDefDescent` — the vertex descent for the Helly class.  Verified exhaustively (all
+`2²¹` graphs on `n ≤ 7` vertices, `1 103 955` of them Helly: 0 counterexamples) and refuted without
+the Helly hypothesis (13020 counterexamples; the smallest is the diamond `K₄ - e`).  Three stronger
+candidate proofs were refuted and are recorded in `README.md` and `discovery/JSP-000090/policy.json`:
+König's property fails on the Helly class (`τ > ν`, 360 counterexamples), the `+1` absorption step at
+a residue fails on the Helly class (360 counterexamples, the smallest a 6-vertex graph with
+`MaxDef = τ = 2`), and the deficiency is **not** superadditive over a disjoint decomposition.
+
+`jsp_000090_main` remains **not** declared, so the harness keeps reporting
+`missing_theorems = ["jsp_000090_main"]`; `score.py --strict-prize` reports
+`build_ok = true, sorry = 0, admit = 0, placeholder_total = 0, partial_ok = true`.
+`formalization.yaml` remains `status: wip`, `prize_ready: false`.  No award claim is made.

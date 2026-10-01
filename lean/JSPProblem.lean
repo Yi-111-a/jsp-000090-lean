@@ -525,3 +525,4 @@ import JSPProblem.Cactus
 import JSPProblem.Sun
 import JSPProblem.Ring
 import JSPProblem.Helly
+import JSPProblem.Descent
