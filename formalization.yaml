@@ -2,7 +2,19 @@ jsp_id: JSP-000090
 catalog_url: https://github.com/TheJustinSunPrize/awards
 status: wip
 prize_ready: false
-github_owner: Yi-111-a
+last_round: 93
+last_round_summary: ""
+  Round 93 -- the CUT AXIS.  New module lean/JSPProblem/MaxCut.lean (26 declarations, 501 lines,
+  0 sorry/admit, lake build OK with 1246 jobs).  Every odd cycle of G has a monochromatic edge
+  of every cut (JSP90.exists_monoEdge_of_isOddCycle); the odd cycle transversals of G are exactly
+  the monochromatic covers of some cut (JSP90.hitsOddCycles_iff_hitsMono); CloseToBipartite q G is a
+  q-vertex cut certificate (JSP90.closeToBipartite_iff_hitsMono, an iff); two new instances of the
+  headline theorem (JSP90.erdos73On_of_hasMonoCover, JSP90.erdos73On_of_monoCoverBetween); on K_n the
+  certificate is exactly optimal, n-2 (JSP90.hasMonoCover_completeGraph_of_split) and it depends on
+  the cut (JSP90.not_hasMonoCover_completeGraph_three).  jsp_000090_main is still not declared: the
+  remaining statement is JSP90.OddCycleErdosPosa r, the odd cycle Erdos-Posa theorem in its
+  3-connected case.  Zero-sorry partial result (build_ok, partial_ok); no prize claim.
+"github_owner: Yi-111-a
 lean_repository: https://github.com/Yi-111-a/jsp-000090-lean
 branch: main
 commit_sha: ""

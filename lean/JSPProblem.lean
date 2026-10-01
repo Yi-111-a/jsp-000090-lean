@@ -613,6 +613,30 @@ deliberately not declared.
   `JSP90.hitsOddCycles_empty_iff_isBipartite_half`: **`X i = ∅` is a transversal of the half-piece
   iff the half-piece is bipartite**, i.e. iff the cut is clean, so no weakening of `hclean` is
   available and `+1` vs `+2` is the exhaustive choice (`JSP90.windmill_plus_two_plus_one`).
+* `JSPProblem.MaxCut` — **the CUT AXIS: odd cycle transversals are exactly the sets covering the
+  monochromatic edges of some cut.**  `JSP90.MonoEdge G A v w` is an edge that does not cross the
+  cut with side `A`, and `JSP90.HitsMono G A Z` says `Z` meets all of them.
+  - **`JSP90.exists_monoEdge_of_isOddCycle`** — **every odd cycle of `G` contains a monochromatic
+    edge of *every* cut**, with both witnesses inside the cycle.  This is the load-bearing step
+    (`JSP90.even_of_cycle_noMono`: a cycle all of whose edges cross a cut has even length, by the
+    `cycSucc_pow_odd` parity argument of `JSPProblem/Transversal.lean`);
+  - **`JSP90.hitsOddCycles_iff_hitsMono`** — **the odd cycle transversals of `G` are exactly the
+    monochromatic covers of some cut** (`⟸` is the lemma above; `⟧` puts the transversal on one
+    side together with a colour class of the bipartition of the residue);
+  - **`JSP90.closeToBipartite_iff_hitsMono`** — **the conclusion of Erdős #73 *is* a cut
+    certificate**: `CloseToBipartite q G ↔ ∃ A Z, HitsMono G A Z ∧ Z.card ≤ q`, with the explicit
+    `2`-colouring `if v ∈ A then 0 else 1` of `G - Z` in `JSP90.isBipartite_deleteFinset_of_hitsMono`;
+  - **new instances of the headline theorem**: `JSP90.erdos73On_of_hasMonoCover` (some cut carries a
+    `q`-vertex monochromatic cover) and `JSP90.erdos73On_of_monoCoverBetween` (**one** set covering
+    the monochromatic edges of **every** cut separating two given vertex sets — the multiway-cut
+    formulation), with `JSP90.hasMonoCover_of_vertexCover` /
+    `JSP90.monoCoverBetween_of_vertexCover` as elementary sources of certificates;
+  - **exactness and obstructions**: `JSP90.exists_noMonoEdge_iff_isBipartite` (`q = 0` ⟺ bipartite),
+    `JSP90.hasMonoCover_completeGraph_of_split` (on `K_n` the certificate is `n - 2`, exactly
+    optimal), `JSP90.hasMonoCover_completeGraph_two_three` (a cut of `K_3` whose certificate is one
+    vertex) and `JSP90.not_hasMonoCover_completeGraph_three` (**the certificate depends on the
+    cut**: the trivial cut of `K_3` has no one-vertex certificate although `K_3` is `1`-close to
+    bipartite).
 
 -/
 import JSPProblem.Definitions
@@ -659,3 +683,4 @@ import JSPProblem.SplitOne
 import JSPProblem.HalfOne
 import JSPProblem.Windmill
 import JSPProblem.CutVertex
+import JSPProblem.MaxCut

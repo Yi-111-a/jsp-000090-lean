@@ -2530,3 +2530,74 @@ machine check (windmill `wf`), that cleanliness is **not** automatic.  This roun
 `missing_theorems = ["jsp_000090_main"]`; `score.py --strict-prize` reports
 `build_ok = true, sorry = 0, admit = 0, partial_ok = true`.  What remains is the 2-cut-free
 (3-connected) case of `JSP90.OddCycleErdosPosa r`.
+
+---
+
+## Round 93 (`lean/JSPProblem/MaxCut.lean`) — the **CUT AXIS**: odd cycle transversals are exactly the
+monochromatic covers of a cut
+
+New module (26 declarations, 501 lines, **0 `sorry`, 0 `admit`**, `lake build` OK with 1246 jobs),
+imported from the root module `JSPProblem.lean`; attack family 37.  Rounds 76–92 attacked the packing,
+degree, deficiency, separator, intersection-pattern, fan and 2-cut axes; none touched the
+**max-cut / 2-colouring** reformulation.
+
+### What is proved
+
+* `JSP90.MonoEdge G A v w` (the edge `vw` does **not** cross the cut with side `A`), `JSP90.HitsMono
+  G A Z` (`Z` meets all of them), `JSP90.Separates S T A`, `JSP90.HasMonoCover G q A`,
+  `JSP90.MonoCoverBetween G S T Z` (one set works for **every** cut separating `S` from `T`) —
+  the notions of the axis.
+* **`JSP90.even_of_cycle_noMono`** — a cycle all of whose edges cross a cut has even length (the
+  `cycSucc_pow_odd` parity argument of `Transversal.lean` with "the two sides of a bipartition"
+  replaced by "the two sides of an arbitrary cut"), and therefore
+* **`JSP90.exists_monoEdge_of_isOddCycle`** — **every odd cycle of `G` contains a monochromatic edge
+  of every cut**, with both witnesses inside the cycle.  This is the load-bearing lemma: it makes a
+  vertex cover of the monochromatic edges of a cut an **odd cycle transversal**
+  (`JSP90.hitsOddCycles_of_hitsMono`).
+* **`JSP90.hitsOddCycles_iff_hitsMono`** — **the odd cycle transversals of `G` are exactly the
+  monochromatic covers of some cut**; the converse is the construction "put the transversal on one
+  side together with one colour class of the bipartition of the residue".
+* **`JSP90.isBipartite_deleteFinset_of_hitsMono`** — deleting a monochromatic cover leaves a
+  bipartite graph, with the explicit `2`-colouring `if v ∈ A then 0 else 1`; and
+* **`JSP90.closeToBipartite_iff_hitsMono`** — **the conclusion of Erdős #73 *is* a cut certificate**:
+  `CloseToBipartite q G ↔ ∃ A Z, HitsMono G A Z ∧ Z.card ≤ q`.  It is an `iff`, so the axis loses
+  nothing in either direction.
+* **New instances of the headline theorem**: `JSP90.erdos73On_of_hasMonoCover` (`LocIndep k G` plus
+  *some* cut carrying a `q`-vertex monochromatic cover ⟹ `CloseToBipartite q G`) and
+  `JSP90.erdos73On_of_monoCoverBetween` (**one** set covering the monochromatic edges of **every**
+  cut separating two given vertex sets — the multiway-cut formulation).  Sources of certificates:
+  `JSP90.hitsMono_of_vertexCover`, `JSP90.hasMonoCover_of_vertexCover`,
+  `JSP90.monoCoverBetween_of_vertexCover`.
+* **Exactness and obstruction**: `JSP90.exists_noMonoEdge_iff_isBipartite` (`q = 0` is exactly
+  bipartiteness — the axis is faithful at every `q`);
+  `JSP90.hasMonoCover_completeGraph_of_split` (**on `K_n` the certificate is `n - 2`, exactly
+  optimal**, for every cut with both sides nonempty — the axis is exact on the class where Erdős #73
+  is completely known); `JSP90.hasMonoCover_completeGraph_two_three` (a cut of `K_3` whose
+  certificate is exactly one vertex); and the machine-checked negative result
+  **`JSP90.not_hasMonoCover_completeGraph_three`**: the certificate **depends on the cut** — `K_3`
+  is `1`-close to bipartite while its trivial cut has *no* one-vertex certificate.  So "find a good
+  cut" is the content of the axis.
+
+### Discarded before formalisation (recorded so no round repeats them)
+
+* **The multiway version is *not* known to be strictly stronger than the conclusion**: for the pair
+  `{0} | {1,2}` of `K_3` the only separating cut is `{0}`, whose monochromatic edges are `{1, 2}`,
+  and `{1}` covers them — the planned strictness witness is refuted by hand.
+* **The "for every cut" form of the single-cut certificate is degenerate**: `∀ A, ∃ Z, HitsMono G A
+  Z ∧ Z.card ≤ q` implies that `G` is bipartite for every `q`.
+* **`HasMonoCover G 0 A` is unsatisfiable** (it asks the empty set to cover, i.e. to *refute*, the
+  monochromatic edges); the correct statement is `JSP90.exists_noMonoEdge_iff_isBipartite`.
+
+### What is *not* proved
+
+No bound on the certificate in terms of `MaxDef G` — but by `closeToBipartite_iff_hitsMono` such a
+bound *is* `JSP90.OddCycleErdosPosa r` again (the certificate is the transversal).  What is still
+missing on this axis is a bound coming from a **local** quantity (e.g. the max-cut counting bound
+`τ(G) ≤ e(G)/2`, which needs a neighbourhood-counting apparatus that `SimpleGraph.degree` does not
+provide at the pinned revision).
+
+`#print axioms` on thirteen headline results shows only `[propext, Classical.choice, Quot.sound]` —
+no `sorryAx`.  `jsp_000090_main` is **not** declared, so the harness keeps reporting
+`missing_theorems = ["jsp_000090_main"]`; `score.py --strict-prize` reports
+`build_ok = true, sorry = 0, admit = 0, partial_ok = true`.  See
+`discovery/JSP-000090/policy.json`.

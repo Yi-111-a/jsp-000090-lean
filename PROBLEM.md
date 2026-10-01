@@ -186,3 +186,30 @@ instances of the headline theorem: `JSP90.erdos73On_of_split_two_of_nonBipartite
 pinned to the last degree by `JSP90.hitsOddCycles_empty_iff_isBipartite_half`: `X i = ∅` is a
 transversal of the half-piece **iff** the half-piece is bipartite **iff** the cut is clean at `i`, so
 `+1` vs `+2` is the exhaustive choice (`JSP90.windmill_plus_two_plus_one`).
+
+**Round 93 (`lean/JSPProblem/MaxCut.lean`, 26 declarations, 0 sorry/admit) — the CUT AXIS: odd cycle
+transversals are exactly the sets covering the monochromatic edges of a cut.**  Rounds 76–92 left the
+max-cut / 2-colouring reformulation untouched.  With `JSP90.MonoEdge G A v w` (the edge `vw` does
+not cross the cut with side `A`) and `JSP90.HitsMono G A Z`,
+
+* **`JSP90.exists_monoEdge_of_isOddCycle`** — every odd cycle of `G` contains a monochromatic edge of
+  *every* cut, both witnesses inside the cycle (`JSP90.even_of_cycle_noMono` is the parity lemma: a
+  cycle all of whose edges cross a cut has even length);
+* **`JSP90.hitsOddCycles_iff_hitsMono`** — the odd cycle transversals of `G` are exactly the
+  monochromatic covers of some cut;
+* **`JSP90.closeToBipartite_iff_hitsMono`** — **the conclusion of Erdős #73 is a cut certificate**:
+  `CloseToBipartite q G ↔ ∃ A Z, HitsMono G A Z ∧ Z.card ≤ q` (with the explicit `2`-colouring
+  `if v ∈ A then 0 else 1` of `G - Z` in `JSP90.isBipartite_deleteFinset_of_hitsMono`);
+* **new instances of the headline theorem** `JSP90.erdos73On_of_hasMonoCover` (one cut carries a
+  `q`-vertex certificate) and `JSP90.erdos73On_of_monoCoverBetween` (**one** set must cover the
+  monochromatic edges of **every** cut separating two given vertex sets — the multiway-cut form);
+* **exactness and obstruction**: `JSP90.exists_noMonoEdge_iff_isBipartite` (`q = 0` ⟺ bipartite),
+  `JSP90.hasMonoCover_completeGraph_of_split` (on `K_n` the certificate is `n - 2`, exactly optimal),
+  and the machine-checked `JSP90.not_hasMonoCover_completeGraph_three` — **the certificate depends on
+  the cut**: `K_3` is `1`-close to bipartite but its trivial cut has no one-vertex certificate, while
+  `JSP90.hasMonoCover_completeGraph_two_three` exhibits a cut of `K_3` whose certificate is exactly
+  one vertex.
+
+A bound on the certificate in terms of `MaxDef G` *is* `JSP90.OddCycleErdosPosa r` again (the
+`iff` above), so what remains on this axis is a **local** bound — the classical max-cut bound
+`τ(G) ≤ e(G)/2`, which needs a neighbourhood-counting apparatus absent from the pinned Mathlib slice.
