@@ -2,23 +2,33 @@ jsp_id: JSP-000090
 catalog_url: https://github.com/TheJustinSunPrize/awards
 status: wip
 prize_ready: false
-last_round: 101
+last_round: 102
 last_round_summary: |
-  Round 101 -- THE ODD-GIRTH LADDER axis (attack family 42).  New module lean/JSPProblem/Stair.lean (28 declarations, 456 lines,
-  0 sorry/admit, lake build OK with 1251 jobs), imported from the root module JSPProblem.lean whose docstring was extended.  A
-  chain of odd cycles C 0..C (n-1) (JSP90.IsOddCycleChain: C j is an odd cycle of the residue after deleting C 0..C j.succ,
-  JSP90.residueOf) with (C j).card <= g j and packing number at most n gives
-  JSP90.closeToBipartite_of_girthLadder : CloseToBipartite (g 0 + ... + g (n-1)) H -- each level pays its own girth, with no degree
-  bound, no packing-weight bound and no uniform bound on odd cycle length.  The only new index lemma is the SHIFT IDENTITY
-  JSP90.residueOf_succChain (inside H - C 0 the tail C 1.. walks exactly the tail of the original chain); the base case is
-  JSP90.isBipartite_of_oddCyclePackingLe_zero (packing number 0 => bipartite).  New instance of the headline theorem:
-  JSP90.erdos73On_of_girthLadder; and JSP90.erdos73On_of_girthLadder_uniform RE-DERIVES JSPProblem/Transversal.lean's l*k instance
-  from the ladder, so the comparison of the two instances is machine-checked (the ladder strictly generalises it because its
-  constant sees the sequence of level girths, not only their maximum).  Closed-form staircase instance: for a chain whose levels
-  grow like 3, 5, 7, ... , JSP90.erdos73On_of_girthLadder_staircase gives CloseToBipartite (k*k + 2*k) G with the closed form proved
-  (JSP90.girthSum_arith, JSP90.staircase_const) and JSP90.staircase_lt_uniform machine-checks k*k + 2*k < (2*k+1)*k for k >= 2.
-  jsp_000090_main is still not declared: behind it stands JSP90.OddCycleErdosPosa r, and on this axis the existence of the chain.
-  Zero-sorry partial result (build_ok, partial_ok); no prize claim.
+  Round 102 -- THE GREEDY SHORTEST-ODD-CYCLE CHAIN axis (attack family 43).  New module lean/JSPProblem/Greedy.lean
+  (72 declarations, 870 lines, 0 sorry/admit, lake build OK with 1252 jobs), imported from the root module JSPProblem.lean
+  whose docstring was extended.  Round 101's odd-girth ladder ASSUMED a chain of odd cycles, one per residue level; this
+  round DERIVES the chain from the graph -- delete the shortest odd cycle, then the shortest odd cycle of the residue,
+  and so on -- with NO girth hypothesis at all.  Machinery: JSP90.girthOf H (vertices of a shortest odd cycle, 0 if H is
+  bipartite), JSP90.greedyCycle H, JSP90.level H j / JSP90.unionUpTo H j (the greedy residue chain and the deleted set),
+  JSP90.level_eq_deleteFinset_unionUpTo and JSP90.residueOf_greedyChain (level j of the greedy chain IS level j of the
+  residue chain of Stair.lean).  The greedy step: JSP90.disjoint_greedyCycle_of_lt (via JSP90.vertsOf,
+  JSP90.isOddCycle_subset_vertsOf, JSP90.not_mem_of_mem_vertsOf_deleteFinset) and JSP90.packing_of_levels (n non-bipartite
+  levels give n vertex-disjoint odd cycles), hence JSP90.level_isBipartite_of_locIndep (Erdos's hypothesis makes the k-th
+  level bipartite); JSP90.firstBipartiteLevel marks where the construction stops.  THE LADDER WITHOUT ANY PACKING BOUND:
+  JSP90.closeToBipartite_of_greedyChain_step -- the first n greedy cycles plus a BIPARTITE RESIDUE at level n pay the sum
+  of the level girths, the only index lemma needed being the self-similarity JSP90.level_tail.  NEW INSTANCE OF THE
+  HEADLINE THEOREM: JSP90.erdos73On_of_greedyChain / _univ -- LocIndep k G -> CloseToBipartite (sum over Fin k of girthOf
+  (level G j)) G, with the hypothesis EXACTLY Erdos's own and no girth/degree/weight/chain/connectivity assumption, and the
+  transversal exhibited (JSP90.closeToBipartite_of_greedyChain, JSP90.hitsOddCycles_greedyChain).  The comparison with
+  Transversal.lean's uniform bound is machine-checked (JSP90.greedySum_le_uniform =>
+  JSP90.erdos73On_of_greedyChain_uniform re-derives the l*k instance), with the strictness recorded
+  (JSP90.greedySum_lt_uniform, JSP90.erdos73On_of_greedyChain_strict).  Two traps recorded so no later round repeats them:
+  OddCyclePackingLe (firstBipartiteLevel G k) G is NOT available (Erdos bounds packings by k, not by the length of a
+  maximal greedy chain), and bipartiteness propagates FORWARD along the residue chain only (a triangle minus one vertex is
+  bipartite).  The blocker is now SHARP: the greedy sum is not a function of k alone (a cycle C_m has LocIndep 1 and
+  greedy sum m), so this axis is exactly as strong as the uniform bound unless one adds structure on the odd-girth
+  sequence; the missing quantitative input is JSP90.OddCyclePackingLe (k - j) (level G j).  jsp_000090_main is still not
+  declared: behind it stands JSP90.OddCycleErdosPosa r.  Zero-sorry partial result (build_ok, partial_ok); no prize claim.
 github_owner: Yi-111-a
 lean_repository: https://github.com/Yi-111-a/jsp-000090-lean
 branch: main

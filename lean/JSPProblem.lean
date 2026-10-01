@@ -754,6 +754,37 @@ deliberately not declared.
     and `JSP90.staircase_lt_uniform` machine-checks `k² + 2k < (2k + 1) * k` for `k ≥ 2`;
   - `JSP90.isBipartite_of_oddCyclePackingLe_zero` — packing number `0` means bipartite, the base case
     of every packing-number induction of this development in one line.
+* `JSPProblem.Greedy` — **the GREEDY SHORTEST-ODD-CYCLE axis** (round 102, one new attack family).
+  Round 101's ladder *assumed* a chain of odd cycles, one per residue level; this file **derives the
+  chain from the graph** — delete the *shortest* odd cycle, then the shortest odd cycle of the
+  residue, and so on — with **no girth hypothesis at all**:
+  - `JSP90.girthOf H` — the number of vertices of a shortest odd cycle of `H` (`0` if `H` is
+    bipartite), `JSP90.shortestOddCycle` / `JSP90.greedyCycle H` — such a shortest odd cycle
+    (`∅` if there is none), with `JSP90.girthOf_le` and `JSP90.card_greedyCycle_le_girthOf`;
+  - `JSP90.level H j` — the residue after deleting the greedy cycles of the `j` earlier levels,
+    `JSP90.unionUpTo H j` — the set deleted, `JSP90.level_eq_deleteFinset_unionUpTo` — the two are
+    complementary, and `JSP90.residueOf_greedyChain` identifies level `j` of the greedy chain with
+    `JSP90.residueOf` of `JSPProblem/Stair.lean`;
+  - **`JSP90.disjoint_greedyCycle_of_lt` — the greedy step**: two greedy cycles of different levels
+    are vertex-disjoint (`JSP90.vertsOf`, `JSP90.isOddCycle_subset_vertsOf`,
+    `JSP90.not_mem_of_mem_vertsOf_deleteFinset`), hence
+    **`JSP90.packing_of_levels`**: `n` non-bipartite levels give `n` disjoint odd cycles, and
+    **`JSP90.level_isBipartite_of_locIndep`**: Erdős's hypothesis makes the `k`-th level bipartite;
+  - `JSP90.firstBipartiteLevel`, `JSP90.firstBipartiteLevel_spec/min`,
+    `JSP90.not_isBipartite_of_lt_firstBipartiteLevel`, `JSP90.isBipartite_of_ge_firstBipartiteLevel`
+    — where the greedy construction stops;
+  - **`JSP90.closeToBipartite_of_greedyChain_step`** — the ladder *without* any packing bound: the
+    chain of the first `n` greedy cycles plus a bipartite residue at level `n` pay the sum of the
+    level girths (via the self-similarity `JSP90.level_tail`);
+  - **`JSP90.erdos73On_of_greedyChain` / `JSP90.erdos73On_of_greedyChain_univ` — a new instance of
+    the headline theorem**: `LocIndep k G → CloseToBipartite (∑ j : Fin k, girthOf (level G j)) G`,
+    the hypothesis being **exactly** Erdős's own, and the constant being read off the graph; the
+    transversal is exhibited (`JSP90.closeToBipartite_of_greedyChain`,
+    `JSP90.hitsOddCycles_greedyChain`);
+  - the comparison with the uniform bound is machine-checked (`JSP90.greedySum_le_uniform`), so
+    `JSP90.erdos73On_of_greedyChain_uniform` re-derives `JSPProblem/Transversal.lean`'s `ℓ * k`
+    instance, and `JSP90.greedySum_lt_uniform` / `JSP90.erdos73On_of_greedyChain_strict` record when
+    the new constant is *strictly* better (`JSP90.girthSum_lt_mul_of_short_first`).
 
 -/
 import JSPProblem.Definitions
@@ -806,3 +837,4 @@ import JSPProblem.DegColour
 import JSPProblem.Sparse
 import JSPProblem.Pivot
 import JSPProblem.Stair
+import JSPProblem.Greedy

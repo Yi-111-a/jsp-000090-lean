@@ -2913,3 +2913,115 @@ predicate is `((univ : Finset (Fin n)).filter (fun i => i.val < j.val)).biUnion 
 goal, so every sum is first moved to `range`-form; and `omega` is blind to `k * (k - 1)` versus
 `k * k - k` (both appear as distinct atoms), so `k ≤ k * k` and `k < k * k` are the two lemmas
 (`JSP90.nat_le_sq`, `JSP90.nat_lt_sq`) that the arithmetic needs.
+
+---
+
+## Round 102 — `JSPProblem/Greedy.lean`: **the GREEDY SHORTEST-ODD-CYCLE CHAIN** — the ladder with no chain and no girth hypothesis
+
+New file `lean/JSPProblem/Greedy.lean` (72 top-level declarations, 870 lines, **0 `sorry`, 0 `admit`**,
+`lake build` OK with 1252 jobs), imported from the root module `JSPProblem.lean` whose docstring was
+extended.  Attack family 43.  `harness/score.py problems/JSP-000090` reports `build_ok = true,
+sorry = 0, admit = 0, placeholder_total = 0, partial_ok = true, missing_theorems =
+["jsp_000090_main"]`.
+
+### The question
+
+Round 101 (`JSPProblem/Stair.lean`) proved the odd-girth ladder `τ_odd(H) ≤ g 0 + … + g (n-1)` from an
+**assumed chain** `C 0, …, C (n-1)` of odd cycles, one per residue level, and recorded in
+`policy.json` option (A) that the missing half is to stop assuming it.  This round **derives the chain
+from the graph**: delete the *shortest* odd cycle, then the shortest odd cycle of the residue, and so
+on.  Nothing has to be exhibited and **no girth hypothesis at all is needed**.
+
+### The machinery
+
+| result | content |
+| --- | --- |
+| `JSP90.girthOf H`, `JSP90.shortestOddCycle`, `JSP90.greedyCycle H` | the odd girth of `H` (vertices of a *shortest* odd cycle, `0` if `H` is bipartite) and a shortest odd cycle (`∅` if there is none); `JSP90.girthOf_le`, `JSP90.card_greedyCycle_le_girthOf`, `JSP90.three_le_girthOf` |
+| `JSP90.level H j`, `JSP90.unionUpTo H j` | the residue after deleting the greedy cycles of the `j` earlier levels, and the set deleted; `JSP90.level_eq_deleteFinset_unionUpTo` says the two are complementary |
+| `JSP90.greedyChain G k`, `JSP90.residueOf_greedyChain` | the greedy chain as a chain of `JSPProblem/Stair.lean`, and level `j` of it **is** level `j` of `JSP90.residueOf` — the bridge to round 101 |
+| `JSP90.vertsOf`, `JSP90.isOddCycle_subset_vertsOf`, `JSP90.not_mem_of_mem_vertsOf_deleteFinset` | an odd cycle lives in the vertex set of its graph; a vertex of a deletion is not deleted |
+| **`JSP90.disjoint_greedyCycle_of_lt`** | **two greedy cycles of different levels are vertex-disjoint** — the greedy step |
+| **`JSP90.packing_of_levels`** | `n` non-bipartite levels give `n` vertex-disjoint odd cycles of `H` |
+| **`JSP90.level_isBipartite_of_locIndep`** | Erdős's hypothesis makes the `k`-th level bipartite (a `k+1`-packing of greedy cycles would contradict `JSP90.locIndep_oddCyclePackingLe`) |
+| `JSP90.firstBipartiteLevel` and its four lemmas | where the greedy construction stops |
+| **`JSP90.level_tail`** | the chain is self-similar: `level (level H b) n = level H (b + n)` |
+| **`JSP90.closeToBipartite_of_greedyChain_step`** | **the ladder with no packing bound**: the first `n` greedy cycles plus a bipartite residue at level `n` pay `∑ j < n, girthOf (level H j)` |
+
+### The instances
+
+* **`JSP90.erdos73On_of_greedyChain`, `JSP90.erdos73On_of_greedyChain_univ` — a new instance of the
+  headline theorem**: `LocIndep k G → CloseToBipartite (∑ j : Fin k, girthOf (level G j)) G`.  The
+  hypothesis is **exactly** Erdős's own; there is **no** girth bound, **no** degree bound, **no**
+  packing-weight bound, **no** chain to exhibit and **no** connectivity or decomposition hypothesis.
+  The constant is read off the graph: the sum of the odd girths of the greedy residues.
+* **The certificate is exhibited** — `JSP90.closeToBipartite_of_greedyChain` (an explicit `X` with
+  `X.card ≤ ∑ girthOf` and `(deleteFinset G X).IsBipartite`) and `JSP90.hitsOddCycles_greedyChain` /
+  `JSP90.hitsOddCycles_of_bipartite_level` (the greedy cycles meet every odd cycle of `G`).
+* **The comparison with the uniform bound is machine-checked** — `JSP90.greedySum_le_uniform`, so
+  `JSP90.erdos73On_of_greedyChain_uniform` **re-derives** `JSPProblem/Transversal.lean`'s instance
+  `CloseToBipartite (ℓ * k) G` from the greedy chain, and `JSP90.greedySum_lt_uniform` /
+  `JSP90.erdos73On_of_greedyChain_strict` record when the new constant is *strictly* smaller
+  (`JSP90.girthSum_lt_mul_of_short_first` is the arithmetic).
+
+### What is *not* proved — and the blocker is now sharp
+
+`jsp_000090_main` is **not** declared, so the harness keeps reporting
+`missing_theorems = ["jsp_000090_main"]`.
+
+Two failed steps are worth recording because they are the traps of this axis:
+
+1. **`OddCyclePackingLe (firstBipartiteLevel G k) G` is not available.**  Erdős's hypothesis bounds
+   packings by `k`, not by the length of a *maximal* greedy chain, and `P.card ≤ k` does not give
+   `P.card ≤ j*`.  So round 101's ladder cannot be applied at the greedy chain length; this is why
+   `JSP90.closeToBipartite_of_greedyChain_step` carries the hypothesis "the residue at level `n` is
+   bipartite" instead of a packing bound — and that variant needs no packing hypothesis at all.
+2. **Bipartiteness propagates FORWARD along the residue chain, never backward.**  A triangle with one
+   vertex deleted is bipartite, so `level (j+1)` bipartite does *not* imply `level j` bipartite.  Only
+   `JSP90.isBipartite_level_mono` (the true direction) is available, and the greedy construction
+   therefore stops at `JSP90.firstBipartiteLevel`.
+
+The remaining gap on this axis is now a **sharp mathematical statement**: the greedy sum
+`∑ j, girthOf (level G j)` is **not** a function of `k` alone — a single cycle `C_m` satisfies
+`LocIndep 1` and its greedy sum is `m` — so the greedy chain is exactly as strong as the uniform
+`ℓ * k` instance, and beating it requires structural input on the odd-girth sequence (the
+triangle / triangle-free case), which is where Reed–Robertson–Seymour–Thomas lives.  The quantitative
+input this axis is still missing is `JSP90.OddCyclePackingLe (k - j) (level G j)`: the greedy cycles
+of the earlier levels are `j` disjoint odd cycles of `G`, so any packing of level `j` adjoins them.
+That, with the packing-number-sensitive instances already proved (`JSP90.erdos73On_of_helly_one`,
+`JSPProblem/Residue.lean`'s `erdos73On_of_packing_one`), is the next step recorded in `policy.json`.
+
+`#print axioms` on all ten headline results shows only
+`[propext, Classical.choice, Quot.sound]` — no `sorryAx`.  `formalization.yaml` remains
+`status: wip`, `prize_ready: false`.  No award claim is made.
+
+### Toolchain facts verified this round (they cost most of the round)
+
+* **`Finset.mem_self` does not exist at this revision** — `Finset.mem` is `Multiset`-based
+  (`Quot.lift …`), so `a ∈ s` for an abstract `s : Finset α` is **not** provable and `simp` cannot do
+  it either.  Use `Finset.mem_insert_self a s` or extract a membership from `s.Nonempty`.
+* **`Disjoint s t` is not `s ∩ t = ∅` definitionally**: `Finset.disjoint_iff_inter_eq_empty :
+  Disjoint s t ↔ s ∩ t = ∅`, and building a `Disjoint` from an empty intersection is `.mpr` (with
+  explicit `(s := _) (t := _)`, because the direction of `.mp`/`.mpr` here is the opposite of the
+  naive reading).
+* Applications of `Iff.mpr` and `Eq.trans` are elaborated **backwards** from the expected type; write
+  `have h : <full statement> := <term>` to fix it instead of trusting the application's own
+  unification.
+* `rw` cannot match `∑ j : Fin n, f j.val` against `∑ j, f j` (higher-order pattern unification), so
+  every conversion between the `Fin`-indexed and `range`-indexed forms of the constant is
+  `have key : … := JSP90.sum_fin_val n (fun j => g j)` followed by `rw [key]`.
+* A `calc` line ending in `:= by` swallows the following, more-indented `_ ≤` lines into the tactic
+  block (a silent parse error surfacing at the *next* declaration).
+* `Finset.sum_range_succ` **is** available at this revision (contrary to the round-101 note) and gives
+  the unshifted step `JSP90.girthSum_succ'`, while `Finset.sum_range_succ'` is the shifted step that
+  `JSPProblem/Stair.lean`'s `girthSum_succ` uses.
+* `Nat.le_succ` is not an `iff` here; `Nat.eq_or_lt_of_le` and `Nat.lt_succ_iff.mp` are the tools.
+* `Nat.find`, `Nat.find_spec`, `Nat.find_min'` need a `DecidablePred`: two *targeted* local instances
+  suffice and are safer than `Classical.propDecidable` for all propositions; a file-wide
+  `local instance (V : Type*) : DecidableEq V` makes `V` a metavariable in every statement that binds
+  it only implicitly ("`Fintype ?m` is stuck").
+* `SimpleGraph.IsBipartite` is the abbreviation `Colorable 2`, an **existential**: to use
+  `hb : ¬ H.IsBipartite` one applies it to a proof of `H.IsBipartite`, and to get "no odd cycle" from
+  `H.IsBipartite` one uses `JSP90.not_isOddCycle_of_isBipartite`.  Building a `Coloring` proof uses
+  `⟨c, fun hab => ?⟩` with the adjacency argument **first** and implicit `a b` binders.
+* An odd cycle of an induced subgraph is an odd cycle of the whole graph *as the same finset*:
+  `JSP90.isOddCycle_deleteFinset` for deletions, `JSP90.isOddCycle_of_isOddCycle_level` for the chain.

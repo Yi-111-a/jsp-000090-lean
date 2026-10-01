@@ -18,6 +18,7 @@
 | `JSPProblem/Count.lean` | the **counting half of the 2-cut decomposition** (round 43): a cycle meeting exactly one vertex of the cut lies in a half-piece, the non-bipartite parts of a split number at most `k` under `LocIndep k G`, so the decomposition costs `2 + m * k` instead of `2 + m * t` (**new, strictly stronger instance of the headline theorem**), the full packing decomposition `card ≤ 2 + t * r`, and **the precise reduction of Erdős–Pósa for odd cycles to the 2-cut-free case plus a uniform bound on the number of 2-cuts** |
 | `JSPProblem/Weight.lean` | the **weighted Erdős–Pósa theorem** (round 44): the residue induction run to exhaustion — bounded *packing weight* forces a bounded odd cycle transversal, the transversal number is at most the weight of a maximum-weight packing, the residue of a maximum-weight packing is bipartite, a **new instance of the headline theorem** for graphs of bounded packing weight, the exact value of the conclusion on complete graphs, and the machine-checked **refutation of the naive `+1` absorption step** (`K_5`) |
 | `JSPProblem/Free.lean` | **the fan of an odd cycle in a triangle-free graph** (round 69): triangle-freeness made usable (a `3`-cycle is a `3`-clique, `N(v)` is independent, the closed neighbourhood is bipartite, every odd cycle has `≥ 5` vertices), the *complete local structure at a shortest odd cycle* of a triangle-free graph, the packing descent `oddCycleFamily_card_le_of_boundary` (the fan carries one unit less packing), and the reduction **`erdos73_iff_fanErdős73`: Erdős #73 is EQUIVALENT to the purely local statement that the boundary of one odd cycle of a triangle-free graph can be killed with `O_k(1)` vertices** — no Menger, no connectivity, no packing number, no odd girth |
+| `JSPProblem/Greedy.lean` | the **GREEDY SHORTEST-ODD-CYCLE axis** (round 102): the odd girth of a graph (`JSP90.girthOf`) and a shortest odd cycle (`JSP90.greedyCycle`), the greedy residue chain (`JSP90.level`, `JSP90.unionUpTo`, `JSP90.residueOf_greedyChain`), two greedy cycles of different levels are disjoint (`JSP90.disjoint_greedyCycle_of_lt`), `n` non-bipartite levels give `n` disjoint odd cycles (`JSP90.packing_of_levels`), Erdős's hypothesis makes the `k`-th level bipartite (`JSP90.level_isBipartite_of_locIndep`), the ladder with **no** packing bound (`JSP90.closeToBipartite_of_greedyChain_step`), and the new instance of the headline theorem `JSP90.erdos73On_of_greedyChain`: `LocIndep k G → CloseToBipartite (∑ j : Fin k, girthOf (level G j)) G`, with the transversal exhibited |
 | `JSPProblem.lean` | root module |
 
 ## The statement
@@ -1115,3 +1116,37 @@ Over **all** graphs on `n ≤ 7` vertices (`2²¹` graphs, `1 103 955` of them H
   *creates* such an atom and breaks `omega`;
 * `helly_induceFinset (s := …) hH`: `s` is implicit, so a positional `Finset.univ \ X` is parsed as
   the *result* and elaborates into a nonsensical `Finset (Finset V)`.
+
+---
+
+## Round 102 — `JSPProblem/Greedy.lean`: the **GREEDY SHORTEST-ODD-CYCLE CHAIN**
+
+Round 101 proved the odd-girth ladder from an **assumed chain** of odd cycles, one per residue level.
+This round **derives the chain from the graph**: delete the *shortest* odd cycle, then the shortest odd
+cycle of the residue, and so on.  No chain has to be exhibited and **no girth hypothesis at all is
+needed**.
+
+* `JSP90.girthOf H` — vertices of a shortest odd cycle of `H` (`0` if `H` is bipartite);
+  `JSP90.greedyCycle H` — such a shortest odd cycle (`∅` if there is none).
+* `JSP90.level H j` / `JSP90.unionUpTo H j` — the greedy residue chain and the vertices deleted;
+  `JSP90.level_eq_deleteFinset_unionUpTo`, and `JSP90.residueOf_greedyChain`: level `j` of the greedy
+  chain **is** level `j` of the residue chain of `JSPProblem/Stair.lean`.
+* **The greedy step** — `JSP90.disjoint_greedyCycle_of_lt` (two greedy cycles of different levels are
+  vertex-disjoint) and `JSP90.packing_of_levels` (`n` non-bipartite levels give `n` disjoint odd
+  cycles), hence `JSP90.level_isBipartite_of_locIndep`: Erdős's hypothesis makes the `k`-th level
+  bipartite.  `JSP90.firstBipartiteLevel` marks where the construction stops.
+* **`JSP90.closeToBipartite_of_greedyChain_step`** — the ladder **without any packing bound**: the first
+  `n` greedy cycles plus a bipartite residue at level `n` pay `∑ j < n, girthOf (level H j)`.  The only
+  index lemma needed is the self-similarity `JSP90.level_tail : level (level H b) n = level H (b + n)`.
+* **`JSP90.erdos73On_of_greedyChain` / `_univ` — a new instance of the headline theorem**:
+  `LocIndep k G → CloseToBipartite (∑ j : Fin k, girthOf (level G j)) G`, the hypothesis being exactly
+  Erdős's own; the transversal is the greedy chain (`JSP90.closeToBipartite_of_greedyChain`,
+  `JSP90.hitsOddCycles_greedyChain`).
+* The comparison with the uniform bound is machine-checked: `JSP90.greedySum_le_uniform` ⇒
+  `JSP90.erdos73On_of_greedyChain_uniform` **re-derives** `JSPProblem/Transversal.lean`'s `ℓ * k`
+  instance, and `JSP90.greedySum_lt_uniform` records the strict improvement.
+
+Two traps of this axis, both machine-checked and recorded so that no later round repeats them:
+`OddCyclePackingLe (firstBipartiteLevel G k) G` is **not** available (Erdős's hypothesis bounds
+packings by `k`, not by the length of a maximal greedy chain), and bipartiteness propagates
+**forward** along the residue chain only (a triangle minus one vertex is bipartite).
