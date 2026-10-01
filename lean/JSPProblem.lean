@@ -486,6 +486,26 @@ deliberately not declared.
   - `JSP90.HellyErdős73 f` — **the remaining statement** for the Helly class at a general constant,
     a `def`, **not** assumed; Part 3 is its proved base level.  Behind it stands
     `JSP90.OddCycleErdosPosa r` (Reed–Robertson–Seymour–Thomas), the unchanged primary blocker.
+* `JSPProblem.Witness` — **the maximum-deficiency witnesses** (round 86, attack family 32).  Round 84
+  reduced Erdős #73 on the Helly class to the vertex descent `JSP90.HellyMaxDefDescent`; this file
+  proves the numerical content of that descent and replaces the blocker by a weaker one:
+  - **`JSP90.card_inter_ge_maxDef`, `JSP90.inter_maxWitness_ne`** — **two maximum-deficiency
+    witnesses of `G` overlap in at least `MaxDef G` vertices**, so the family of witnesses is
+    pairwise intersecting (in contrast with the family of odd cycles);
+  - **`JSP90.CommonMaxWitness G d`, `JSP90.defOf_le_sub_one_of_not_mem`,
+    `JSP90.maxDef_add_one_le_maxDef_delete_of_common`** — **the descent in the form in which it is
+    needed**: one vertex common to all witnesses of deficiency `d = MaxDef G` forces
+    `MaxDef (G − {v}) + 1 ≤ MaxDef G`, with no hypothesis on odd cycles;
+  - **`JSP90.commonWitness_iff_maxDef_descent`** — the descent is *equivalent* to the existence of a
+    common witness vertex (machine-checked on all graphs with `n ≤ 6` vertices), so the new statement
+    is exactly as strong as round 84's;
+  - **`JSP90.HellyCommonMaxWitness`, `JSP90.TwoHellyCommonMaxWitness`** — the two missing lemmas, and
+    **`JSP90.hellyCommonMaxWitness_of_hellyMaxDefDescent`** shows the new one implies round 84's;
+  - **`JSP90.erdos73On_helly_of_commonWitness`, `JSP90.closeToBipartite_of_helly_of_commonWitness`,
+    `JSP90.closeToBipartite_of_twoHelly_of_commonWitness`** — **Erdős #73 with the optimal constant
+    `f(k) = k` on the Helly class and on the strictly larger two-Helly class** from those single
+    statements.  Two machine-checked results of round 84 are corrected here (its `tau_` was an upper
+    bound, so its "König fails on the Helly class" was an artefact: König's property *holds* there).
 
 -/
 import JSPProblem.Definitions
@@ -526,3 +546,4 @@ import JSPProblem.Sun
 import JSPProblem.Ring
 import JSPProblem.Helly
 import JSPProblem.Descent
+import JSPProblem.Witness
