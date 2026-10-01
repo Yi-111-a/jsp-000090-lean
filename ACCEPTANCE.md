@@ -2480,3 +2480,53 @@ a residue fails on the Helly class (360 counterexamples, the smallest a 6-vertex
 `missing_theorems = ["jsp_000090_main"]`; `score.py --strict-prize` reports
 `build_ok = true, sorry = 0, admit = 0, placeholder_total = 0, partial_ok = true`.
 `formalization.yaml` remains `status: wip`, `prize_ready: false`.  No award claim is made.
+
+
+---
+
+## Round 90 — `JSPProblem/CutVertex.lean`: the 2-cut axis is closed
+
+New file `lean/JSPProblem/CutVertex.lean` (24 top-level declarations, 0 sorry/admit, `lake build` OK
+with 1245 jobs), imported from the root module `JSPProblem.lean`, whose docstring was extended.
+
+Rounds 78–89 attacked the 2-cut decomposition.  Round 89 reached
+`JSP90.VertexSplit.closeToBipartite_one_avoid_of_clean`: a packing bound `r`, the cleanliness
+hypothesis "every bipartite part has a bipartite half-piece", and `CloseToBipartite m` on the
+half-pieces of the non-bipartite parts give `CloseToBipartite (1 + m * r) G` — and it recorded, by
+machine check (windmill `wf`), that cleanliness is **not** automatic.  This round closes the axis.
+
+* `JSP90.oddCycle_mem_b_of_halfPiece_of_isBipartite_part`,
+  `JSP90.oddCycle_mem_a_of_halfPiece_of_isBipartite_part` — **the local fact**: over a bipartite part
+  `T_i`, every odd cycle of the half-piece `T_i ∪ {b}` contains `b`.  Hence
+  `JSP90.hitsOddCycles_half_insert_b_of_isBipartite_part` (and its `a`-sister): the single cut vertex
+  is a transversal of the half-piece of a bipartite part.
+* `JSP90.VertexSplit.hitsOddCycles_both` — **the cut step with no hypothesis on the cut**: if
+  `X i ∪ {a}` meets every odd cycle of `T_i ∪ {a}` for every `i`, then `{a, b} ∪ ⋃ X i` is an odd cycle
+  transversal of `G`.  Nothing about the edges from `a` or `b` to the parts is used.
+* **`JSP90.VertexSplit.closeToBipartite_two_of_nonBipartiteParts` — THE MAIN THEOREM**:
+  a packing bound `r` and `CloseToBipartite m` on the half-pieces `T_i ∪ {a}` of the non-bipartite
+  parts give `CloseToBipartite (2 + m * r) G`, **with no hypothesis on the cut**.  Its hypothesis is
+  *strictly weaker* than `JSPProblem.VertexSplit.closeToBipartite_of_split_of_bounded_pieces_pack`
+  (`2 + m * p` on the pieces `T_i ∪ {a,b}`), because a half-piece is a subgraph of the piece.
+  `JSP90.VertexSplit.closeToBipartite_two_of_nonBipartiteParts_swap` is the `b`-side version.
+* `JSP90.closeToBipartite_of_split_step`, `JSP90.closeToBipartite_of_split_of_oddCycleErdosPosa_two` —
+  **the induction step of the classical proof along a 2-cut**, with no hypothesis on the cut;
+  `JSP90.closeToBipartite_of_split_step_one_of_clean` is the `+1` form (`1 + m * r`).
+* **New instances of the headline theorem**:
+  `JSP90.erdos73On_of_split_two_of_nonBipartiteParts` (`LocIndep k G` forces
+  `CloseToBipartite (2 + m * k) G`), `JSP90.erdos73On_of_split_two_of_nonBipartiteParts_of_bounded_branch`
+  (`2 + (m + k) * k`), and `JSP90.erdos73On_of_split_one_avoid_of_clean_parts` (`1 + m * k`).
+* `JSP90.VertexSplit.sdiff_biUnion_half` — **the residue of the cut step is exact**:
+  `V \ ({a,b} ∪ ⋃ X i) = ⋃ i (T_i \ ⋃ X i)`; and `JSP90.VertexSplit.isBipartite_delete_of_both`
+  gives the bipartiteness of the residue.
+* **The obstruction, pinned exactly**: `JSP90.hitsOddCycles_empty_iff_isBipartite_half` (and its
+  `a`-sister, and `JSP90.clean_iff_empty_transversal`) says `X i = ∅` is a transversal of the
+  half-piece **iff** the half-piece is bipartite, i.e. iff the cut is clean at `i`.  So the
+  cleanliness hypothesis cannot be weakened in this form, and `+1` (round 89, clean) versus `+2`
+  (this round, unconditional) is the exhaustive choice; `JSP90.windmill_plus_two_plus_one` records
+  both on the windmill.
+
+`jsp_000090_main` is **not** declared, so the harness keeps reporting
+`missing_theorems = ["jsp_000090_main"]`; `score.py --strict-prize` reports
+`build_ok = true, sorry = 0, admit = 0, partial_ok = true`.  What remains is the 2-cut-free
+(3-connected) case of `JSP90.OddCycleErdosPosa r`.

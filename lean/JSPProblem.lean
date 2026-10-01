@@ -589,6 +589,30 @@ deliberately not declared.
   be done on the **parts** (`JSPProblem/Count.lean`) and the half-piece hypothesis of round 89 must
   be kept.  Note the obstruction is only to the *counting*: `wf` itself is one vertex away from
   bipartite (`JSP90.windmill_closeToBipartite_one`), as Erdős #73 predicts.
+* `JSPProblem.CutVertex` — **the 2-cut axis is closed: `+1` needs the cleanliness hypothesis and
+  `+2` needs none, and both are sharp.**  The local fact
+  `JSP90.oddCycle_mem_b_of_halfPiece_of_isBipartite_part` says that over a **bipartite** part every
+  odd cycle of the half-piece passes through the cut vertex, so a bipartite part costs nothing; the
+  cut step `JSP90.VertexSplit.hitsOddCycles_both` then gives, with **no hypothesis on the cut at
+  all**, the packing-counted lemma
+  **`JSP90.VertexSplit.closeToBipartite_two_of_nonBipartiteParts`: `CloseToBipartite (2 + m * r) G`**
+  from a packing bound `r` and `CloseToBipartite m` on the **half-pieces** `T_i ∪ {a}` of the
+  non-bipartite parts — a strictly weaker hypothesis than round 43's
+  `closeToBipartite_of_split_of_bounded_pieces_pack` (`2 + m * p`, on the *pieces*) and with no
+  hypothesis where round 89's `closeToBipartite_one_avoid_of_clean` needed `hclean`.  In the two
+  forms an induction consumes: `JSP90.closeToBipartite_of_split_step` and
+  `JSP90.closeToBipartite_of_split_of_oddCycleErdosPosa_two` — **the induction step of the classical
+  proof along a 2-cut, with no hypothesis on the cut** — and
+  `JSP90.closeToBipartite_of_split_step_one_of_clean` (the `+1` form, `1 + m * r`);
+  `JSP90.erdos73On_of_split_two_of_nonBipartiteParts` and
+  `JSP90.erdos73On_of_split_two_of_nonBipartiteParts_of_bounded_branch` are **new instances of the
+  headline theorem**.  The residue is exact
+  (`JSP90.VertexSplit.sdiff_biUnion_half`, `JSP90.VertexSplit.isBipartite_delete_of_both`): the
+  residue of the cut step is the union, over the parts, of the residues of the parts.  And the
+  obstruction of round 89 is pinned exactly by
+  `JSP90.hitsOddCycles_empty_iff_isBipartite_half`: **`X i = ∅` is a transversal of the half-piece
+  iff the half-piece is bipartite**, i.e. iff the cut is clean, so no weakening of `hclean` is
+  available and `+1` vs `+2` is the exhaustive choice (`JSP90.windmill_plus_two_plus_one`).
 
 -/
 import JSPProblem.Definitions
@@ -634,3 +658,4 @@ import JSPProblem.PackDescent
 import JSPProblem.SplitOne
 import JSPProblem.HalfOne
 import JSPProblem.Windmill
+import JSPProblem.CutVertex

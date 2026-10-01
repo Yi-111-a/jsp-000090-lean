@@ -162,3 +162,27 @@ The upper-bound side is unchanged: the missing statement is still `JSP90.OddCycl
 `r` (equivalently `JSP90.TouchCriticalErdős73 c` for some `c`, per round 74, or
 `JSP90.ShareEdgePackingOne r` for some `r` per round 80); behind it, on the Helly axis,
 `JSP90.HellySelfPay` (equivalently `JSP90.HellyErdős73 id`).
+
+**Round 90 (`lean/JSPProblem/CutVertex.lean`, 24 declarations, 0 sorry/admit) — the 2-CUT AXIS IS
+CLOSED: `+1` iff the cut is clean, `+2` unconditionally, and both are sharp.**  Round 89 obtained
+`CloseToBipartite (1 + m * r) G` over a *clean* 2-cut and machine-checked (windmill) that cleanliness
+is not automatic.  This round answers exactly what replaces it.  The local fact
+`JSP90.oddCycle_mem_b_of_halfPiece_of_isBipartite_part` is that *every odd cycle of the half-piece
+`T_i ∪ {b}` over a bipartite part passes through `b`*; hence a bipartite part needs **no** hypothesis
+and the refined cut step
+
+> **`JSP90.VertexSplit.closeToBipartite_two_of_nonBipartiteParts`: every packing of odd cycles of `G`
+> has at most `r` members and `CloseToBipartite m` on the half-pieces `T_i ∪ {a}` of the
+> non-bipartite parts ⟹ `CloseToBipartite (2 + m * r) G`** —
+
+with **no hypothesis on the cut at all** and a *strictly weaker* hypothesis than round 43's
+`closeToBipartite_of_split_of_bounded_pieces_pack` (half-pieces `T_i ∪ {a}`, not pieces
+`T_i ∪ {a,b}`).  In the two forms an induction consumes: `JSP90.closeToBipartite_of_split_step` /
+`JSP90.closeToBipartite_of_split_of_oddCycleErdosPosa_two` (**the induction step of the classical
+proof along a 2-cut**, no cut hypothesis) and `…_of_clean` (the `+1` form, `1 + m * r`).  New
+instances of the headline theorem: `JSP90.erdos73On_of_split_two_of_nonBipartiteParts`
+(`2 + m * k` from `LocIndep k`) and `…_of_bounded_branch` (`2 + (m + k) * k`).  The residue is exact
+(`JSP90.VertexSplit.sdiff_biUnion_half`, `isBipartite_delete_of_both`).  And the obstruction is
+pinned to the last degree by `JSP90.hitsOddCycles_empty_iff_isBipartite_half`: `X i = ∅` is a
+transversal of the half-piece **iff** the half-piece is bipartite **iff** the cut is clean at `i`, so
+`+1` vs `+2` is the exhaustive choice (`JSP90.windmill_plus_two_plus_one`).
