@@ -785,6 +785,28 @@ deliberately not declared.
     `JSP90.erdos73On_of_greedyChain_uniform` re-derives `JSPProblem/Transversal.lean`'s `ℓ * k`
     instance, and `JSP90.greedySum_lt_uniform` / `JSP90.erdos73On_of_greedyChain_strict` record when
     the new constant is *strictly* better (`JSP90.girthSum_lt_mul_of_short_first`).
+* `JSPProblem.Budget` — **the PACKING-BUDGET axis** (round 103, one new attack family).  Round 102's
+  greedy chain was only used to make the *last* level bipartite; this file proves the **quantitative**
+  statement that an induction along the chain consumes, in two forms, and derives a new instance of
+  the headline theorem from it:
+  - **`JSP90.oddCycleFamily_union_chainBelow` — the exchange lemma**: a packing `P` of the residue at
+    level `j`, adjoined with the `j` greedy cycles of the earlier levels, is a packing of odd cycles
+    of `G` of size `P.card + j` (`JSP90.chainBelow`, `JSP90.greedyCycle_subset_unionUpTo`,
+    `JSP90.disjoint_unionUpTo_of_isOddCycle_level`, `JSP90.not_mem_chainBelow_of_isOddCycleFamily`,
+    `JSP90.biUnion_chainBelow`);
+  - **THE PACKING BUDGET `JSP90.level_oddCyclePackingLe`**: `LocIndep k G → j ≤ k →
+    OddCyclePackingLe (k - j) (level G j)`, with `JSP90.level_packing_add_le` (`P.card + j ≤ k`),
+    `JSP90.level_oddCyclePackingLe_one` (the classical residue step) and
+    `JSP90.level_isBipartite_of_budget`;
+  - **THE DEFICIENCY BUDGET `JSP90.level_locIndep`**: `LocIndep k G → LocIndep (k - j) (level G j)`
+    (via `JSP90.level_maxDef_add_le`, round 87's descent read along the chain), the hypothesis-free
+    form `JSP90.level_locIndep_of_firstBipartite`, and `JSP90.level_locIndep_one`;
+  - **`JSP90.closeToBipartite_of_greedyChain_cost` / `JSP90.stepCost`** — the ladder with a
+    **per-level residue price**, strictly generalising round 102's step, and the new instance
+    **`JSP90.erdos73On_of_greedyChain_cost`**: `LocIndep k G` plus "each greedy residue is `c i`-close
+    to bipartite" gives `CloseToBipartite (∑ j < k, girthOf (level G j) + c (j + 1)) G`, with the
+    unit-cost corollary `JSP90.closeToBipartite_of_greedyChain_cost_one` (strictly cheaper than round
+    102's constant by exactly `k`, `JSP90.girthSum_lt_of_unit`).
 
 -/
 import JSPProblem.Definitions
@@ -838,3 +860,4 @@ import JSPProblem.Sparse
 import JSPProblem.Pivot
 import JSPProblem.Stair
 import JSPProblem.Greedy
+import JSPProblem.Budget

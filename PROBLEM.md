@@ -330,3 +330,30 @@ axis: round 99's recorded target is FALSE (machine-checked), and the correct sta
   (odd girth and degree alone do not bound the transversal), and
   **`JSP90.not_oddGirth_bound_without_packing`**: an odd girth from *below* bounds nothing — only an
   upper bound on the length of the odd cycles pays.
+
+**Round 103 (`lean/JSPProblem/Budget.lean`, 28 declarations, 0 sorry/admit) — the PACKING BUDGET
+AXIS: `k - j` at level `j`, in both the packing and the deficiency form.**  Round 102's greedy chain
+could only be used to make the *last* level bipartite; the concrete lemma it was missing —
+`OddCyclePackingLe (k - j) (level G j)` — is now proved, and so is its stronger deficiency form.
+
+* **The exchange lemma** `JSP90.oddCycleFamily_union_chainBelow`: a packing of the residue at level
+  `j`, adjoined with the `j` greedy cycles of the earlier levels, is a packing of odd cycles of `G` of
+  size `P.card + j` (`JSP90.disjoint_unionUpTo_of_isOddCycle_level`,
+  `JSP90.not_mem_chainBelow_of_isOddCycleFamily`, `JSP90.biUnion_chainBelow`);
+* **`JSP90.level_oddCyclePackingLe`: `LocIndep k G → j ≤ k → OddCyclePackingLe (k - j) (level G j)`**
+  (the *packing budget*), with `JSP90.level_packing_add_le`, the residue step
+  `JSP90.level_oddCyclePackingLe_one`, and `JSP90.level_isBipartite_of_budget`;
+* **`JSP90.level_locIndep`: `LocIndep k G → LocIndep (k - j) (level G j)`** (the *deficiency
+  budget*), from round 87's `maxDef_ge_card_add_maxDef_delete` along the chain
+  (`JSP90.level_maxDef_add_le`), hypothesis-free up to the first bipartite level
+  (`JSP90.level_locIndep_of_firstBipartite`), and at the top (`JSP90.level_locIndep_one`) — this is
+  the parameter the classical Erdős–Pósa descent decreases, and it was absent before;
+* **`JSP90.closeToBipartite_of_greedyChain_cost` / `JSP90.stepCost`** — the ladder with a
+  **per-level residue price**, strictly generalising round 102's step, giving the **new instance**
+  `JSP90.erdos73On_of_greedyChain_cost` (`LocIndep k G` + "each greedy residue is `c i`-close to
+  bipartite" ⇒ `CloseToBipartite (∑ j < k, girthOf (level G j) + c (j + 1)) G`) and its unit-cost
+  corollary `JSP90.closeToBipartite_of_greedyChain_cost_one`, strictly cheaper than round 102's
+  constant by exactly `k`.
+
+The budgets do not by themselves improve the constant of `JSP90.erdos73On_of_greedyChain` (the greedy
+sum is not a function of `k`, round 102); the missing half is unchanged, `JSP90.OddCycleErdosPosa r`.

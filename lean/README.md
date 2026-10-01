@@ -1150,3 +1150,56 @@ Two traps of this axis, both machine-checked and recorded so that no later round
 `OddCyclePackingLe (firstBipartiteLevel G k) G` is **not** available (Erdős's hypothesis bounds
 packings by `k`, not by the length of a maximal greedy chain), and bipartiteness propagates
 **forward** along the residue chain only (a triangle minus one vertex is bipartite).
+
+---
+
+## Round 103 — the PACKING BUDGET along the greedy chain (`lean/JSPProblem/Budget.lean`)
+
+Attack family 44.  Round 102 built the greedy shortest-odd-cycle chain but could only use it to make
+the *last* level bipartite; `discovery/JSP-000090/policy.json` recorded the quantitative statement
+that its ladder was missing, `OddCyclePackingLe (k - j) (level G j)` for `j ≤ k`.  It is proved here,
+in **two** forms, together with a generalisation of the ladder step and a new instance.
+
+* **The exchange lemma** `JSP90.oddCycleFamily_union_chainBelow`: a packing `P` of the residue at
+  level `j`, adjoined with the `j` greedy cycles of the earlier levels, is a packing of odd cycles of
+  `G` of size `P.card + j` — the greedy chain does not merely *complete* every packing of the
+  residue, it dominates it.  (`JSP90.chainBelow`, `JSP90.greedyCycle_subset_unionUpTo`,
+  `JSP90.disjoint_unionUpTo_of_isOddCycle_level`, `JSP90.not_mem_chainBelow_of_isOddCycleFamily`,
+  `JSP90.biUnion_chainBelow`, `JSP90.card_chainBelow`.)
+
+* **THE PACKING BUDGET** `JSP90.level_oddCyclePackingLe`:
+
+  > `LocIndep k G → j ≤ k → OddCyclePackingLe (k - j) (level G j)`
+
+  with `JSP90.level_packing_add_le` (`P.card + j ≤ k`), the classical residue step
+  `JSP90.level_oddCyclePackingLe_one`, and `JSP90.level_isBipartite_of_budget` (the `j = k` end:
+  packing number `0` means bipartite — round 102's `level_isBipartite_of_locIndep` re-derived).
+
+* **THE DEFICIENCY BUDGET** `JSP90.level_locIndep`:
+
+  > `LocIndep k G → LocIndep (k - j) (level G j)`
+
+  proved from round 87's `maxDef_ge_card_add_maxDef_delete` along the chain
+  (`JSP90.level_maxDef_add_le`: `j + MaxDef (level G j) ≤ MaxDef G`), in the hypothesis-free form
+  `JSP90.level_locIndep_of_firstBipartite`, and at the top of the chain
+  (`JSP90.level_locIndep_one`).  This is the parameter that the classical Erdős–Pósa descent
+  decreases, and it was not available anywhere in the development before this round.
+
+* **THE LADDER WITH A PER-LEVEL RESIDUE PRICE** `JSP90.closeToBipartite_of_greedyChain_cost`
+  (`JSP90.stepCost` = `g j + c (j + 1)`) strictly generalises round 102's
+  `closeToBipartite_of_greedyChain_step` (recovered as
+  `JSP90.closeToBipartite_of_greedyChain_cost_bipartiteLevels`), and yields the new instance
+
+  > `JSP90.erdos73On_of_greedyChain_cost`:
+  > `LocIndep k G → (∀ i, 1 ≤ i → i ≤ k → CloseToBipartite (c i) (level G i)) →
+  >   CloseToBipartite (∑ j < k, girthOf (level G j) + c (j + 1)) G`
+
+  in which each greedy residue pays a *level-dependent* price — the shape in which the budgets enter
+  a theorem — and its unit-cost instance `JSP90.closeToBipartite_of_greedyChain_cost_one`, whose
+  constant is **strictly smaller** than round 102's by exactly `k`
+  (`JSP90.girthSum_lt_of_unit`).
+
+The gap to `jsp_000090_main` is unchanged: the budgets are proved, but the *transversal* half — a
+bound on an odd cycle transversal in terms of the packing number — is still
+`JSP90.OddCycleErdosPosa r`, and the budgets themselves do not improve the constant of
+`JSP90.erdos73On_of_greedyChain` (the greedy sum is not a function of `k`, as round 102 recorded).
