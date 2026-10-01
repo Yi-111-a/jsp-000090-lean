@@ -529,6 +529,29 @@ deliberately not declared.
     `JSP90.hellySelfPay_of_hellyErdős73` shows it is **equivalent to the instance** `HellyErdős73 id`
     itself.  Unlike the single-vertex descent it allows a whole set to be deleted in one step, which
     is what an absorption argument needs (round 44 proved the `+ 1` absorption step false).
+* `JSPProblem.SplitOne` — **charging ONE vertex of a 2-cut instead of two** (round 88, attack
+  family 34).  The 2-cut decomposition of `JSPProblem/Separator.lean` charged **both** vertices of a
+  cut `{a, b}`; its header named the missing step exactly ("*a cycle meeting exactly one vertex of
+  the cut lies in a piece*"), and this file proves it and applies it:
+  - **`JSP90.VertexSplit.cycle_subset_insert`** — an odd cycle containing `a` and avoiding `b` lies
+    in `T_i ∪ {a}` for a single `i` (the cycle minus `a` is a path, and no edge joins two parts);
+  - **`JSP90.VertexSplit.oddCycle_piece_or_both`** — **the only odd cycles not contained in a piece
+    are the ones containing *both* `a` and `b`**, which *strengthens*
+    `JSPProblem.VertexSplit.oddCycle_piece_or_avoid` (a cycle meeting the cut in one vertex is still
+    contained in a piece);
+  - **`JSP90.VertexSplit.hitsOddCycles_one`, `JSP90.VertexSplit.exists_transversal_one`** — **THE
+    SHARP CUT STEP**: a transversal of every piece together with the **single** vertex `a` is an
+    odd cycle transversal of `G`, so `τ(G) ≤ 1 + Σᵢ τ(Tᵢ ∪ {a,b})` instead of round 78's
+    `2 + Σᵢ τ(Tᵢ ∪ {a,b})`;
+  - **`JSP90.erdos73On_of_split_one`** — **a new instance of the headline theorem**,
+    `CloseToBipartite (1 + m * t) G`, strictly stronger than
+    `JSPProblem.erdos73On_of_split` (`m * t + 2`); likewise
+    `JSP90.erdos73On_of_split_one_of_bounded_branch` (`1 + (m + k) * t` instead of `2 + (m + k) * t`)
+    and `JSP90.closeToBipartite_of_split_one_of_oddCycleErdosPosa`, the **Erdős–Pósa form** of the
+    same step, which is what an induction on the Erdős–Pósa function along a 2-cut consumes;
+  - **`JSP90.c5`, `JSP90.sp5`, `JSP90.sp5_split_one_attained`** — the `+ 1` is **necessary and
+    attained**: the 5-cycle has a 2-cut whose two pieces are both bipartite (transversal number
+    `0`), yet `c5` needs one deleted vertex, so `1 + m * t` cannot be lowered to `m * t`.
 
 -/
 import JSPProblem.Definitions
@@ -571,3 +594,4 @@ import JSPProblem.Helly
 import JSPProblem.Descent
 import JSPProblem.Witness
 import JSPProblem.PackDescent
+import JSPProblem.SplitOne
