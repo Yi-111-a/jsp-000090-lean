@@ -307,3 +307,26 @@ bipartiteness (`JSP90.locIndep_zero_of_isBipartite`), and bipartite graphs have 
 edges, so no function of `k` bounds `|E(G)|` — stated, not assumed, as
 `JSP90.LocIndepEdgeUnbounded`.  The next statement of the axis, `JSP90.BoundedOddGirthEdgeCount`
 (odd girth `ℓ` and degree `≤ d` ⟹ `f ℓ d`-close to bipartite), is stated and not assumed.
+
+**Round 100 (`lean/JSPProblem/Pivot.lean`, 41 declarations, 0 sorry/admit) — the LOCAL-TRANSVERSAL
+axis: round 99's recorded target is FALSE (machine-checked), and the correct statements replace it.**
+
+* `JSP90.NeighClosed G C = C ∪ ∂C` and **`JSP90.hitsOddCycles_neighClosed_of_maxPacking`** — the
+  distance-one neighbourhood of the union of a **maximum** packing of odd cycles is an odd cycle
+  transversal — with `JSP90.card_neighClosed_maxPacking_le` for its size;
+* `JSP90.two_le_card_inter_neigh_of_mem_oddCycle`, `JSP90.card_boundary_le_card_mul_sub_two` and
+  `JSP90.card_neighClosed_le_card_mul_sub_one`, which **generalise** `JSPProblem/Subcubic.lean`'s
+  `d = 3` statements to every degree `d ≥ 2` and every set `S`;
+* `JSP90.erdos73On_of_neighClosedPacking` — `LocIndep k` + degree `≤ d` + odd cycles of length `≤ ℓ`
+  ⟹ `CloseToBipartite (ℓ * k * (d - 1))`, with the transversal exhibited; the constant is **dominated**
+  by `JSP90.erdos73On_of_bounded_odd_girth` (`ℓ * k`), the new content being the certificate;
+* the **two-level odd-girth ladder** `JSP90.closeToBipartite_of_twoLevelGirth`,
+  `JSP90.erdos73On_of_ladder`, `JSP90.erdos73On_of_ladder_subcubic` (`ℓ * (2 k - 1)`) and
+  `JSP90.closeToBipartite_of_twoLevelGirth_degreeTwo`;
+* **exactness at maximum degree `≤ 2`, for every `k`**: `JSP90.maxDegLe_two_iff_oddCyclePackingLe`
+  (`τ_odd = ν_odd` exactly), `JSP90.erdos73On_of_maxDegLe_two` with the optimal constant `k`, attained
+  on `kTriangles k`;
+* **`JSP90.not_boundedOddGirthEdgeCount`**: round 99's `JSP90.BoundedOddGirthEdgeCount` is **false**
+  (odd girth and degree alone do not bound the transversal), and
+  **`JSP90.not_oddGirth_bound_without_packing`**: an odd girth from *below* bounds nothing — only an
+  upper bound on the length of the odd cycles pays.

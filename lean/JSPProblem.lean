@@ -699,6 +699,39 @@ deliberately not declared.
     direction of the deficiency (`kTriangles k` needs `k`, the edge count gives `3 k`);
   - the remaining statement of the axis, **stated and not assumed**:
     `JSP90.BoundedOddGirthEdgeCount` (odd girth `ℓ` and degree `≤ d` ⟹ `f ℓ d`-close to bipartite).
+* `JSPProblem.Pivot` — **the LOCAL-TRANSVERSAL axis** (round 100, one new attack family).  Where
+  must the odd cycle transversal sit?  `JSPProblem/Transversal.lean` puts it on a maximum packing and
+  `JSPProblem/Sparse.lean` counts edges; this file puts it *around* one:
+  - `JSP90.NeighClosed G C = C ∪ ∂C`, `JSP90.mem_neighClosed`, `JSP90.disjoint_boundary`,
+    `JSP90.card_neighClosed_eq_add`;
+  - **`JSP90.hitsOddCycles_neighClosed_of_maxPacking` — the distance-one neighbourhood of the union
+    of a maximum packing of odd cycles is an odd cycle transversal** (an odd cycle missing it could be
+    added to the packing), with `JSP90.card_neighClosed_maxPacking_le` for its size;
+  - the counting at an odd cycle in **every** degree range:
+    `JSP90.two_le_card_inter_neigh_of_mem_oddCycle` (a vertex of an odd cycle has two neighbours *on*
+    it), `JSP90.card_boundary_le_card_mul_sub_two` (generalising `JSPProblem/Subcubic.lean`'s
+    `card_boundary_le_card_oddCycle` from `d = 3` to every `d ≥ 2` and every set `S`),
+    `JSP90.card_neighClosed_le_card_mul_sub_one` (generalising
+    `card_neighClosed_le_two_mul_card_oddCycle`), and `JSP90.erdos73On_of_neighClosedPacking`
+    (`LocIndep k` + degree `≤ d` + odd cycles of length `≤ ℓ` ⟹ `CloseToBipartite (ℓ * k * (d - 1))`,
+    with the transversal *exhibited* as that neighbourhood);
+  - **the two-level odd-girth ladder**: `JSP90.closeToBipartite_of_twoLevelGirth` (pay `ℓ₁` for a
+    cycle of at most `ℓ₁` vertices, then `ℓ₂ * (k - 1) * (d - 1)` for the residue),
+    `JSP90.closeToBipartite_of_ladder_uniform`, `JSP90.erdos73On_of_ladder`,
+    `JSP90.erdos73On_of_ladder_subcubic` (constant `ℓ * (2 k - 1)`) and
+    `JSP90.closeToBipartite_of_twoLevelGirth_degreeTwo` (no degree factor at `d = 2`);
+  - **exactness at maximum degree `≤ 2`, for every `k`**:
+    `JSP90.disjointFamily_oddCycles_of_maxDegLe_two`,
+    `JSP90.maxDegLe_two_iff_oddCyclePackingLe` (`CloseToBipartite m G ↔ OddCyclePackingLe m G`, i.e.
+    `τ_odd = ν_odd`), `JSP90.erdos73On_of_maxDegLe_two` with the optimal constant `k`, and
+    `JSP90.erdos73On_of_maxDegLe_two_optimal` / `JSP90.closeToBipartite_kTriangles_of_maxDegLe_two`
+    (attained on `kTriangles k`);
+  - **two machine-checked refutations**: `JSP90.not_boundedOddGirthEdgeCount` — round 99's recorded
+    target `JSP90.BoundedOddGirthEdgeCount` is **false** (odd girth and degree alone do not bound the
+    transversal, `JSP90.maxDegLe_two_unbounded_oddCycles`) — and
+    `JSP90.not_oddGirth_bound_without_packing`, which pins the *direction*: an odd girth from **below**
+    (`JSP90.OddGirthGe ℓ G`) bounds nothing, whereas the upper bound on odd cycle length used by
+    `JSPProblem/Transversal.lean` is the one that works.
 -/
 import JSPProblem.Definitions
 import JSPProblem.Reed
@@ -748,3 +781,4 @@ import JSPProblem.MaxCut
 import JSPProblem.Finite
 import JSPProblem.DegColour
 import JSPProblem.Sparse
+import JSPProblem.Pivot

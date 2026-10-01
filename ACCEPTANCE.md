@@ -2752,3 +2752,89 @@ turns out to provide `SimpleGraph.edgeFinset`, `SimpleGraph.degree` and
 reports `build_ok = true, partial_ok = true, prize_ready = false`, `missing_theorems =
 ["jsp_000090_main"]` (behind it `JSP90.OddCycleErdosPosa r`).  See
 `discovery/JSP-000090/policy.json`.
+
+---
+
+## Round 100 — `lean/JSPProblem/Pivot.lean`: the **LOCAL-TRANSVERSAL axis** — attack family 41
+
+New module (41 declarations, 715 lines, **0 `sorry`, 0 `admit`**, `lake build` OK with 1250 jobs),
+imported from the root module `JSPProblem.lean` whose docstring was extended.  Round 99's option (A)
+is **closed as impossible** this round, by machine check.
+
+### The question
+
+Every axis so far turns an *existence* statement about an odd cycle transversal into a number
+(`Transversal.lean`: the transversal is the union of a maximum packing; `Sparse.lean`:
+`τ ≤ ⌊|E|/2⌋`).  This round asks where the transversal must **sit**: within distance one of a packing.
+
+* `JSP90.NeighClosed G C = C ∪ ∂C`, `JSP90.mem_neighClosed`, `JSP90.disjoint_boundary`,
+  `JSP90.card_neighClosed_eq_add` (`|N[V(C)]| = |C| + |∂C|`);
+* **`JSP90.hitsOddCycles_neighClosed_of_maxPacking` — the distance-one neighbourhood of the union of a
+  *maximum* packing of odd cycles is an odd cycle transversal**: an odd cycle missing it is disjoint
+  from every packed cycle, so it could be added, contradicting maximality.  With
+  `JSP90.card_neighClosed_maxPacking_le` for its size (`≤ ℓ * |P| * (d - 1)`), which uses the packing
+  additivity `JSP90.card_eq_sum_card_inter_of_disjoint`.
+
+### The counting, in every degree range
+
+* `JSP90.two_le_card_inter_neigh_of_mem_oddCycle` — a vertex of an odd cycle has two neighbours **on**
+  the cycle (the fact `JSPProblem/Subcubic.lean` used implicitly in
+  `card_le_one_outerNeigh_oddCycle`);
+* `JSP90.card_boundary_le_card_mul_sub_two` — every vertex of `S` has two neighbours in `S` ⟹
+  `|∂S| ≤ |S| * (d - 2)`; this **generalises** `card_boundary_le_card_oddCycle` from `d = 3` to every
+  `d ≥ 2` and every set `S`;
+* `JSP90.card_neighClosed_le_card_mul_sub_one` — **generalises**
+  `card_neighClosed_le_two_mul_card_oddCycle`; attained on `K₃`
+  (`JSP90.card_neighClosed_completeGraph_three_tight`: `|N[V(C)]| = 3 = 3 * (2 - 1)`).
+
+### Instances of the headline theorem (with the honest constant)
+
+* `JSP90.erdos73On_of_neighClosedPacking`: `LocIndep k G` + `MaxDegLe G d` (`2 ≤ d`) + every odd cycle
+  of length `≤ ℓ` ⟹ `CloseToBipartite (ℓ * k * (d - 1)) G`, with the transversal **exhibited** as the
+  neighbourhood.  **`JSPProblem/Transversal.lean` already proves `CloseToBipartite (ℓ * k) G` under
+  strictly weaker hypotheses** (no degree bound), so this constant is *larger*: what is new is the
+  certificate and the arbitrary degree range;
+* **the two-level odd-girth ladder**, strictly stronger than the uniform bound:
+  `JSP90.closeToBipartite_of_twoLevelGirth` (pay `ℓ₁` for a cycle of at most `ℓ₁` vertices, then
+  `ℓ₂ * (k - 1) * (d - 1)` for the residue) ⟹ `JSP90.closeToBipartite_of_ladder_uniform`
+  (`ℓ + ℓ * (k - 1) * (d - 1)`, i.e. `ℓ * (2 k - 1)` at `d = 3`, better than `2 * k * ℓ`),
+  `JSP90.erdos73On_of_ladder`, `JSP90.erdos73On_of_ladder_subcubic`, and
+  `JSP90.closeToBipartite_of_twoLevelGirth_degreeTwo` (`ℓ₁ + ℓ₂ * (k - 1)`, no degree factor at
+  `d = 2`).
+
+### Exactness at maximum degree `≤ 2`, for **every** `k`
+
+`JSPProblem/Subcubic.lean` had only the `k = 1` level (`erdos73On_one_of_maxDegLe_two`).  Now:
+
+* `JSP90.disjointFamily_oddCycles_of_maxDegLe_two` — the odd cycles of a graph of maximum degree `≤ 2`
+  are pairwise vertex-disjoint;
+* **`JSP90.maxDegLe_two_iff_oddCyclePackingLe` — `CloseToBipartite m G ↔ OddCyclePackingLe m G`**, i.e.
+  the least odd cycle transversal *equals* the packing number;
+* `JSP90.erdos73On_of_maxDegLe_two` — Erdős #73 on that class with the **optimal constant `k`** —
+  and `JSP90.erdos73On_of_maxDegLe_two_optimal` / `JSP90.closeToBipartite_kTriangles_of_maxDegLe_two`
+  (attained on `kTriangles k`, with the new `JSP90.maxDegLe_kTriangles`).
+
+### Two machine-checked refutations (round 99's recorded target is false)
+
+* **`JSP90.not_boundedOddGirthEdgeCount`: `JSP90.BoundedOddGirthEdgeCount` — "odd girth `ℓ` and degree
+  `≤ d` ⟹ `f ℓ d`-close to bipartite" — is FALSE.**  For `ℓ = 3`, `d = 2` its hypothesis holds for every
+  graph of maximum degree `≤ 2`, and `kTriangles (f + 1)` is not `f`-close to bipartite
+  (`JSP90.maxDegLe_two_unbounded_oddCycles`).  Round 99's `next_bet (A)` is therefore closed as
+  impossible, not unfinished.
+* **`JSP90.not_oddGirth_bound_without_packing`: the *direction* of the girth hypothesis matters.**  An
+  odd girth from **below** (`JSP90.OddGirthGe ℓ G`, added this round) bounds nothing — `kTriangles 5`
+  has odd girth `3 ≤ 3` and needs `5` vertices — whereas the **upper** bound on the length of the odd
+  cycles used by `Transversal.lean` is the one that pays.
+
+### Reusable additions
+
+`JSP90.maxDegLe_deleteFinset`, `JSP90.isOddCycle_of_isOddCycle_deleteFinset` (an odd cycle of `G - X`
+is an odd cycle of `G` **as the same finset** — `Transversal.oddCycle_of_isOddCycle_delete` returns
+*some* odd cycle), `JSP90.OddGirthGe.deleteFinset`, `JSP90.OddCyclePackingLe.succ_of_residue`.
+
+`#print axioms` on all twenty headline results shows only `[propext, Classical.choice, Quot.sound]` —
+no `sorryAx`.  `lake build` succeeds (1250 jobs) with **0 `sorry`, 0 `admit`**; `score.py --strict-prize`
+reports `build_ok = true, partial_ok = true, prize_ready = false`, `missing_theorems =
+["jsp_000090_main"]`.  What remains is `JSP90.OddCycleErdosPosa r` (behind it, Mader's structure
+theorem); see `discovery/JSP-000090/policy.json` (`next_bet`: the **full** girth ladder, and maximal
+packings).
