@@ -2,46 +2,34 @@ jsp_id: JSP-000090
 catalog_url: https://github.com/TheJustinSunPrize/awards
 status: wip
 prize_ready: false
-last_round: 112
+last_round: 118
 last_round_summary: |
-  Round 110 -- THE CUT-VERTEX PIECE AXIS: THE ONE-SIDED 1-CUT IS FREE (attack family 51).  New module
-  lean/JSPProblem/Piece.lean (34 declarations, 802 lines, 0 sorry/admit, lake build OK with 1261
-  jobs), imported from the root module JSPProblem.lean.  Round 109 localised the remaining gap of the
-  1-cut axis to the ONE-SIDED CHAINS and asked for the block-cut tree or the classical short-C-path
-  lemma, neither of which exists in the pinned Mathlib.  This round shows NEITHER IS NEEDED: the
-  object to control is not the part T_i but the PIECE T_i u {v}, and the two differ exactly in the
-  right direction.  Proved: OneSplit.cycle_subset_piece -- THE MISSING STRUCTURAL LEMMA, an odd cycle
-  CONTAINING the cut vertex lies in a single piece (the companion of round 48's cycle_subset_part,
-  which says a cycle AVOIDING it lies in a single part) -- so the odd cycles of G are exactly the odd
-  cycles of its pieces (OneSplit.oddCycle_piece, OneSplit.isOddCycle_iff_pieces); monotonicity at a
-  cut vertex AT THE SAME CONSTANT (closeToBipartite_piece_of_closeToBipartite,
-  closeToBipartite_pieces_of_closeToBipartite); THE COMPOSITION RULE WITHOUT THE +1
-  (closeToBipartite_of_1split_bounded_pieces, m*t against 1 + m*k in Connect.lean, because the cut
-  vertex lies in every piece); THE SHARP TWO-PIECE COMPOSITION
-  closeToBipartite_of_1split_twoPieces (2*m, independently of t, the first constant on this axis that
-  does not grow with the number of parts); closeToBipartite_of_1split_nonBipartitePieces (only the
-  non-bipartite pieces are charged, still no +1).  THE HEADLINE OF THE ROUND:
-  JSP90.closeToBipartite_iff_of_oneNonBipartitePiece -- CloseToBipartite m G <-> CloseToBipartite m
-  (T_i0 u {v}) when that piece is the only non-bipartite one, i.e. THE ONE-SIDED 1-CUT IS FREE -- the
-  one-sided chains are deleted at ZERO COST and no tree and no path is needed; with
-  isOddCycle_iff_of_oneNonBipartitePiece and hitsOddCycles_iff_of_oneNonBipartitePiece the reduction
-  loses NOTHING (the whole odd-cycle structure of G is that of the single piece, as the same
-  finsets); and closeToBipartite_iff_of_twoSideCuts, where the reduction ITERATES, i.e. the
-  classical block-cut reduction in two steps.  New instances of the headline theorem along the piece
-  axis: erdos73On_of_1split_of_bounded_PIECES, oddCycleErdosPosa_of_1split_of_bounded_PIECES,
-  erdos73On_of_1split_pieces_of_locIndep_sub -- hypothesis on the PIECES, constant m*t, no +1 and NO
-  counting step (round 48's OneSplit.card_nonBipartiteParts_le is not used).  A MACHINE-CHECKED
-  OBSTRUCTION closes the axis: wf_oneSplit is a 1-CUT of the windmill wf at 0 (Windmill.lean had only
-  the 2-cut {0,5}), not_isBipartite_wf_piece_0/1 show TWO of its three pieces are non-bipartite, and
-  wf_locIndep_one_two_nonBipartitePieces records LocIndep 1 wf together with 2 > k = 1 non-bipartite
-  pieces -- so |nonBipartitePieces| <= k is FALSE and no f(k) comes from the piece count.  A tempting
-  statement recorded as false: CloseToBipartite m G <-> every piece is m-close (two disjoint triangles
-  with pendants at the cut vertex), so the m*t factor of the composition is real.  NOT proved:
-  jsp_000090_main; the blocker JSP90.OddCycleErdosPosa r is unchanged, and it is now localised to the
-  graphs with NO CUT VERTEX, i.e. the 2-connected case, where Mader's structure theorem and a
-  Menger-type fan lemma are needed.
-
-
+  Round 118 -- THE SPREAD CONSTANT: ROUND 53's CRITICAL-INTERSECTION-GRAPH ROUTE IS CLOSED (attack
+  family 56).  New module lean/JSPProblem/CriticalSharp.lean (29 declarations, 0 sorry/admit, lake
+  build OK with 1267 jobs), imported from the root module JSPProblem.lean.  Round 53 reduced all of
+  Erdos #73 to JSP90.SpreadMinimalTransversal r c (every graph of odd cycle packing number <= r admits
+  a minimal transversal whose critical intersection graph is c-colourable) and claimed that c = 2 is
+  the classical shape of Reed-Robertson-Seymour-Thomas.  This round COMPUTES that colour count on
+  complete graphs and settles both points.  Proved: card_criticalTransversal_completeGraph -- a set of
+  K_n carrying critical data has EXACTLY n-2 vertices (a critical cycle of x in X has three vertices
+  inside {x} u (V \ X), which has three of them); criticalCycle_eq_completeGraph and
+  adj_IntGraph_completeGraph -- every critical cycle is exactly the triangle {x} u (V \ X), so THE
+  CRITICAL INTERSECTION GRAPH OF K_n IS THE COMPLETE GRAPH ON ITS TRANSVERSAL;
+  spreadTransversal_completeGraph_iff -- THE SPREAD CONSTANT OF A COMPLETE GRAPH, EXACTLY,
+  SpreadTransversal c (completeGraph (Fin n)) <-> (n - 2 <= c /\ 0 < c), whence K_4 needs exactly two
+  colours and K_5 exactly three (spreadTransversal_completeGraph_four/five) and
+  not_spread_transversal_two_completeGraph_five refutes round 53's c = 2 claim; the packing bound of a
+  complete graph (sum_card_le_of_disjointFamily, mul_three_le_of_packing_completeGraph,
+  packing_card_le_completeGraph: a packing of odd cycles of K_n has at most n/3 members).
+  HEADLINE NEGATIVE RESULT: spreadMinimalTransversal_c_ge, not_spreadMinimalTransversal_of_packing and
+  no_fixed_spreadConstant -- NO FIXED COLOUR COUNT WORKS: SpreadMinimalTransversal r c forces
+  3r - 2 <= c (witness K_{3r}), so the class-level hypothesis of
+  JSP90.erdos73_of_spreadMinimalTransversal is FALSE and that route is closed.  AND THE ROUTE IS
+  QUADRATIC ANYWAY: exact_spread_constant_locIndep -- K_{k+2} satisfies LocIndep k and has spread
+  constant exactly k, while round 53's card_X_le_of_colouring gives |X| <= c*k, so every instance of
+  that shape carries a constant >= k*(k+2) against the O(k log k) of Erdos-Posa for odd cycles.  NOT
+  proved: jsp_000090_main (still not declared) and JSP90.OddCycleErdosPosa r, which is unchanged;
+  round 118 removes one ROUTE, not the theorem.
 github_owner: Yi-111-a
 lean_repository: https://github.com/Yi-111-a/jsp-000090-lean
 branch: main

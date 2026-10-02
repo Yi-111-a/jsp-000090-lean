@@ -1930,3 +1930,98 @@ number `r`, and (ii) the absorption (along 2-cuts, with a bound on the number of
 * **`harness/score.py` counts the words `sorry`/`admit` anywhere in a `.lean` file**, prose included:
   writing "nothing is sorry" in a docstring turned `partial_ok` off.  Docstrings must avoid both
   words.
+
+---
+
+## Round 118 — `JSPProblem/CriticalSharp.lean`: the SPREAD CONSTANT (round 53's route is closed)
+
+New module, **29 declarations, zero placeholders**, imported from the root module `JSPProblem.lean`.
+This is the **fifty-sixth** attack family, and the first to attack a *previous round's own reduction*
+(`JSP90.erdos73_of_spreadMinimalTransversal`, round 53) instead of the problem.
+
+### The question
+
+Round 53 proved `JSP90.card_le_of_colouring_pack` (a `c`-colourable critical intersection graph gives
+a transversal of size `≤ c * k`) and localised all of Erdős #73 to the class-level hypothesis
+`JSP90.SpreadMinimalTransversal r c` — *every graph of odd cycle packing number at most `r` admits a
+minimal transversal whose critical intersection graph is `c`-colourable* — with `JSP90.erdos73_of_spreadMinimalTransversal`
+proving the whole theorem from `∀ r, SpreadMinimalTransversal r c` for **one fixed `c`**.  That header
+also claimed that `c = 2` "is the classical shape of the Reed–Robertson–Seymour–Thomas theorem".
+Round 118 computes the colour count on complete graphs and settles both points.
+
+### What is proved
+
+* `JSP90.card_le_sub_two_of_hitsOddCycles_completeGraph`, `JSP90.card_lt_sub_two_of_not_hitsOddCycles_completeGraph`,
+  `JSP90.minimalTransversal_card_completeGraph`, `JSP90.card_criticalTransversal_completeGraph` — a set
+  of `K_n` meets every odd cycle only if `n ≤ |X| + 2`, and **any set carrying critical data has
+  exactly `n - 2` vertices** (a critical cycle of `x ∈ X` has at least three vertices and they all lie
+  in `{x} ∪ (V \ X)`, which has `1 + (n - (n - 2)) = 3` of them);
+* `JSP90.exists_criticalTransversal_completeGraph` — conversely any set of size `n - 2` carries
+  critical data (`V \ {0, 1}` is a transversal, and every proper subset of it is not);
+* `JSP90.criticalCycle_eq_completeGraph`, `JSP90.mem_compl_of_criticalCycle`,
+  `JSP90.adj_IntGraph_completeGraph` — **every critical cycle of a transversal of `K_n` is exactly the
+  triangle `{x} ∪ (V \ X)`**, so any two of them meet in `V \ X`: **the critical intersection graph of
+  `K_n` is the complete graph on its transversal**, and its chromatic number is `n - 2`;
+* `JSP90.card_le_of_colouring_IntGraph_completeGraph`, `JSP90.colouring_IntGraph_completeGraph` — a
+  colouring is injective on the transversal, and an injection the other way;
+* **`JSP90.spreadTransversal_completeGraph_iff` — THE SPREAD CONSTANT OF A COMPLETE GRAPH, EXACTLY:
+  `SpreadTransversal c (completeGraph (Fin n)) ↔ (n - 2 ≤ c ∧ 0 < c)`** (for `n ≥ 3` the positivity is
+  automatic: `spreadTransversal_completeGraph_iff'`).  In particular
+  `JSP90.spreadTransversal_completeGraph_four : … K_4 ↔ 2 ≤ c`,
+  `JSP90.spreadTransversal_completeGraph_five : … K_5 ↔ 3 ≤ c`,
+  `JSP90.spreadTransversal_completeGraph_two : … K_2 ↔ 0 < c`;
+* **`JSP90.not_spread_transversal_two_completeGraph_five`** — round 53's `c = 2` claim is refuted;
+* `JSP90.sum_card_le_of_disjointFamily`, `JSP90.mul_three_le_of_packing_completeGraph`,
+  `JSP90.packing_card_le_completeGraph` — the **packing bound of a complete graph**: a packing of odd
+  cycles of `K_n` has at most `⌊n / 3⌋` members (this is the general form of the count that
+  `JSPProblem/Sharp.lean` does by hand on `kTriangles k`);
+* **`JSP90.spreadMinimalTransversal_c_ge`, `JSP90.not_spreadMinimalTransversal_of_packing`,
+  `JSP90.no_fixed_spreadConstant` — NO FIXED COLOUR COUNT WORKS.**  `SpreadMinimalTransversal r c`
+  forces `3 * r - 2 ≤ c`, with witness `K_{3r}`; hence `¬ (∃ c, ∀ r, SpreadMinimalTransversal r c)`,
+  and `JSP90.erdos73_of_spreadMinimalTransversal` cannot be instantiated at all;
+* **`JSP90.spreadConstant_exact_completeGraph` — the bound `3 * r - 2` is SHARP**: `K_{3r}` has odd cycle
+  packing number at most `r` and its minimum spread constant is exactly `3 * r - 2`;
+* **`JSP90.exact_spread_constant_locIndep`, `JSP90.spread_constant_ge_of_locIndep` — and the route is
+  quadratic anyway.**  `K_{k + 2}` satisfies `LocIndep k` (`locIndep_iff_maxDef_le`,
+  `maxDef_completeGraph`) and has spread constant exactly `k`, while round 53's counting lemma gives
+  `|X| ≤ c * k`; so every instance obtained by this route carries a constant of at least
+  `k * (k + 2)`, whereas Erdős–Pósa for odd cycles has the constant `O(k log k)`.
+
+### What is *not* proved
+
+`JSP90.OddCycleErdosPosa r` (Reed–Robertson–Seymour–Thomas) is untouched, and `jsp_000090_main` is
+**not** declared.  This round removes one route (the critical intersection graph of a minimal
+transversal, together with round 117's removal of the two-attachment-cover route) and localises the
+remaining gap.
+
+### Toolchain notes (round 118)
+
+* `SimpleGraph.Coloring α` is `G →g (completeGraph α)` and `SimpleGraph.Coloring.mk` takes
+  `(color : V → α)` **and** `(valid : ∀ {v w}, G.Adj v w → color v ≠ color w)`, so a colouring is built
+  with `⟨SimpleGraph.Coloring.mk f hf⟩`, and a colouring obtained from `obtain ⟨col, hcol⟩ := hc` is
+  applied as `hcol hAdj` (the vertices are instance-implicit), the result being
+  `(completeGraph (Fin c)).Adj (col x) (col y)`, i.e. `col x ≠ col y` **up to `simpa`**;
+* `Finset.disjoint_singleton_left` and `Finset.nonempty_iff_ne_empty` are **iffs**, so
+  `Finset.disjoint_singleton_left.mpr (by simp [hx])` and
+  `Finset.nonempty_iff_ne_empty.mpr (proof of `s ≠ ∅`)` / `.mp (proof of `s.Nonempty`)` are the
+  working forms; there is no `Finset.not_mem_empty`, and `rw` cannot match a card-lemma against a goal
+  of the form `s ≠ ∅` (derive `s.card = 0` first);
+* `Finset.eq_of_subset_of_card_le (h : s ⊆ t) (h₂ : #t ≤ #s) : s = t` is the tool for "same three
+  vertices" arguments, and `Finset.card_sdiff_of_subset (h : t ⊆ s) : #(s \ t) = #s - #t` needs an
+  explicit `rw [..., Finset.card_fin]` before `omega` (a bare `:=` leaves `#(Finset.univ)` in the goal);
+* `Finset.sum_le_sum` produces `∑ i ∈ s, f i ≤ ∑ i ∈ s, g i`, and **`∑ _ ∈ s, k` is not *definitionally*
+  `#s * k`** (`Finset.sum_const` gives `#s • k`), so a constant-sum comparison needs an explicit
+  `calc` with `Finset.sum_const (s := C) (b := 3)` and `Nat.mul_comm`; `refine Finset.sum_le_sum …`
+  leaves the order type as a metavariable (`AddLeftMono ?m` stuck) while `exact Finset.sum_le_sum …`
+  against a fully stated goal does not;
+* `Finset.equivFinOfCardEq (h : #s = n) : ↥s ≃ Fin n` is the index map used to colour a finset
+  injectively; its injectivity is obtained as `congrArg Subtype.val (e.injective hEq)` — writing
+  `e ⟨x, hx⟩` inside a `≠`-statement needs that form, since `fun h => …` leaves the domain a metavariable;
+* `Finset.nonempty_iff_ne_empty : s.Nonempty ↔ s ≠ ∅` (not `↔ ¬ …`) and
+  `Finset.not_nonempty_iff_eq_empty : ¬s.Nonempty ↔ s = ∅`;
+* `Nat.zero_lt_of_lt (h : n < m) : 0 < m` turns `(col ⟨0, h⟩).isLt` into `0 < c`, which `omega` cannot
+  do because it does not know the value of `col ⟨0, h⟩`;
+* `Finset.card_lt_card` needs `s ⊂ t`, built as `Finset.card_lt_card (Finset.ssubset_iff_subset_ne.mpr ⟨hY, hne⟩)`;
+* `NormNum` is **not** in the import slice reached from `JSPProblem.Critical`: use `(by omega)` for
+  `2 ≤ 4`.
+

@@ -1139,11 +1139,44 @@ is still missing — and it settles the two design questions about the cover rou
   optimal in constant on the family that makes Erdős #73 hard.  Only the *existence* of a small cover
   is open.
 
+### Round 117 — `JSPProblem/Petals.lean`: the multi-petal windmill refutes the two-attachment target
+
 What remains: `TwoAttachCoverExists` itself.  Together with the round-114 obstruction — the
 one-attachment odd cycles of `JSP90.oneAttach_of_isCPath_return` must be absorbed by a 2-cut before a
 cover can be built, and that absorption is bounded by nothing here — the two missing statements are
 now *both* about the construction of `𝒞`.  `JSP90.OddCycleErdosPosa r` and `jsp_000090_main` are
 unchanged.
+
+### Round 118 — `JSPProblem/CriticalSharp.lean`: the SPREAD CONSTANT (round 53's route is closed)
+
+* **`JSP90.card_le_sub_two_of_hitsOddCycles_completeGraph`, `JSP90.minimalTransversal_card_completeGraph`,
+  `JSP90.card_criticalTransversal_completeGraph`** — a set of `K_n` meets every odd cycle only if
+  `n ≤ |X| + 2`, and **any set carrying critical data has exactly `n - 2` vertices** (a critical cycle
+  of `x ∈ X` has three vertices inside `{x} ∪ (V \ X)`);
+* **`JSP90.criticalCycle_eq_completeGraph`, `JSP90.mem_compl_of_criticalCycle`,
+  `JSP90.adj_IntGraph_completeGraph`** — every critical cycle of a transversal of `K_n` is exactly the
+  triangle `{x} ∪ (V \ X)`, so **the critical intersection graph of `K_n` is the complete graph on
+  its transversal**;
+* **`JSP90.spreadTransversal_completeGraph_iff` — THE SPREAD CONSTANT OF A COMPLETE GRAPH, EXACTLY:
+  `SpreadTransversal c (completeGraph (Fin n)) ↔ (n - 2 ≤ c ∧ 0 < c)`** — so `K_4` needs exactly two
+  colours, `K_5` exactly three, and the minimum spread constant of the family `K_n` is unbounded;
+* **`JSP90.not_spread_transversal_two_completeGraph_five`** — round 53's remark that "`c = 2` is the
+  classical shape of Reed–Robertson–Seymour–Thomas" is refuted by a complete graph;
+* **`JSP90.spreadMinimalTransversal_c_ge`, `JSP90.not_spreadMinimalTransversal_of_packing`,
+  `JSP90.no_fixed_spreadConstant`** — **NO FIXED COLOUR COUNT WORKS**: a graph of odd cycle packing
+  number `r` needs at least `3 * r - 2` colours (witness `K_{3r}`, whose packing bound `⌊n / 3⌋` is
+  `JSP90.packing_card_le_completeGraph`), so the class-level hypothesis of
+  `JSP90.erdos73_of_spreadMinimalTransversal` — a *fixed* `c` for all `r` — is **false**;
+* **`JSP90.spreadConstant_exact_completeGraph`** — the lower bound `3 * r - 2` is **sharp**: `K_{3r}`
+  has odd cycle packing number at most `r` and its minimum spread constant is exactly `3 * r - 2`;
+* **`JSP90.exact_spread_constant_locIndep`, `JSP90.spread_constant_ge_of_locIndep`** — and the route is
+  in any case **quadratic**: `K_{k + 2}` satisfies `LocIndep k` and has spread constant exactly `k`,
+  while round 53's counting lemma gives `|X| ≤ c * k`; every instance obtained that way therefore
+  carries a constant of at least `k * (k + 2)`, whereas Erdős–Pósa for odd cycles has the constant
+  `O(k log k)`.
+
+What remains: `JSP90.OddCycleErdosPosa r` (Reed–Robertson–Seymour–Thomas) and
+`jsp_000090_main` are unchanged; what round 118 removes is one *route* to them, not the theorem.
 
 -/
 import JSPProblem.Definitions
@@ -1211,3 +1244,4 @@ import JSPProblem.CPathSkip
 import JSPProblem.CPathPair
 import JSPProblem.TwoAttach
 import JSPProblem.Petals
+import JSPProblem.CriticalSharp

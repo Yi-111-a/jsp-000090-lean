@@ -3367,3 +3367,75 @@ cover members must be allowed to be non-cycles).
 `JSP90.OddCycleErdosPosa r` (Reed–Robertson–Seymour–Thomas) is not proved: the existence of the cover
 `𝒞` itself is the missing combinatorial content, and so is the absorption of the one-attachment odd
 cycles of `JSP90.oneAttach_of_isCPath_return`.  See `discovery/JSP-000090/policy.json`.
+
+---
+
+## Round 118 — `JSPProblem/CriticalSharp.lean`: the SPREAD CONSTANT, and the machine-checked
+## refutation of round 53's residual lemma
+
+New file `lean/JSPProblem/CriticalSharp.lean` (29 declarations, 0 placeholders, `lake build` OK with
+1267 jobs), imported from the root module `JSPProblem.lean`.  This is the **fifty-sixth** attack
+family, and the first to attack a *previous round's own reduction* rather than the problem.
+
+### The target attacked
+
+`JSPProblem/Critical.lean` (round 53) proved the counting lemma
+
+```lean
+JSP90.card_X_le_of_colouring_pack : (critical intersection graph of X is c-colourable)
+                                  → (every packing has ≤ k members) → |X| ≤ c * k
+```
+
+and localised the whole of Erdős #73 to `JSP90.SpreadMinimalTransversal r c` (every graph of odd cycle
+packing number at most `r` admits a minimal transversal whose critical intersection graph is
+`c`-colourable), with `JSP90.erdos73_of_spreadMinimalTransversal` proving `∀ k, Erdős73 k` from
+`∀ r, SpreadMinimalTransversal r c` for one **fixed** `c`.  Its header also asserted that "`c = 2`
+is the classical shape of the Reed–Robertson–Seymour–Thomas theorem".
+
+### What is proved
+
+* **Complete graphs carry critical data exactly at size `n - 2`**
+  (`card_le_sub_two_of_hitsOddCycles_completeGraph`,
+  `card_lt_sub_two_of_not_hitsOddCycles_completeGraph`, `card_compl_eq_two`,
+  `exists_transversal_completeGraph`, `minimalTransversal_card_completeGraph`,
+  `card_criticalTransversal_completeGraph`, `exists_criticalTransversal_completeGraph`): a set of `K_n`
+  meets every odd cycle iff `n ≤ |X| + 2`, and **any** set carrying critical data has `|X| = n - 2`,
+  because a critical cycle of `x ∈ X` has at least three vertices and they all lie in
+  `{x} ∪ (V \ X)`.
+* **The critical intersection graph of `K_n` is complete on the transversal**
+  (`criticalCycle_eq_completeGraph`, `mem_compl_of_criticalCycle`, `adj_IntGraph_completeGraph`):
+  every critical cycle of `x` is exactly the triangle `{x} ∪ (V \ X)`, so any two of them meet in the
+  two vertices outside `X`.
+* **`JSP90.spreadTransversal_completeGraph_iff` — THE SPREAD CONSTANT OF A COMPLETE GRAPH, EXACTLY:
+  `SpreadTransversal c (completeGraph (Fin n)) ↔ (n - 2 ≤ c ∧ 0 < c)`**, and
+  `spreadTransversal_completeGraph_iff'` (for `n ≥ 3`, where the positivity is automatic).
+  Consequently `spreadTransversal_completeGraph_four` (`K_4 ↔ 2 ≤ c`),
+  `spreadTransversal_completeGraph_five` (`K_5 ↔ 3 ≤ c`) and `spreadTransversal_completeGraph_two`
+  (`K_2 ↔ 0 < c`): the minimum spread constant of the family `K_n` is unbounded.
+* **`not_spread_transversal_two_completeGraph_five`** — round 53's `c = 2` claim is refuted.
+* **The packing bound of a complete graph** (`sum_card_le_of_disjointFamily`,
+  `sum_card_le_of_disjointFamily_sub`, `mul_three_le_of_packing_completeGraph`,
+  `packing_card_le_completeGraph`): a packing of odd cycles of `K_n` has at most `⌊n / 3⌋` members.
+* **`spreadMinimalTransversal_c_ge`, `not_spreadMinimalTransversal_of_packing`,
+  `no_fixed_spreadConstant` — NO FIXED COLOUR COUNT WORKS.**  `SpreadMinimalTransversal r c` forces
+  `3 * r - 2 ≤ c` (witness `K_{3r}`), hence `¬ (∃ c, ∀ r, SpreadMinimalTransversal r c)`: the
+  class-level hypothesis of `erdos73_of_spreadMinimalTransversal` is **false** and that route is
+  closed.
+* **`spreadConstant_exact_completeGraph` — the bound `3 * r - 2` is SHARP**: `K_{3r}` has odd cycle
+  packing number at most `r` and its minimum spread constant is exactly `3 * r - 2`, so `3r - 2` is
+  the least colour count such a class-level hypothesis can ask for, and it is forced;
+* **`exact_spread_constant_locIndep`, `spread_constant_ge_of_locIndep` — and the route is quadratic
+  anyway.**  `K_{k + 2}` satisfies `LocIndep k` and has spread constant exactly `k`, while
+  `card_X_le_of_colouring` turns a `c`-colourable critical intersection graph into `|X| ≤ c * k`; so
+  every instance obtained by this route carries a constant of at least `k * (k + 2)`, whereas the
+  Erdős–Pósa theorem for odd cycles has the constant `O(k log k)`.
+
+### What is *not* proved
+
+`JSP90.OddCycleErdosPosa r` (Reed–Robertson–Seymour–Thomas) is untouched, and `jsp_000090_main` is
+**not** declared, so the harness keeps reporting `missing_theorems = ["jsp_000090_main"]`;
+`score.py --strict-prize` reports `build_ok = true, sorry = 0, admit = 0, partial_ok = true`.
+`formalization.yaml` remains `status: wip`, `prize_ready: false`.  No award claim is made.  What this
+round removes is one *route* to the theorem — together with round 117's removal of the
+two-attachment-cover route — and records, machine-checked, the exact lower bound that any instance of
+that shape must pay.
