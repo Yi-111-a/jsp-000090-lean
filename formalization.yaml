@@ -2,34 +2,38 @@ jsp_id: JSP-000090
 catalog_url: https://github.com/TheJustinSunPrize/awards
 status: wip
 prize_ready: false
-last_round: 118
+last_round: 119
 last_round_summary: |
-  Round 118 -- THE SPREAD CONSTANT: ROUND 53's CRITICAL-INTERSECTION-GRAPH ROUTE IS CLOSED (attack
-  family 56).  New module lean/JSPProblem/CriticalSharp.lean (29 declarations, 0 sorry/admit, lake
-  build OK with 1267 jobs), imported from the root module JSPProblem.lean.  Round 53 reduced all of
-  Erdos #73 to JSP90.SpreadMinimalTransversal r c (every graph of odd cycle packing number <= r admits
-  a minimal transversal whose critical intersection graph is c-colourable) and claimed that c = 2 is
-  the classical shape of Reed-Robertson-Seymour-Thomas.  This round COMPUTES that colour count on
-  complete graphs and settles both points.  Proved: card_criticalTransversal_completeGraph -- a set of
-  K_n carrying critical data has EXACTLY n-2 vertices (a critical cycle of x in X has three vertices
-  inside {x} u (V \ X), which has three of them); criticalCycle_eq_completeGraph and
-  adj_IntGraph_completeGraph -- every critical cycle is exactly the triangle {x} u (V \ X), so THE
-  CRITICAL INTERSECTION GRAPH OF K_n IS THE COMPLETE GRAPH ON ITS TRANSVERSAL;
-  spreadTransversal_completeGraph_iff -- THE SPREAD CONSTANT OF A COMPLETE GRAPH, EXACTLY,
-  SpreadTransversal c (completeGraph (Fin n)) <-> (n - 2 <= c /\ 0 < c), whence K_4 needs exactly two
-  colours and K_5 exactly three (spreadTransversal_completeGraph_four/five) and
-  not_spread_transversal_two_completeGraph_five refutes round 53's c = 2 claim; the packing bound of a
-  complete graph (sum_card_le_of_disjointFamily, mul_three_le_of_packing_completeGraph,
-  packing_card_le_completeGraph: a packing of odd cycles of K_n has at most n/3 members).
-  HEADLINE NEGATIVE RESULT: spreadMinimalTransversal_c_ge, not_spreadMinimalTransversal_of_packing and
-  no_fixed_spreadConstant -- NO FIXED COLOUR COUNT WORKS: SpreadMinimalTransversal r c forces
-  3r - 2 <= c (witness K_{3r}), so the class-level hypothesis of
-  JSP90.erdos73_of_spreadMinimalTransversal is FALSE and that route is closed.  AND THE ROUTE IS
-  QUADRATIC ANYWAY: exact_spread_constant_locIndep -- K_{k+2} satisfies LocIndep k and has spread
-  constant exactly k, while round 53's card_X_le_of_colouring gives |X| <= c*k, so every instance of
-  that shape carries a constant >= k*(k+2) against the O(k log k) of Erdos-Posa for odd cycles.  NOT
-  proved: jsp_000090_main (still not declared) and JSP90.OddCycleErdosPosa r, which is unchanged;
-  round 118 removes one ROUTE, not the theorem.
+  Round 119 -- THE PETAL SET: THE ONE-ATTACHMENT ODD CYCLES AND A QUANTITATIVE ABSORPTION STEP
+  (attack family 57).  New module lean/JSPProblem/Petal.lean (21 declarations, 0 sorry/admit, lake
+  build OK with 1268 jobs), imported from the root module JSPProblem.lean.  Round 118's next_bet asked
+  for the counting half of the Mader step (how many one-attachment odd cycles hang off a shortest odd
+  cycle); this round does not count them but introduces the finite quantity that controls them --
+  JSP90.PetalSet G C, the set of vertices of C lying ALONE on some odd cycle of G (the attachment
+  points of the petals) -- and proves the transversal certificate and the absorption step built on it.
+  New objects: JSP90.OneAttach G C D (a petal: an odd cycle meeting C in exactly one vertex) and
+  JSP90.PetalSet G C, with petalSet_subset, card_petalSet_le_card, petalSet_empty_of_isBipartite and
+  oneAttach_mem_petalSet.  HEADLINE 1: JSP90.petalSet_transversal -- if every odd cycle of G meets the
+  odd cycle C, then a SUBSET of C with at most |C| - 1 + |PetalSet G C| vertices meets every odd cycle
+  of G (certificate C.erase c u PetalSet G C, for any c in C).  HEADLINE 2:
+  JSP90.closeToBipartite_of_residue_petalSet -- the residue absorption step of round 40
+  (CloseToBipartite q (G - C) => CloseToBipartite (q + |C|) G) becomes
+  CloseToBipartite (q + |PetalSet G C| + (|C| - 1)) G, and closeToBipartite_of_residue_petalSet_zero
+  gives q + |C| - 1, ONE VERTEX BETTER THAN ROUND 40, in the case of an empty petal set; so the |C|
+  term is only ever needed to pay for the attachment points.  ALSO: erdos73On_of_petalSet, a NEW INSTANCE
+  OF THE HEADLINE THEOREM with the growing parameter a (CloseToBipartite (a + |C| - 1) G, constant
+  independent of k, and LocIndep not even needed for that step); erdos73On_of_petalSet_of_residue, the
+  two-parameter instance; closeToBipartite_of_petalSet_empty and closeToBipartite_of_twoAttach', which
+  RE-DERIVE round 111's two-attachment transversal (bound |C| - 1) because the two-attachment
+  hypothesis is exactly "PetalSet G C is empty"; and JSP90.IsOddCycle.of_finset_ext /
+  of_finset_eq, transport lemmas that remove the round-53 DecidableEq-instance pitfall for any later
+  concrete witness.  NOT proved: the bound |PetalSet G C| <= phi(k) -- with the absorption step now
+  quantified, this is the single missing lemma and it is PURELY NUMERICAL; the nine-vertex witness
+  that the petal term cannot be dropped (triangle with a pendant triangle at each vertex) was
+  elaborated this round but dropped from the build, its construction and the four elaboration pitfalls
+  being recorded in discovery/JSP-000090/policy.json.  NOT proved: jsp_000090_main (still not
+  declared) and JSP90.OddCycleErdosPosa r, which is unchanged; round 119 improves the absorption step,
+  not the theorem.
 github_owner: Yi-111-a
 lean_repository: https://github.com/Yi-111-a/jsp-000090-lean
 branch: main
@@ -116,3 +120,30 @@ build:
       - JSP90.OddCycleErdosPosa r (unchanged: this is the missing jsp_000090_main)
     prize_ready: false
     missing_theorems: [jsp_000090_main]
+  round_119:
+    module: lean/JSPProblem/Petal.lean
+    attack_family: 57
+    status: wip
+    new_declarations: 21
+    sorry: 0
+    admit: 0
+    headline_results:
+      - JSP90.OneAttach G C D (a petal: an odd cycle meeting C in exactly one vertex)
+      - JSP90.PetalSet G C (the attachment set: the vertices of C lying alone on an odd cycle of G)
+      - JSP90.petalSet_subset and JSP90.card_petalSet_le_card (PetalSet G C is contained in C)
+      - JSP90.petalSet_empty_of_isBipartite (a bipartite graph has no petals)
+      - JSP90.oneAttach_mem_petalSet (every petal is met by the petal set at its attachment point)
+      - JSP90.petalSet_transversal (THE PETAL-SET TRANSVERSAL: a subset of C of size at most |C| - 1 + |PetalSet G C| meets every odd cycle of G)
+      - JSP90.closeToBipartite_of_petalSet and JSP90.erdos73On_of_petalSet (a NEW INSTANCE OF THE HEADLINE THEOREM with the growing parameter a, constant independent of k)
+      - JSP90.closeToBipartite_of_residue_petalSet (THE ABSORPTION STEP QUANTIFIED: q + |PetalSet G C| + (|C| - 1) instead of round 40's q + |C|)
+      - JSP90.closeToBipartite_of_residue_petalSet_zero (q + |C| - 1, one vertex better than round 40, when the petal set is empty)
+      - JSP90.erdos73On_of_petalSet_of_residue (the two-parameter instance form)
+      - JSP90.closeToBipartite_of_petalSet_empty and JSP90.closeToBipartite_of_twoAttach' (round 111's two-attachment transversal re-derived)
+      - JSP90.IsOddCycle.of_finset_ext and JSP90.IsOddCycle.of_finset_eq (transport lemmas removing the round-53 instance pitfall)
+    next_step:
+      - the numerical bound |PetalSet G C| <= phi(k) for an odd cycle C of a graph with LocIndep k G: with the absorption step quantified this is the SINGLE missing lemma, and it is purely numerical (the counting half of the Mader step)
+      - the nine-vertex witness that the petal term cannot be dropped (triangle with a pendant triangle at each vertex): the construction and the four elaboration pitfalls are in discovery/JSP-000090/policy.json
+      - JSP90.OddCycleErdosPosa r (unchanged: this is the missing jsp_000090_main)
+    prize_ready: false
+    missing_theorems: [jsp_000090_main]
+

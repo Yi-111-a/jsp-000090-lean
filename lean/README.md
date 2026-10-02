@@ -2025,3 +2025,48 @@ remaining gap.
 * `NormNum` is **not** in the import slice reached from `JSPProblem.Critical`: use `(by omega)` for
   `2 ≤ 4`.
 
+
+---
+
+## Round 119 — `JSPProblem/Petal.lean`: the petal (attachment) set and a quantitative absorption step
+
+New module, 21 declarations, 0 placeholders.  It adds the one finite quantity that the Mader step of
+`policy.json` needs, and turns the residue absorption step into a *quantitative* statement.
+
+* `JSP90.OneAttach G C D` — a *petal*: an odd cycle of `G` meeting `C` in exactly one vertex.
+* `JSP90.PetalSet G C` — the vertices of `C` lying *alone* on some odd cycle of `G` (the attachment
+  points).  `petalSet_subset`, `card_petalSet_le_card`, `petalSet_empty_of_isBipartite`,
+  `oneAttach_mem_petalSet`.
+* **`JSP90.petalSet_transversal`** — if every odd cycle of `G` meets the odd cycle `C`, then some
+  subset of `C` with at most `|C| - 1 + |PetalSet G C|` vertices meets every odd cycle of `G`
+  (certificate `C.erase c ∪ PetalSet G C`, any `c ∈ C`).
+* `JSP90.closeToBipartite_of_petalSet` / `JSP90.erdos73On_of_petalSet` — a **new instance of the
+  headline theorem** with a growing parameter `a`: `CloseToBipartite (a + |C| - 1) G`, constant
+  independent of `k`.
+* **`JSP90.closeToBipartite_of_residue_petalSet`** — the residue absorption step of round 40
+  (`CloseToBipartite q (G - C) → CloseToBipartite (q + |C|) G`) improved to
+  `CloseToBipartite (q + |PetalSet G C| + (|C| - 1)) G`, and
+  `closeToBipartite_of_residue_petalSet_zero` gives `q + |C| - 1`, **one vertex better than round 40**,
+  when the petal set is empty.
+* `JSP90.closeToBipartite_of_petalSet_empty`, `JSP90.closeToBipartite_of_twoAttach'` — round 111's
+  two-attachment transversal re-derived (the two-attachment hypothesis *is* "the petal set is empty").
+* `JSP90.IsOddCycle.of_finset_ext` / `of_finset_eq` — transport lemmas for `IsOddCycle` along an
+  equality of vertex sets (the round-53 `DecidableEq`-instance pitfall).
+
+### Toolchain facts added this round
+
+* a `local instance : DecidableEq V := Classical.decEq V` gets the auto-generated name
+  `instDecidableEq_jSPProblem_N`, and two files of one package that declare it collide at
+  `lake build` — give it an explicit name;
+* `JSP90.attachSet`, `JSP90.mem_attachSet`, `JSP90.card_attachSet_le_two` are **already taken** by
+  `JSPProblem/Book.lean` (the neighbours of a fan vertex on `C`);
+* `Finset.inter` has no field notation at the pinned revision, so a statement using `∩` must be
+  elaborated in a scope carrying the same `DecidableEq` instance as the definition it must match;
+* `decide` is unusable once the classical `DecidableEq` is in scope for the type, and `by decide` does
+  not unfold a plain `def` (use `@[reducible]`);
+* `omega` proves a goal from mutually contradictory hypotheses, but **not** from a hypothesis that
+  contradicts the goal — use `absorb`/`absurd` with the negated hypothesis;
+* `Nat.eq_one_or_two_le`, `Finset.not_mem_empty` and `interval_cases` are unavailable at the pinned
+  revision; `Finset.disjoint_left` has another shape than expected;
+* `omit [Fintype V] in` must be written *after* a docstring is impossible: docstring first, then
+  `omit ... in`, then the theorem.

@@ -3439,3 +3439,92 @@ is the classical shape of the Reed–Robertson–Seymour–Thomas theorem".
 round removes is one *route* to the theorem — together with round 117's removal of the
 two-attachment-cover route — and records, machine-checked, the exact lower bound that any instance of
 that shape must pay.
+
+---
+
+## Round 119 — `JSPProblem/Petal.lean`: the ONE-ATTACHMENT odd cycles, the PETAL SET, and the
+## absorption step with a growing parameter
+
+New file `lean/JSPProblem/Petal.lean` (21 declarations, 0 sorry/admit, `lake build` OK with 1268
+jobs), imported from the root module `JSPProblem.lean`.  This is the **fifty-seventh** attack family,
+and the first to make the *absorption step* of the residue induction quantitative.
+
+`policy.json` (round 118) asked for the counting half of the Mader step, i.e. how many
+**one-attachment** odd cycles can hang off a shortest odd cycle and how they are absorbed.  Rounds 117
+and 118 had killed the two-attachment-cover route and the `c`-spread-transversal route, so this round
+does not restart either; it introduces the finite quantity that both need.
+
+### The new objects
+
+* **`JSP90.OneAttach G C D`** — `D` is an odd cycle of `G` meeting `C` in **exactly one** vertex: a
+  *petal* attached to `C` at a single point, `D ∩ C` being its attachment point.
+* **`JSP90.PetalSet G C`** — the **petal set** (attachment set): the vertices `v ∈ C` which lie
+  *alone* on some odd cycle of `G`, i.e. the attachment points of the petals.  `petalSet_subset`
+  gives `PetalSet G C ⊆ C`, so `card_petalSet_le_card` bounds it by `|C|`; `petalSet_empty_of_isBipartite`
+  makes it empty for a bipartite graph; `oneAttach_mem_petalSet` says every petal is met by it.
+
+### What is proved
+
+1. **`JSP90.petalSet_transversal` — THE PETAL-SET TRANSVERSAL.**  If `C` is an odd cycle of `G` and
+   *every* odd cycle of `G` meets `C`, then some set **contained in `C`** with at most
+   `|C| - 1 + |PetalSet G C|` vertices meets every odd cycle of `G`.  The certificate is
+   `C.erase c ∪ PetalSet G C` for **any** `c ∈ C`; the proof is the two cases of an odd cycle `D`:
+   `|D ∩ C| ≥ 2` ⟹ `D` meets `C.erase c` (`JSP90.exists_mem_inter_erase_of_card_ge_two`), and
+   `|D ∩ C| = 1` ⟹ that vertex is an attachment point.  The certificate is a subset of `C`, so it is
+   never weaker than the trivial "`C` meets every odd cycle".
+
+2. **`JSP90.closeToBipartite_of_petalSet`, `JSP90.erdos73On_of_petalSet` — A NEW INSTANCE OF THE
+   HEADLINE THEOREM WITH A GROWING PARAMETER `a`:**  `LocIndep k G`, an odd cycle `C` meeting every
+   odd cycle of `G` (equivalently `G - C` bipartite) and at most `a` attachment points give
+   `CloseToBipartite (a + |C| - 1) G`; the constant does **not** grow with `k` (and Erdős's hypothesis
+   is not needed for this step at all — the transversal is built from the structure at `C` alone).
+
+3. **`JSP90.closeToBipartite_of_residue_petalSet` — THE ABSORPTION STEP, QUANTIFIED.**  Round 40's
+   induction step is `CloseToBipartite q (G - C) → CloseToBipartite (q + |C|) G`, and the `+|C|` is
+   the recorded blocker.  This file improves it: with `|PetalSet G C| ≤ a` the step costs
+   `q + a + (|C| - 1)`, and `JSP90.closeToBipartite_of_residue_petalSet_zero` (empty petal set) costs
+   **`q + |C| - 1`, one vertex less than round 40**.  So the `|C|` term is only ever needed to pay for
+   the attachment points; what is missing is a bound on those points in terms of `k`.
+   `JSP90.erdos73On_of_petalSet_of_residue` is the corresponding instance form.
+
+4. **`JSP90.closeToBipartite_of_petalSet_empty` and `JSP90.closeToBipartite_of_twoAttach'`**:
+   round 111's two-attachment transversal `JSP90.closeToBipartite_of_twoAttach` (constant `|C| - 1`)
+   is **re-derived**, because "every odd cycle meets `C` in at least two vertices" is exactly
+   "`PetalSet G C = ∅`".  So the new instance is never weaker than round 111's.
+
+5. **`JSP90.IsOddCycle.of_finset_ext` / `JSP90.IsOddCycle.of_finset_eq`** — transport lemmas for the
+   `IsOddCycle` predicate along an equality of vertex sets.  These remove the instance pitfall
+   recorded in the round-53 header: a `Finset (Fin n)` built with the classical `DecidableEq`
+   instance (the one inside the statements of `JSPProblem/Transversal.lean`) is *equal* to but not
+   syntactically the finset one gets with the computable instance, which is why round 53's `K_4`
+   witness did not elaborate.  Reusable by any later concrete witness.
+
+### A mathematical point worth recording
+
+The certificate `C.erase c ∪ PetalSet G C` is a **subset of `C`**, so the petal-set transversal can
+never be worse than deleting all of `C`; and it is *strictly* better exactly when the attachment points
+avoid `c`.  Conversely, one vertex cannot always be removed: the natural strengthening of round 111
+obtained by dropping "in at least **two** vertices" is FALSE, and the minimal witness is the nine-vertex
+cactus *triangle with a pendant triangle at each vertex* (vertices `0..8`; triangles `{0,1,2}`,
+`{0,3,4}`, `{1,5,6}`, `{2,7,8}`; no other edges, `C = {0,1,2}`): the residue `G - C` is the matching
+`3-4, 5-6, 7-8`, hence every odd cycle meets `C`; each pendant triangle meets `C` in exactly one
+vertex, so `PetalSet G C = C`; and the three pendant triangles are pairwise disjoint, so
+`¬ CloseToBipartite 2 G = ¬ CloseToBipartite (|C| - 1) G`.  The construction is **not** in this round's
+build: it is written out in `discovery/JSP-000090/policy.json` together with the four elaboration
+pitfalls that cost this round most of its time (the `DecidableEq` baked into `Finset.inter`; `decide`
+being unusable once the classical instance is in scope; `Finset.image` fixing an instance in the
+`IsOddCycle` statement; `Finset.card` of a literal needing a computable instance).
+
+### What is *not* proved
+
+The **counting bound on `|PetalSet G C|`** — the Mader step itself.  At a shortest odd cycle with
+`|C| >= 5` a vertex outside `C` meets `C` in at most two vertices two steps apart
+(`JSPProblem.card_inter_neigh_le_two`, `JSPProblem/shortArc_of_shortest`, both proved), and the family
+of petals must then be charged against the packing number.  Without such a bound `a` is not known to
+be `O(k)`, so `JSP90.erdos73On_of_petalSet` does not close Erdős #73.
+`JSP90.OddCycleErdosPosa r` (Reed–Robertson–Seymour–Thomas) and `jsp_000090_main` are unchanged, and
+`jsp_000090_main` is **not** declared, so the harness keeps reporting
+`missing_theorems = ["jsp_000090_main"]`; `score.py --strict-prize` reports
+`build_ok = true, sorry = 0, admit = 0, partial_ok = true`.  `#print axioms` on the six headline
+declarations of the round gives only `[propext, Classical.choice, Quot.sound]`.
+`formalization.yaml` remains `status: wip`, `prize_ready: false`.  No award claim is made.

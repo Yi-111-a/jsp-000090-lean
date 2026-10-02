@@ -1245,3 +1245,4 @@ import JSPProblem.CPathPair
 import JSPProblem.TwoAttach
 import JSPProblem.Petals
 import JSPProblem.CriticalSharp
+import JSPProblem.Petal
