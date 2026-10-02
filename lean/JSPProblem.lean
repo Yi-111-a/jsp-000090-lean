@@ -1013,6 +1013,47 @@ Still open: `policy.json`'s second half — *the shortest `C`-path is induced* �
 `IsCPath.isOddCycle_return`; the index arithmetic of the first two (`skipPath`, `skip_idx_lt`,
 `skip_idx_inj`) is written out in the file and the three lemmas are named as the next concrete step in
 `discovery/JSP-000090/policy.json`.  `JSP90.OddCycleErdosPosa r` and `jsp_000090_main` are unchanged.
+## `JSPProblem/CPathSkip.lean` (round 112) — the C-PATH SHORTCUT, the SHORTEST `C`-PATH IS INDUCED, the CLOSED `C`-PATH IS AN ODD CYCLE, and the TWO-ATTACHMENT COVER
+
+Round 111 left four named lemmas and the file closed the whole set.
+
+* **A CHORD OF A `C`-PATH SHORTENS IT.**  `JSP90.skipPath` is the splice `p 0 … p a`, chord
+  `p a ~ p b`, `p b … p d`; `JSP90.IsCPath.skip` builds from it a `C`-path **to the same target** of
+  length `a + 1 + (d - b)`, and `JSP90.IsCPath.skip_shorter` records that this is `< d`
+  (`JSP90.skip_len_lt`);
+* **`JSP90.IsCPath.Shortest`** — minimality, necessarily a *hypothesis*: `Nat.find` would need a
+  `DecidablePred` and the predicate quantifies over a *function* `Fin (d' + 1) → V`;
+* **`JSP90.IsCPath.induced_of_shortest` — THE SHORTEST `C`-PATH IS INDUCED** (the exact lemma named by
+  `discovery/JSP-000090/policy.json` after round 111): for `u ≠ v`, `u + 1 ≠ v`, `v + 1 ≠ u` one has
+  `¬ G.Adj (p u) (p v)`;
+* **`JSP90.IsCPath.adj_target_of_shortest`** — Mader's neighbour count at the far end (`x` sees only
+  `p (d-1)` and `p d`), and **`JSP90.IsCPath.adj_iff_step_of_shortest`** — the *full* neighbour count:
+  a vertex of a shortest `C`-path is adjacent to no other vertex of it except its own two
+  path-neighbours;
+* **`JSP90.IsCPath.isOddCycle_return` — A CLOSED `C`-PATH OF EVEN LENGTH IS AN ODD CYCLE OF `G`**, and
+  `JSP90.oneAttach_of_isCPath_return` records that this odd cycle meets `C` in **exactly one vertex**
+  and contains the target: *Mader's one-attachment lemma in `C`-path form*, the first odd cycle
+  attached to `C` at a single point that this development constructs;
+* **`JSP90.TwoAttachCover` / `JSP90.closeToBipartite_of_twoAttachCover` — THE TWO-ATTACHMENT COVER**:
+  a family `𝒞` of vertex sets (the members need **not** be odd cycles, and there is **no bound** on
+  their number) such that every odd cycle of `G` meets some member in at least two vertices gives
+  `CloseToBipartite (∑ X ∈ 𝒞, |X| - 1) G`.  This is a **strict generalisation** of round 111's
+  `closeToBipartite_of_twoAttach`, which is the singleton case
+  (`JSP90.closeToBipartite_of_twoAttachCover_of_singleton`,
+  `JSP90.sum_card_sub_one_singleton`).  The certificate and its cost are
+  `JSP90.hitsOddCycles_of_twoAttachCover` and
+  `JSP90.card_biUnion_erase_le_sum_card_sub_one_of_twoAttachCover`; the counting input is
+  `JSP90.exists_mem_inter_erase_of_card_ge_two` (an odd cycle meeting `X` in two vertices also meets
+  `X` minus any one of them);
+* **NEW INSTANCES OF THE HEADLINE THEOREM**, constants independent of `k`:
+  **`JSP90.erdos73On_of_twoAttachCover`** (cost `∑ X ∈ 𝒞, |X| - 1`) and
+  **`JSP90.erdos73On_of_twoAttachCover_bounded`** (cost `ℓ * |𝒞|` when every member has at most `ℓ`
+  vertices — the Erdős–Pósa shape, one unit per cover member).
+
+Still open: the one-attachment lemma gives an odd cycle attached to `C` **once**, but no transversal
+— the *two-attachment cover* hypothesis is what pays, and the classical existence of such a cover for
+a 3-connected graph is the unresolved part.  `JSP90.OddCycleErdosPosa r` and `jsp_000090_main` are
+unchanged.
 
 -/
 import JSPProblem.Definitions
@@ -1076,3 +1117,4 @@ import JSPProblem.SplitSharp
 import JSPProblem.Chain
 import JSPProblem.Piece
 import JSPProblem.CPath
+import JSPProblem.CPathSkip

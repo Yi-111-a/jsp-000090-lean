@@ -1761,3 +1761,52 @@ through `Fin.val` (`zero_lt_fin_mk'` bridges this) and cannot handle `% (d + 1)`
 `ite` (no hypothesis in the `else` branch, so `omega` fails); write `if _h : …` to get a `dite`.
 `Nat.find` is unusable for the length of a shortest `C`-path, because `Nat.find` needs a
 `DecidablePred` and existential quantification over *functions* is not decidable.
+
+---
+
+## `JSPProblem/CPathSkip.lean` (round 112) — the C-PATH SHORTCUT, the shortest `C`-path is induced, the closed `C`-path is an odd cycle, and the TWO-ATTACHMENT COVER
+
+Round 111 (`CPath.lean`) defined Mader's `C`-path and its single transversal, and named the three
+lemmas that close the local half of the C-path apparatus.  This file closes all three and turns the
+one-attachment object into a **cover theorem**, which is a strictly more general transversal than
+round 111's.
+
+| result | content |
+| --- | --- |
+| `skipPath`, `IsCPath.skip`, `IsCPath.skip_shorter`, `skip_len_lt` | **A CHORD OF A `C`-PATH SHORTENS IT**: a `C`-path of length `d` from `f i` to `x` with a chord `p a ~ p b` (`a + 2 ≤ b ≤ d`) gives a `C`-path to the *same* target `x` of length `a + 1 + (d - b) < d` |
+| `IsCPath.skipPath_eq`, `skipPath_eq_tail`, `skipPath_val_inj`, `skipPath_inj` | the API of the splice: the head and tail indices of `skipPath`, and the fact that `skipPath` is simple whenever `p` is |
+| **`IsCPath.Shortest`** | minimality of a `C`-path to `x` — a *hypothesis*, because `Nat.find` needs a `DecidablePred` and the predicate quantifies over a *function* |
+| **`IsCPath.induced_of_shortest`** | **THE SHORTEST `C`-PATH IS INDUCED** — the lemma `policy.json` named after round 111: for `u ≠ v`, `u + 1 ≠ v`, `v + 1 ≠ u` one has `¬ G.Adj (p u) (p v)` |
+| **`IsCPath.adj_target_of_shortest`** | Mader's neighbour count at the far end: in a shortest `C`-path the target `x` sees only `p (d-1)` and `p d` |
+| **`IsCPath.adj_iff_step_of_shortest`** | the **full** neighbour count: a vertex of a shortest `C`-path is adjacent to no other vertex of it except its own two path-neighbours |
+| **`IsCPath.isOddCycle_return`** | **A CLOSED `C`-PATH OF EVEN LENGTH IS AN ODD CYCLE OF `G`** |
+| **`oneAttach_of_isCPath_return`** | … and that odd cycle meets `C` in **exactly one vertex** (the start) and contains the target: *Mader's one-attachment lemma in `C`-path form* |
+| **`exists_mem_inter_erase_of_card_ge_two`** | if `D` meets `X` in ≥ 2 vertices then `D` meets `X.erase c` for every `c ∈ X` — the counting input of the cover theorem |
+| **`TwoAttachCover`, `hitsOddCycles_of_twoAttachCover`, `card_biUnion_erase_le_sum_card_sub_one_of_twoAttachCover`** | the two-attachment **cover** and its explicit certificate and cost |
+| **`closeToBipartite_of_twoAttachCover`** | **THE TWO-ATTACHMENT COVER**: `CloseToBipartite (∑ X ∈ 𝒞, |X| - 1) G` — a **strict generalisation** of round 111 (members need not be odd cycles, no bound on their number) |
+| **`closeToBipartite_of_twoAttachCover_of_singleton`, `sum_card_sub_one_singleton`** | round 111's theorem as the singleton cover, so the cover theorem is never weaker |
+| **`erdos73On_of_twoAttachCover`** | **a new instance of the headline theorem**, constant `∑ X ∈ 𝒞, |X| - 1`, independent of `k` |
+| **`erdos73On_of_twoAttachCover_bounded`** | **a second new instance**, constant `ℓ * |𝒞|` when every cover member has at most `ℓ` vertices — the Erdős–Pósa shape (one unit per cover member) |
+
+`lake build` OK (1263 jobs), **0 sorry, 0 admit**.
+
+**Not proved this round.**  The one-attachment lemma produces an odd cycle attached to `C` **once**
+but no transversal: the *two-attachment cover* is what pays, and the classical existence of such a
+cover for a 3-connected graph is the unresolved part.  `jsp_000090_main` and
+`JSP90.OddCycleErdosPosa r` are unchanged.
+
+**Toolchain notes.**  `dite_eq_left` / `dite_eq_right` (not `dif_pos` / `dif_neg`, which are deprecated)
+reduce a `dite`; but **`rw` with an index lemma such as `skipPath_eq` is unusable** — `kabstract`
+generalises the index into the `Fin` proof of the target term and the motive stops typechecking
+("motive is not type correct").  The working pattern is `simp only [Fin.val_mk, skipPath,
+dite_eq_left hle, dite_eq_right hle, …]` on the goal, with **named** hypotheses: an inline
+`dite_eq_right (by omega)` leaves the condition as a metavariable and never fires.  Further:
+`u.val` is not a syntactic subterm of `skipPath p hab hbd u`, so `rw [← …] at h` fails — rewrite
+forward.  `congrArg Fin.val` on `⟨↑u, _⟩ = ⟨↑v, _⟩` returns `u = v`, not `↑u = ↑v`; use
+`Fin.mk.inj_iff.mp` (or `rw [Fin.mk.inj_iff] at h` when the `Fin`s are at the top).  `Finset.mem_erase.mpr`
+takes `⟨a ≠ b, a ∈ s⟩` (**inequality first**), `Finset.mem_inter.mpr` takes the pair
+`⟨a ∈ s, a ∈ t⟩`, and `Finset.mem_biUnion` takes `⟨i, i ∈ s, a ∈ t i⟩` — pin `t` with
+`(Finset.mem_biUnion (t := …)).mpr` or it stays a metavariable.  `Finset.nonempty_iff_ne_empty.mp`
+gives `Nonempty → ≠ ∅` and `.mpr` the converse; `Nonempty` is a `def`, so it must be applied through
+`∃`-destructuring, and a `y ∈ s` is a `Quot.lift` application and **cannot be applied as a function** —
+use `rw [Finset.mem_inter] at h` first and then `.1` / `.2`.

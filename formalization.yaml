@@ -2,7 +2,7 @@ jsp_id: JSP-000090
 catalog_url: https://github.com/TheJustinSunPrize/awards
 status: wip
 prize_ready: false
-last_round: 110
+last_round: 112
 last_round_summary: |
   Round 110 -- THE CUT-VERTEX PIECE AXIS: THE ONE-SIDED 1-CUT IS FREE (attack family 51).  New module
   lean/JSPProblem/Piece.lean (34 declarations, 802 lines, 0 sorry/admit, lake build OK with 1261
@@ -74,5 +74,30 @@ build:
       - JSP90.IsCPath.skip (a chord shortens the C-path)
       - JSP90.IsCPath.Shortest and JSP90.IsCPath.induced_of_shortest (the shortest C-path is induced)
       - JSP90.IsCPath.ne_iff_last and JSP90.IsCPath.isOddCycle_return
+    prize_ready: false
+    missing_theorems: [jsp_000090_main]
+
+  round_112:
+    module: lean/JSPProblem/CPathSkip.lean
+    attack_family: 53
+    status: wip
+    new_declarations: 36
+    sorry: 0
+    admit: 0
+    headline_results:
+      - JSP90.IsCPath.skip / JSP90.skip_len_lt (a chord of a C-path shortens it)
+      - JSP90.IsCPath.Shortest and JSP90.IsCPath.induced_of_shortest (THE SHORTEST C-PATH IS INDUCED)
+      - JSP90.IsCPath.adj_target_of_shortest / JSP90.IsCPath.adj_iff_step_of_shortest (neighbour count)
+      - JSP90.IsCPath.isOddCycle_return (a closed C-path of even length is an odd cycle of G)
+      - JSP90.oneAttach_of_isCPath_return (that odd cycle meets C in exactly one vertex)
+      - JSP90.exists_mem_inter_erase_of_card_ge_two (two-vertex attachment survives one deletion)
+      - JSP90.TwoAttachCover / JSP90.hitsOddCycles_of_twoAttachCover / JSP90.closeToBipartite_of_twoAttachCover (THE TWO-ATTACHMENT COVER)
+      - JSP90.closeToBipartite_of_twoAttachCover_of_singleton (round 111 as the singleton cover)
+      - JSP90.erdos73On_of_twoAttachCover (new instance of the headline theorem, cost sum |X| - 1)
+      - JSP90.erdos73On_of_twoAttachCover_bounded (new instance, cost l * |C|)
+    next_step:
+      - the two-attachment COVER for a 3-connected graph: existence of a finite family 𝒞 such that every odd cycle of G meets some member in two vertices, with sum |X| - 1 bounded by a function of the packing number
+      - equivalently the depth-two attachment: two internally disjoint C-paths from a vertex x to C whose union with C is an odd cycle, giving the second attachment
+      - JSP90.OddCycleErdosPosa r (unchanged: this is the missing jsp_000090_main)
     prize_ready: false
     missing_theorems: [jsp_000090_main]

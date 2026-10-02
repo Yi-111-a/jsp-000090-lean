@@ -550,3 +550,37 @@ It is a new instance of the headline theorem (`JSP90.erdos73On_of_twoAttach`).  
 the step named by `policy.json` (the shortest `C`-path is induced) is the next round's target:
 `IsCPath.skip` → `IsCPath.Shortest` → `IsCPath.induced_of_shortest`.  `jsp_000090_main` is still not
 declared.
+
+## Round 112 note (`lean/JSPProblem/CPathSkip.lean`, attack family 53)
+
+Round 111 defined Mader's `C`-path and left three named lemmas.  All three are now proved, plus the
+transversal they make possible:
+
+* `JSP90.IsCPath.skip` — **a chord of a `C`-path shortens it** (the splice `skipPath`), with
+  `skip_len_lt` recording the strict decrease `a + 1 + (d - b) < d`;
+* `JSP90.IsCPath.Shortest` + **`JSP90.IsCPath.induced_of_shortest`: THE SHORTEST `C`-PATH IS
+  INDUCED** — the exact lemma named by the round-111 policy.  With
+  `JSP90.IsCPath.adj_target_of_shortest` (Mader's neighbour count at the far end) and
+  `JSP90.IsCPath.adj_iff_step_of_shortest` (the full neighbour count) the local structure of a
+  shortest `C`-path is complete;
+* **`JSP90.IsCPath.isOddCycle_return`** — **a closed `C`-path of even length is an odd cycle of `G`**,
+  and `JSP90.oneAttach_of_isCPath_return` records that this odd cycle meets `C` in **exactly one
+  vertex** and contains the target: *Mader's one-attachment lemma in `C`-path form*, the first
+  single-attachment odd cycle this development constructs;
+* **`JSP90.closeToBipartite_of_twoAttachCover`** — **THE TWO-ATTACHMENT COVER**, a **strict
+  generalisation** of round 111's `closeToBipartite_of_twoAttach`: a family `𝒞` of vertex sets (the
+  members need **not** be odd cycles, and there is **no bound** on their number) such that every odd
+  cycle of `G` meets some member in at least two vertices gives
+  `CloseToBipartite (∑ X ∈ 𝒞, |X| - 1) G`; the singleton case is round 111's theorem
+  (`closeToBipartite_of_twoAttachCover_of_singleton`).  The certificate and its cost are
+  `hitsOddCycles_of_twoAttachCover` and
+  `card_biUnion_erase_le_sum_card_sub_one_of_twoAttachCover`, with counting input
+  `exists_mem_inter_erase_of_card_ge_two`;
+* **new instances of the headline theorem** with constants independent of `k`:
+  `JSP90.erdos73On_of_twoAttachCover` (cost `∑ X ∈ 𝒞, |X| - 1`) and
+  `JSP90.erdos73On_of_twoAttachCover_bounded` (cost `ℓ * |𝒞|` when every cover member has at most `ℓ`
+  vertices — the Erdős–Pósa shape, one unit per cover member).
+
+The one-attachment lemma yields an odd cycle attached **once**, which no transversal pays for; the
+*two-attachment cover* is what pays, and its existence for a 3-connected graph is the unresolved
+part.  `jsp_000090_main` remains undeclared and `JSP90.OddCycleErdosPosa r` is unchanged.

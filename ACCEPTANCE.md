@@ -3254,3 +3254,49 @@ requires `JSP90.IsCPath.skip` (a chord shortens the path), `JSP90.IsCPath.Shorte
 out in the file and compiles, the theorem bodies did not close within the round, and those five names
 are the concrete next steps recorded in `discovery/JSP-000090/policy.json`.  `JSP90.OddCycleErdosPosa r`
 and `jsp_000090_main` are unchanged; the two-attachment class does not contain all 2-connected graphs.
+
+---
+
+## Round 112 — `JSPProblem/CPathSkip.lean`: the C-path shortcut, the shortest C-path is induced, the closed C-path is an odd cycle, and the TWO-ATTACHMENT COVER
+
+Round 111's `policy.json` named four concrete next lemmas.  **All four are now proved**, with
+`lake build` OK (1263 jobs), 0 `sorry`, 0 `admit`:
+
+1. `JSP90.IsCPath.skip` — a chord `p a ~ p b` of a `C`-path (`a + 2 ≤ b ≤ d`) shortens it to a
+   `C`-path to the same target of length `a + 1 + (d - b) < d` (`JSP90.skip_len_lt`);
+2. `JSP90.IsCPath.Shortest` + **`JSP90.IsCPath.induced_of_shortest`: THE SHORTEST `C`-PATH IS
+   INDUCED** (minimality must be a hypothesis — `Nat.find` needs a `DecidablePred` and the predicate
+   quantifies over a *function*);
+3. `JSP90.IsCPath.adj_target_of_shortest` (Mader's neighbour count at the far end) and
+   `JSP90.IsCPath.adj_iff_step_of_shortest` (the full neighbour count);
+4. **`JSP90.IsCPath.isOddCycle_return`** — a closed `C`-path of even length is an odd cycle of `G`;
+   `JSP90.oneAttach_of_isCPath_return` records that it meets `C` in **exactly one vertex** and
+   contains the target.
+
+**The transversal payoff: the TWO-ATTACHMENT COVER.**  `JSP90.TwoAttachCover G 𝒞 pick` says that a
+vertex `pick X` is chosen in each member of a family `𝒞` of vertex sets and that every odd cycle of
+`G` meets some member of `𝒞` in at least two vertices.  The members need **not** be odd cycles and
+their number is **unbounded**, so this is a **strict generalisation** of round 111:
+
+* `JSP90.hitsOddCycles_of_twoAttachCover` — the certificate
+  `𝒞.biUnion (fun X => X.erase (pick X))`;
+* `JSP90.card_biUnion_erase_le_sum_card_sub_one_of_twoAttachCover` — its cost
+  `≤ ∑ X ∈ 𝒞, |X| - 1`;
+* `JSP90.closeToBipartite_of_twoAttachCover` — `CloseToBipartite (∑ X ∈ 𝒞, |X| - 1) G`;
+* `JSP90.exists_mem_inter_erase_of_card_ge_two` — the counting input: an odd cycle meeting `X` in two
+  vertices also meets `X` minus any one of them;
+* `JSP90.closeToBipartite_of_twoAttachCover_of_singleton` and `JSP90.sum_card_sub_one_singleton` —
+  round 111's theorem as the singleton cover, so the cover theorem is never weaker.
+
+**New instances of the headline theorem** (constants independent of Erdős's `k`):
+
+* `JSP90.erdos73On_of_twoAttachCover` — cost `∑ X ∈ 𝒞, |X| - 1`;
+* `JSP90.erdos73On_of_twoAttachCover_bounded` — cost `ℓ * |𝒞|` when every member has at most `ℓ`
+  vertices: the Erdős–Pósa shape, one unit per cover member.
+
+**What is still missing, unchanged.**  `jsp_000090_main` is not declared and
+`JSP90.OddCycleErdosPosa r` (Reed–Robertson–Seymour–Thomas) is not proved.  The one-attachment
+lemma yields an odd cycle attached to `C` **once**, and no transversal pays for that; the
+*two-attachment cover* is the hypothesis that pays, and its existence for a 3-connected graph is
+the unresolved part.  The exact remaining lemmas are recorded in
+`discovery/JSP-000090/policy.json` (`next_bet`).
