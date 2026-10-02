@@ -524,3 +524,18 @@ The remaining obstruction is located exactly: the **one-sided chains** (cut vert
 non-bipartite side), which cannot be bounded by the packing number and need the block-cut tree and
 the short-C-path lemma.  `jsp_000090_main` remains undeclared and
 `JSP90.OddCycleErdosPosa r` is unchanged.
+
+---
+
+## Round 110 note
+
+New module `lean/JSPProblem/Piece.lean` (0 `sorry`, 0 `admit`, `lake build` OK): the cut-vertex
+**piece** axis.  `JSP90.OneSplit.cycle_subset_piece` (an odd cycle through the cut vertex lies in a
+single piece) completes the local structure at a 1-cut, so the odd cycles of `G` are exactly those
+of its pieces; the composition rule then costs **no `+1`** for the cut vertex
+(`JSP90.closeToBipartite_of_1split_bounded_pieces`, `…_twoPieces` with the sharp `2 * m`,
+`…_nonBipartitePieces`), and **a one-sided 1-cut is free**
+(`JSP90.closeToBipartite_iff_of_oneNonBipartitePiece`, iterated in
+`JSP90.closeToBipartite_iff_of_twoSideCuts`) — this is the machine-checked block-cut reduction, so the
+short-`C`-path lemma that `policy.json` demanded for the one-sided chains is **not needed**.
+`JSP90.wf_locIndep_one_two_nonBipartitePieces` records why no `f(k)` comes out of the piece count.

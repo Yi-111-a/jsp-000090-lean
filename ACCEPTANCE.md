@@ -3177,3 +3177,46 @@ block-cut tree and the short-C-path lemma (a C-path of length `≤ 2r + 1` betwe
 cycles).  `lake build` succeeds (1260 jobs), **0 `sorry`, 0 `admit`**, so `score.py --strict-prize`
 reports `build_ok = true, partial_ok = true, missing_theorems = ["jsp_000090_main"]`.  No award
 claim is made.
+
+---
+
+## Round 110 — `lean/JSPProblem/Piece.lean`: the CUT-VERTEX PIECE axis — **the one-sided 1-cut is free**
+
+New module (34 declarations, 802 lines, **0 `sorry`, 0 `admit`**, `lake build` OK with 1261 jobs),
+imported from the root module `JSPProblem.lean`.  Attack family 51.
+
+Round 109 closed the 1-cut axis except for the *one-sided chains* and asked for the block-cut tree
+or the short-`C`-path lemma.  **Neither is needed**: the right object is the *piece* `T_i ∪ {v}`,
+not the part `T_i`, and
+
+* **`JSP90.OneSplit.cycle_subset_piece`** — an odd cycle **containing** the cut vertex lies in a
+  single piece (the companion of `JSPProblem/Connect.lean` `OneSplit.cycle_subset_part`, which says a
+  cycle **avoiding** it lies in a single part);
+* **`JSP90.OneSplit.isOddCycle_iff_pieces`** — **the odd cycles of `G` are exactly the odd cycles of
+  the pieces**;
+* **`JSP90.closeToBipartite_pieces_of_closeToBipartite`** — `CloseToBipartite m G` forces
+  `CloseToBipartite m` on *every* piece, at the **same** constant;
+* **`JSP90.closeToBipartite_of_1split_bounded_pieces`** — the composition **without the `+1`**
+  (`m * t` against `1 + m * k`), the cut vertex being in every piece;
+* **`JSP90.closeToBipartite_of_1split_twoPieces`** — the sharp `2 * m`, independent of `t`;
+* **`JSP90.closeToBipartite_of_1split_nonBipartitePieces`** — only the non-bipartite pieces are
+  charged, still without the `+1`;
+* **`JSP90.closeToBipartite_iff_of_oneNonBipartitePiece`** — **THE ONE-SIDED 1-CUT IS FREE**:
+  `CloseToBipartite m G ↔ CloseToBipartite m (T_{i₀} ∪ {v})`; together with
+  `JSP90.isOddCycle_iff_of_oneNonBipartitePiece` and
+  `JSP90.hitsOddCycles_iff_of_oneNonBipartitePiece` the reduction loses *nothing*: the whole
+  odd-cycle structure of `G` is that of the single piece;
+* **`JSP90.closeToBipartite_iff_of_twoSideCuts`** — the reduction **iterates**, i.e. the classical
+  block-cut reduction in two steps;
+* `JSP90.erdos73On_of_1split_of_bounded_PIECES`, `JSP90.oddCycleErdosPosa_of_1split_of_bounded_PIECES` —
+  new instances of the headline theorem along the piece axis (hypothesis on the *pieces*, no
+  counting step).
+
+A **machine-checked obstruction** closes the axis: `JSP90.wf_oneSplit` is a 1-cut of the windmill at
+`0`, `JSP90.not_isBipartite_wf_piece_0/1` show **two** of its pieces are non-bipartite, and
+`JSP90.wf_locIndep_one_two_nonBipartitePieces` records `LocIndep 1 wf` together with `2 > k = 1`
+non-bipartite pieces — so `|nonBipartitePieces| ≤ k` is false and no `f(k)` comes from this axis.
+
+`jsp_000090_main` remains **not** declared, so the harness keeps reporting
+`missing_theorems = ["jsp_000090_main"]`.  What is left is `JSP90.OddCycleErdosPosa r` for the graphs
+with **no cut vertex** (the 2-connected case).

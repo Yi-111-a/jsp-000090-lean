@@ -1047,3 +1047,4 @@ import JSPProblem.Multi
 import JSPProblem.Split
 import JSPProblem.SplitSharp
 import JSPProblem.Chain
+import JSPProblem.Piece

@@ -2,37 +2,44 @@ jsp_id: JSP-000090
 catalog_url: https://github.com/TheJustinSunPrize/awards
 status: wip
 prize_ready: false
-last_round: 109
+last_round: 110
 last_round_summary: |
-  Round 109 -- THE DECREASE AT A HARD 1-CUT, AND THE BLOCK-CUT BOUND (attack family 50).  New
-  module lean/JSPProblem/Chain.lean (18 declarations, 0 sorry/admit, lake build OK with 1260 jobs),
-  imported from the root module JSPProblem.lean.  Round 108 closed the class axis and named the
-  packing-number axis; this round works on its quantitative content.  What JSPProblem/Connect.lean
-  (round 48) had along the 1-cut axis was a COUNT of the charged parts
-  (OneSplit.card_nonBipartiteParts_le) and an instance with the constant 1 + m*r; what it lacked is
-  how much the packing bound DROPS at a 1-cut.  Proved: OneSplit.oddCycle_family_erase (one odd
-  cycle in each of the other non-bipartite parts, pairwise disjoint, as many as there are parts),
-  -- THE HEADLINE OF THIS ROUND -- OneSplit.packing_part_le (under a packing bound r a non-bipartite
-  part of a 1-cut with s non-bipartite parts has packing number at most r + 1 - s, so for s = 2 the
-  packing number STRICTLY DECREASES: packing_part_le_lt), OneSplit.packing_part_no_decrease_of_oneSide
-  (at a one-sided 1-cut, s = 1, the bound is inherited unchanged -- the descent stalls, the
-  machine-checked form of round 48's negative result), and closeToBipartite_of_1split_of_decreasing,
-  erdos73On_of_1split_of_decreasing, closeToBipartite_of_1split_of_decreasing_pack -- A NEW INSTANCE
-  OF THE HEADLINE THEOREM along the 1-cut axis whose hypothesis on the parts is needed only at the
-  DECREASED bound r + 1 - s (constant 1 + s*m, independent of the number of parts, no bound on the
-  odd girth, packing weight or branch vertices).  Part 3 proves THE BLOCK-CUT BOUND for the hard
-  chains: HardCert G d (d successive 1-cuts each separating two non-bipartite sides),
-  exists_packing_of_hardCert (such a chain of length d+1 gives d+1 pairwise disjoint odd cycles) and
-  hardCert_isBipartite_of_packing_le (a packing bound r forbids a hard chain of r+1 cuts) -- round
-  48's named missing lemma oneDepth_le_of_packing IN THE FORM IN WHICH IT IS TRUE.  A
-  MACHINE-CHECKED NEGATIVE RESULT was found on the way:
-  JSP90.locIndep_param_cannot_be_lowered shows LocIndep 1 (K_3) while ~LocIndep 0 (K_3), i.e. the
-  classical descent cannot be stated in Erdos's own parameter (LocIndep is monotone INCREASING in
-  k); every statement of the file is therefore in the packing language.  NOT proved:
-  jsp_000090_main; the blocker JSP90.OddCycleErdosPosa r is unchanged, and the remaining obstruction
-  is located exactly: the ONE-SIDED chains (a single non-bipartite side at a cut vertex), which
-  cannot be bounded by the packing number (triangle with a pendant path: packing number 1, arbitrary
-  chain length) and need the block-cut tree and the short-C-path lemma.
+  Round 110 -- THE CUT-VERTEX PIECE AXIS: THE ONE-SIDED 1-CUT IS FREE (attack family 51).  New module
+  lean/JSPProblem/Piece.lean (34 declarations, 802 lines, 0 sorry/admit, lake build OK with 1261
+  jobs), imported from the root module JSPProblem.lean.  Round 109 localised the remaining gap of the
+  1-cut axis to the ONE-SIDED CHAINS and asked for the block-cut tree or the classical short-C-path
+  lemma, neither of which exists in the pinned Mathlib.  This round shows NEITHER IS NEEDED: the
+  object to control is not the part T_i but the PIECE T_i u {v}, and the two differ exactly in the
+  right direction.  Proved: OneSplit.cycle_subset_piece -- THE MISSING STRUCTURAL LEMMA, an odd cycle
+  CONTAINING the cut vertex lies in a single piece (the companion of round 48's cycle_subset_part,
+  which says a cycle AVOIDING it lies in a single part) -- so the odd cycles of G are exactly the odd
+  cycles of its pieces (OneSplit.oddCycle_piece, OneSplit.isOddCycle_iff_pieces); monotonicity at a
+  cut vertex AT THE SAME CONSTANT (closeToBipartite_piece_of_closeToBipartite,
+  closeToBipartite_pieces_of_closeToBipartite); THE COMPOSITION RULE WITHOUT THE +1
+  (closeToBipartite_of_1split_bounded_pieces, m*t against 1 + m*k in Connect.lean, because the cut
+  vertex lies in every piece); THE SHARP TWO-PIECE COMPOSITION
+  closeToBipartite_of_1split_twoPieces (2*m, independently of t, the first constant on this axis that
+  does not grow with the number of parts); closeToBipartite_of_1split_nonBipartitePieces (only the
+  non-bipartite pieces are charged, still no +1).  THE HEADLINE OF THE ROUND:
+  JSP90.closeToBipartite_iff_of_oneNonBipartitePiece -- CloseToBipartite m G <-> CloseToBipartite m
+  (T_i0 u {v}) when that piece is the only non-bipartite one, i.e. THE ONE-SIDED 1-CUT IS FREE -- the
+  one-sided chains are deleted at ZERO COST and no tree and no path is needed; with
+  isOddCycle_iff_of_oneNonBipartitePiece and hitsOddCycles_iff_of_oneNonBipartitePiece the reduction
+  loses NOTHING (the whole odd-cycle structure of G is that of the single piece, as the same
+  finsets); and closeToBipartite_iff_of_twoSideCuts, where the reduction ITERATES, i.e. the
+  classical block-cut reduction in two steps.  New instances of the headline theorem along the piece
+  axis: erdos73On_of_1split_of_bounded_PIECES, oddCycleErdosPosa_of_1split_of_bounded_PIECES,
+  erdos73On_of_1split_pieces_of_locIndep_sub -- hypothesis on the PIECES, constant m*t, no +1 and NO
+  counting step (round 48's OneSplit.card_nonBipartiteParts_le is not used).  A MACHINE-CHECKED
+  OBSTRUCTION closes the axis: wf_oneSplit is a 1-CUT of the windmill wf at 0 (Windmill.lean had only
+  the 2-cut {0,5}), not_isBipartite_wf_piece_0/1 show TWO of its three pieces are non-bipartite, and
+  wf_locIndep_one_two_nonBipartitePieces records LocIndep 1 wf together with 2 > k = 1 non-bipartite
+  pieces -- so |nonBipartitePieces| <= k is FALSE and no f(k) comes from the piece count.  A tempting
+  statement recorded as false: CloseToBipartite m G <-> every piece is m-close (two disjoint triangles
+  with pendants at the cut vertex), so the m*t factor of the composition is real.  NOT proved:
+  jsp_000090_main; the blocker JSP90.OddCycleErdosPosa r is unchanged, and it is now localised to the
+  graphs with NO CUT VERTEX, i.e. the 2-connected case, where Mader's structure theorem and a
+  Menger-type fan lemma are needed.
 
 
 github_owner: Yi-111-a

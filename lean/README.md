@@ -1593,3 +1593,133 @@ Toolchain notes are in the header of `JSPProblem/Chain.lean`; the three that cos
 * `Finset.card_erase_of_mem : #(s.erase a) = #s − 1` (not `+ 1 = #s`), `Finset.card_pos` and
   `Finset.card_ne_zero` are plain implications, and `Finset.notMem_empty` (not
   `Finset.mem_empty_iff_false`) is the "not in ∅" lemma.
+
+---
+
+## Round 110 — `JSPProblem/Piece.lean`: the **CUT-VERTEX PIECE axis**, and **THE ONE-SIDED 1-CUT IS FREE**
+
+New module `lean/JSPProblem/Piece.lean` (34 top-level declarations, 802 lines, **0 `sorry`, 0
+`admit`**), imported from the root module `JSPProblem.lean`.  `lake build` OK with 1261 jobs;
+`harness/score.py --strict-prize` reports `build_ok: true, sorry: 0, admit: 0, placeholder_total: 0,
+partial_ok: true, missing_theorems: ["jsp_000090_main"]`.  Attack family 51.
+
+Round 109 localised the remaining gap of the 1-cut axis to the **one-sided chains** and demanded
+"the block-cut tree (or the classical short-`C`-path lemma)", neither of which exists in the pinned
+Mathlib.  This round removes that demand: the object to control is not the *part* but the ***piece***
+`T_i ∪ {v}`, and the difference is exactly in the right direction.
+
+### Part 1 — the missing structural lemma
+
+`JSPProblem/Connect.lean` had `OneSplit.cycle_subset_part` (a cycle *avoiding* `v` lies in a part)
+and nothing for a cycle *meeting* `v`.  This round proves it:
+
+* **`JSP90.OneSplit.cycle_subset_piece`** — an odd cycle containing `v` lies in `T_i ∪ {v}` for a
+  single `i`.  The reason: a simple cycle meets `v` once, so cutting the cyclic order there leaves a
+  path all of whose vertices avoid `v`, and no edge joins two distinct parts.
+* `JSP90.OneSplit.mem_part_of_adj` — the propagation step.
+
+Together with round 48's lemma this is the **complete local structure at a cut vertex**: every cycle
+of `G` lies in a piece.
+
+### Part 2 — the odd cycles of `G` are the odd cycles of the pieces
+
+* `JSP90.OneSplit.oddCycle_piece`, `JSP90.OneSplit.isOddCycle_iff_pieces` — the biconditional.
+
+### Part 3 — the two halves of the axis
+
+* `JSP90.closeToBipartite_piece_of_closeToBipartite`, `JSP90.closeToBipartite_pieces_of_closeToBipartite`
+  — **monotonicity at a cut vertex at the *same* constant**: `CloseToBipartite m G` forces
+  `CloseToBipartite m` on *every* piece.  This is the direction a cut-vertex induction needs.
+* **`JSP90.closeToBipartite_of_1split_bounded_pieces`** — **the composition rule *without* the `+1`**:
+  every piece `m`-close gives `CloseToBipartite (m * t) G`, against `1 + m * k` in
+  `JSPProblem/Connect.lean`.  The cut vertex lives in every piece and is therefore never charged.
+* **`JSP90.closeToBipartite_of_1split_twoPieces`** — **the sharp two-piece composition**: if exactly
+  two pieces are non-bipartite and both are `m`-close, then `CloseToBipartite (2 * m) G`,
+  *independently of `t`*.  The first constant on this axis that does not grow with the number of
+  parts.
+* `JSP90.deleteFinset_induceFinset_eq`, `JSP90.isBipartite_deleteFinset_induceFinset` — the bridge.
+
+### Part 4 — only the non-bipartite pieces are charged
+
+`JSP90.closeToBipartite_of_1split_nonBipartitePieces`: `CloseToBipartite (∑_{i ∈ nonBipartitePieces}
+m) G`, still with **no `+1`**.  A strict improvement on `1 + m * k`.
+
+### Part 5 — new instances of the headline theorem
+
+`JSP90.erdos73On_of_1split_of_bounded_PIECES`, `JSP90.oddCycleErdosPosa_of_1split_of_bounded_PIECES`,
+`JSP90.erdos73On_of_1split_pieces_of_locIndep_sub`: hypothesis on the **pieces**, constant `m * t`,
+**no `+1`**, and **no `|non-bipartite parts| ≤ k` counting step** (round 48's
+`OneSplit.card_nonBipartiteParts_le` is not used at all).
+
+### Part 6 — THE HEADLINE: the one-sided 1-cut is free
+
+* **`JSP90.closeToBipartite_iff_of_oneNonBipartitePiece`** —
+  `CloseToBipartite m G ↔ CloseToBipartite m (T_{i₀} ∪ {v})` when that piece is the only
+  non-bipartite one.  **The one-sided chains of `policy.json` are deleted at zero cost**, and *no
+  tree and no path is needed*: the bipartite side of the cut can be discarded wholesale.  A triangle
+  with a pendant path — the witness that one-sided chains are unbounded for the packing number — is
+  `1`-close to bipartite because its single triangle is.
+* `JSP90.isOddCycle_iff_of_oneNonBipartitePiece`, `JSP90.hitsOddCycles_iff_of_oneNonBipartitePiece`,
+  `JSP90.not_isBipartite_of_oneNonBipartitePiece`, `JSP90.locIndep_of_oneNonBipartitePiece` — **the
+  reduction loses nothing at all**: the odd cycles of `G` *are* the odd cycles of the single piece,
+  as the same finsets.
+* **`JSP90.closeToBipartite_iff_of_twoSideCuts`** — **the reduction iterates**: two successive
+  one-sided cuts reduce `G` to a single induced subgraph with `CloseToBipartite m` preserved in both
+  directions.  This is the classical block-cut reduction, machine-checked.
+* `JSP90.closeToBipartite_of_oneSideCut`, `JSP90.hitsOddCycles_of_oneSideCut` — the one-step form in
+  the `LocIndep` and packing languages: the hypothesis is checked on a strictly smaller graph and the
+  constant does not grow.
+
+### Part 7 — the obstruction, machine-checked
+
+The piece axis buys the `+1`-free constants and the exact one-sided `iff`, but **not** a bound
+`|nonBipartitePieces| ≤ f(k)`, and this is machine-checked on the existing windmill:
+
+* **`JSP90.wf_oneSplit`** — a **1-cut** of the windmill `wf` at its central vertex `0` (parts
+  `{1,2}`, `{3,4}`, `{5}`); `JSPProblem/Windmill.lean` had only the *2-cut* `{0,5}`.
+* `JSP90.isOddCycle_wf_tri012`, `JSP90.isOddCycle_wf_tri034` — the two triangles.
+* `JSP90.not_isBipartite_wf_piece_0`, `JSP90.not_isBipartite_wf_piece_1` — **two of its three pieces
+  are non-bipartite**.
+* **`JSP90.wf_locIndep_one_two_nonBipartitePieces`** — with `locIndep_one_wf`, `LocIndep 1 wf` holds
+  and the cut has **two** non-bipartite pieces, i.e. more than `k = 1`.  So the hypothesis
+  `|non-bipartite pieces| ≤ k` of the natural Erdős #73 instance along this axis is **false**: the
+  *parts* are controlled by the packing number, the *pieces* are not.
+
+### A statement that looks natural and is false (recorded, not proved)
+
+`CloseToBipartite m G ↔ ∀ i, CloseToBipartite m (T_i ∪ {v})` is **false**: the forward direction is
+`JSP90.closeToBipartite_pieces_of_closeToBipartite`, the backward one is not — two disjoint
+triangles, each with a pendant vertex at the common cut vertex `v`, give two pieces that are
+`1`-close while `G` is not.  The `m * t` factor of the composition is therefore real.
+
+### What is not proved
+
+`jsp_000090_main` is **not** declared, so the harness keeps reporting
+`missing_theorems = ["jsp_000090_main"]`; `score.py --strict-prize` reports `build_ok = true,
+partial_ok = true`.  Behind it stands `JSP90.OddCycleErdosPosa r` for the graphs with **no cut
+vertex** — the 2-connected case — where Mader's structure theorem and a Menger-type fan lemma are
+needed.  The reduction of Parts 3–6 is free but is a reduction, not a bound: a chain of one-sided
+cuts ends at an arbitrary graph.
+
+`#print axioms` on thirteen headline results shows only `[propext, Classical.choice, Quot.sound]` —
+no `sorryAx`.
+
+### Toolchain notes (the ones that cost the most)
+
+* `Nat.strong_induction_on` on a term `s` generalised over a goal `P s` yields `ih (s - 1) (proof)
+  hs1' hs2'` — **three** explicit arguments, not the four of the `JSPProblem/SplitOne.lean` `hrun`.
+* `v ∈ sp.parts i` is **not** refutable from a bare `OneSplit` (`OneSplit G v 1` with
+  `parts 0 = univ` exists), so the propagation must obtain `f (mk (s-1)) ≠ v` from the *interval*
+  (`hnv`), never from the part.
+* `Finset.disjoint_iff_inter_eq_empty : Disjoint s t ↔ s ∩ t = ∅` — **`.mp`** builds the equation.
+  `Iff.mpr` is elaborated backwards, so `X.mpr y` with the expected type `Y` picks the direction
+  from `Y`; write the expected type, not `.mpr`.
+* `Finset.nonempty_iff_ne_empty : s.Nonempty ↔ s ≠ ∅` — give it `(s := …)` or the `.mpr`/`.mp`
+  direction is elaborated against the wrong side; `x ∈ s ∩ t` is a `Multiset` membership so `hx.1`
+  is **not** a projection (`Finset.mem_inter.mp hx`).
+* `¬ ¬ p → p` is `not_not.mp`; it is *not* `Classical.byContradiction` (which introduces `¬ p`).
+* A theorem whose first binder is `[Fintype V]` is **not** put in the namespace of its `OneSplit`
+  argument: `JSP90.closeToBipartite_of_1split_bounded_pieces sp h`, not `sp.…`.
+* `Finset.ext z` + `fin_cases z` + `simp` is the reliable way to prove `s ∩ t = ∅` for literal finsets
+  here: `decide` gets stuck in `List.filter … |>.isPerm`, and `Finset.mem_inter.mp` re-synthesises a
+  *different* `DecidableEq` instance from the one baked into the literal.
