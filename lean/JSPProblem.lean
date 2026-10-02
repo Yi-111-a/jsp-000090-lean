@@ -807,6 +807,33 @@ deliberately not declared.
     to bipartite" gives `CloseToBipartite (∑ j < k, girthOf (level G j) + c (j + 1)) G`, with the
     unit-cost corollary `JSP90.closeToBipartite_of_greedyChain_cost_one` (strictly cheaper than round
     102's constant by exactly `k`, `JSP90.girthSum_lt_of_unit`).
+ * `JSPProblem.Cluster` — **the CLUSTER-GRAPH axis** (round 104, one new attack family).  The
+   largest class on which Erdős's hypothesis and its conclusion coincide: `G` a disjoint union of
+   complete graphs.
+   - **THE CLASS `JSP90.ClusterDecomposition`**: the pieces of `𝒬` are pairwise disjoint, pairwise
+     anticomplete and cover `V` (`AnticoverCoverFamily`, so every cycle of `G` lies in one piece),
+     each piece has at least two vertices, and each piece is a clique;
+   - **THE COUNT `JSP90.maxDef_cluster`**: `MaxDef G = ∑ C ∈ 𝒬, (|C| - 2)`, from
+     `JSP90.indepCard_cluster` (the independence number of `G[X]` is *exactly* the number of pieces
+     `X` meets, `JSP90.piecesMet`, `JSP90.exists_indep_onePerPiece`), `JSP90.card_biUnion_eq_sum`
+     and `JSP90.sum_card_eq_sum_cost`;
+   - **THE TRANSVERSAL `JSP90.exists_oddCycle_transversal`**: `JSP90.bigPieces` (the pieces with at
+     least three vertices), two vertices deleted and two points chosen per big piece, which gives
+     `JSP90.closeToBipartite_iff_maxDef_cluster`: `CloseToBipartite m G ↔ MaxDef G ≤ m` — on this
+     class the hypothesis and the conclusion of Erdős #73 are the same statement;
+   - **THE NEW INSTANCE `JSP90.erdos73On_of_cluster`**: `ClusterDecomposition G 𝒬 → LocIndep k G →
+     CloseToBipartite k G`, constant `k`, with no odd girth, no packing weight, no degree bound and
+     no bound on the number of pieces (plus `JSP90.erdos73On_of_cluster_univ`,
+     `JSP90.cluster_isBipartite_iff`, `JSP90.maxDef_cluster_univ` = round 54's `MaxDef (K_n) = n - 2`,
+     `JSP90.erdos73On_cluster_zero`);
+   - `JSPProblem.ClusterSharp` — **the sharpness certificate for that instance**: the lower-bound
+     witness `kTriangles k` *is* a cluster graph (`JSP90.cluster_kTriangles`), so
+     `JSP90.maxDef_kTriangles_eq : MaxDef (kTriangles k) = k` and
+     `JSP90.erdos73On_of_cluster_optimal : (LocIndep k (kTriangles k) → CloseToBipartite m
+     (kTriangles k)) ↔ k ≤ m` — the new instance is an **equivalence with the optimal constant**, and
+     `JSP90.erdos73_cluster_notBelowK` shows no `m < k` works.  This file declares **no** `DecidableEq`
+     instance (the round-103 toolchain note: a file with a local instance cannot state anything over
+     `Fin 3 × Fin k` that mentions an intersection).
 
 -/
 import JSPProblem.Definitions
@@ -861,3 +888,5 @@ import JSPProblem.Pivot
 import JSPProblem.Stair
 import JSPProblem.Greedy
 import JSPProblem.Budget
+import JSPProblem.Cluster
+import JSPProblem.ClusterSharp

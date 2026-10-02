@@ -357,3 +357,26 @@ could only be used to make the *last* level bipartite; the concrete lemma it was
 
 The budgets do not by themselves improve the constant of `JSP90.erdos73On_of_greedyChain` (the greedy
 sum is not a function of `k`, round 102); the missing half is unchanged, `JSP90.OddCycleErdosPosa r`.
+
+**Round 104 (`lean/JSPProblem/Cluster.lean` + `lean/JSPProblem/ClusterSharp.lean`, 59 declarations,
+0 sorry/admit) — the CLUSTER-GRAPH AXIS: a new instance with the optimal constant `k` on the
+largest class on which hypothesis and conclusion coincide.**
+
+* `JSP90.ClusterDecomposition G 𝒬` — the pieces are pairwise disjoint, pairwise anticomplete, cover
+  `V`, have at least two vertices, and are **cliques**; i.e. `G` is a disjoint union of complete
+  graphs;
+* **`JSP90.erdos73On_of_cluster`**: `ClusterDecomposition G 𝒬 → LocIndep k G → CloseToBipartite k G`
+  (with `_univ`), the **new instance** of the headline theorem, with no odd girth, no packing weight,
+  no degree bound and no bound on the number of pieces;
+* **`JSP90.closeToBipartite_iff_maxDef_cluster`**: on this class `CloseToBipartite m G ↔ MaxDef G ≤ m`,
+  and **`JSP90.maxDef_cluster`**: `MaxDef G = ∑ C ∈ 𝒬, (|C| - 2)` — the deficiency *is* the sum of the
+  piece costs, via `JSP90.indepCard_cluster` (`α(G[X])` = number of pieces met) and the transversal
+  `JSP90.exists_oddCycle_transversal`;
+* **`JSP90.erdos73On_of_cluster_optimal`** (`ClusterSharp.lean`): the new instance is an
+  **equivalence** on `kTriangles k`, `(LocIndep k → CloseToBipartite m) ↔ k ≤ m`, with
+  `JSP90.maxDef_kTriangles_eq : MaxDef (kTriangles k) = k`, so the constant is optimal; and
+  `JSP90.erdos73_cluster_notBelowK` re-derives the lower bound `f(k) ≥ k` *through* the new instance.
+  The class is strictly larger than round 98's (`K_5 ⊔ K_5` is a cluster graph that is not a disjoint
+  union of odd cycles).
+
+The missing half is unchanged: `JSP90.OddCycleErdosPosa r`, i.e. `jsp_000090_main`.

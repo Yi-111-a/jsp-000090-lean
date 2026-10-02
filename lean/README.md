@@ -1203,3 +1203,63 @@ The gap to `jsp_000090_main` is unchanged: the budgets are proved, but the *tran
 bound on an odd cycle transversal in terms of the packing number — is still
 `JSP90.OddCycleErdosPosa r`, and the budgets themselves do not improve the constant of
 `JSP90.erdos73On_of_greedyChain` (the greedy sum is not a function of `k`, as round 102 recorded).
+
+---
+
+## Round 104 — CLUSTER GRAPHS: a new instance with the optimal constant `k`
+(`lean/JSPProblem/Cluster.lean`, `lean/JSPProblem/ClusterSharp.lean`)
+
+Attack family 45.  Every instance so far was of the shape "hypothesis `LocIndep k` **plus** a
+structural hypothesis" (bounded odd girth, no branch vertex, a packing budget, ...).  Round 98's
+`DisjointFamily (OddCycles G)` is the only one with no side condition, and it forces `G` to be a
+disjoint union of *odd cycles*.  This round asks for the **largest** class on which the hypothesis
+alone already gives the conclusion: **disjoint unions of complete graphs** (cluster graphs).  On
+that class Erdős's hypothesis and its conclusion coincide, and the instance has the optimal
+constant `f(k) = k`.
+
+* **The class** `JSP90.ClusterDecomposition G 𝒬`: the pieces of `𝒬` are pairwise disjoint and
+  pairwise anticomplete and cover `V` (`AnticoverCoverFamily`, so every cycle of `G` lies in one
+  piece), each piece has at least two vertices, and each piece is a **clique**.
+
+* **THE INSTANCE** `JSP90.erdos73On_of_cluster`:
+
+  > `ClusterDecomposition G 𝒬 → LocIndep k G → CloseToBipartite k G`
+
+  with the quantified form `JSP90.erdos73On_of_cluster_univ`.  No odd girth, no packing weight, no
+  degree bound, no bound on the number of pieces.
+
+* **Hypothesis = conclusion on this class** `JSP90.closeToBipartite_iff_maxDef_cluster`:
+
+  > `CloseToBipartite m G ↔ MaxDef G ≤ m`
+
+  so the whole content of Erdős #73 there is the comparison of two invariants — and the deficiency
+  is **exactly the cost of the pieces**, `JSP90.maxDef_cluster`:
+
+  > `MaxDef G = ∑ C ∈ 𝒬, (|C| - 2)`
+
+  proved from `JSP90.indepCard_cluster` (`α(G[X])` = the number of pieces `X` meets,
+  `JSP90.piecesMet`), `JSP90.card_biUnion_eq_sum`, `JSP90.sum_card_eq_sum_cost` and the transversal
+  `JSP90.exists_oddCycle_transversal` (big pieces, two vertices deleted per piece, every odd cycle
+  hit).
+
+* **Exactness of the conclusion** `JSP90.cluster_isBipartite_iff` (`G.IsBipartite ↔ every piece has
+  ≤ 2 vertices`), the single-piece case `JSP90.maxDef_cluster_univ` (`MaxDef = |V| - 2`, recovering
+  round 54's `MaxDef (K_n) = n - 2`), and the proved case `k = 0`,
+  `JSP90.erdos73On_cluster_zero`.
+
+* **Sharpness, machine-checked** (`lean/JSPProblem/ClusterSharp.lean`, no `DecidableEq` instance in
+  scope, as the toolchain notes of round 103 require): the witness of the lower bound,
+  `kTriangles k`, **is** a cluster graph (`JSP90.cluster_kTriangles`, `JSP90.anticover_fibreFamily`),
+  its fibres cost `3 - 2 = 1` each (`JSP90.sum_cost_fibreFamily`, `JSP90.card_fibreFamily`), so
+
+  > `JSP90.maxDef_kTriangles_eq : MaxDef (kTriangles k) = k`
+  > `JSP90.erdos73On_of_cluster_optimal : (LocIndep k (kTriangles k) → CloseToBipartite m (kTriangles k)) ↔ k ≤ m`
+  > `JSP90.erdos73_cluster_notBelowK / JSP90.cluster_lower_bound`: for `m < k` the implication fails
+
+  i.e. **the new instance is an equivalence with the optimal constant**, and the class is strictly
+  larger than round 98's (`K_5 ⊔ K_5` is a cluster graph which is not a disjoint union of odd
+  cycles, `JSP90.not_oddCyclesDisjoint_completeGraph_five`).
+
+The headline theorem `jsp_000090_main` (`Erdős73` for every `k`, i.e. `JSP90.OddCycleErdosPosa r` for
+the 3-connected case) is **unchanged**: this round removes no restriction on `G` in general, only on
+a class on which the answer is already explicit.

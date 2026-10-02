@@ -3025,3 +3025,27 @@ That, with the packing-number-sensitive instances already proved (`JSP90.erdos73
   `⟨c, fun hab => ?⟩` with the adjacency argument **first** and implicit `a b` binders.
 * An odd cycle of an induced subgraph is an odd cycle of the whole graph *as the same finset*:
   `JSP90.isOddCycle_deleteFinset` for deletions, `JSP90.isOddCycle_of_isOddCycle_level` for the chain.
+
+## Round 104 (attack family 45) — the CLUSTER-GRAPH instance and its sharpness
+
+New: `lean/JSPProblem/Cluster.lean` (40 declarations) and `lean/JSPProblem/ClusterSharp.lean`
+(19 declarations), both imported from the root module; 0 `sorry`/`admit`, `lake build` green
+(1255 jobs), `harness/score.py --strict-prize` reports `build_ok: true`, `partial_ok: true`,
+`prize_ready: false` with `missing_theorems: ["jsp_000090_main"]`.
+
+* **New instance, optimal constant** `JSP90.erdos73On_of_cluster`: if `G` is a disjoint union of
+  complete graphs (`JSP90.ClusterDecomposition`, i.e. a clique decomposition by pairwise disjoint,
+  pairwise anticomplete, vertex-covering pieces) and every induced subgraph of `G` has an
+  independent set of size `≥ (|V(H)| − k)/2`, then `G` is the union of a bipartite graph and **at
+  most `k` vertices**.
+* **Hypothesis = conclusion on this class** `JSP90.closeToBipartite_iff_maxDef_cluster`:
+  `CloseToBipartite m G ↔ MaxDef G ≤ m`, with `JSP90.maxDef_cluster`:
+  `MaxDef G = ∑ C ∈ 𝒬, (|C| − 2)` (the deficiency is the sum of the piece costs).
+* **Sharpness, machine-checked** `JSP90.erdos73On_of_cluster_optimal`: on `kTriangles k` the new
+  instance is the equivalence `(LocIndep k → CloseToBipartite m) ↔ k ≤ m`, with
+  `JSP90.maxDef_kTriangles_eq : MaxDef (kTriangles k) = k` and `JSP90.erdos73_cluster_notBelowK`
+  (no `m < k` works).  The class is **strictly larger** than round 98's disjoint-odd-cycles class.
+
+The required theorem `jsp_000090_main` (`Erdős73` for every `k`, i.e. `JSP90.OddCycleErdosPosa r`
+for the 3-connected case) is **still missing**; nothing in this round removes a hypothesis for
+arbitrary graphs.
