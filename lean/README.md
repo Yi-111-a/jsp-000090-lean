@@ -1432,3 +1432,32 @@ the complementary, **connected** family: the complete multipartite graph.
 * `Classical.choose` never reduces, so a colouring built as `d (Classical.choose h)` cannot be
   rewritten to `d p`; the witness properties have to be fetched with `Classical.choose_spec`.
 * A file that opens a `noncomputable section` needs a bare `end` for it before `end <Namespace>`.
+
+## Round 107 — `JSPProblem/Split.lean`: the SPLIT-GRAPH axis
+
+New file (32 declarations, 0 sorry/admit), a new attack family: graphs `V = A ⊔ B` with `A`
+independent and `B` a clique.  The two sides of Erdős #73 are both computed exactly, and the class
+is connected, neither a cluster graph nor multipartite nor a disjoint union of odd cycles.
+
+* hypothesis: `cardB_le_locIndep_add_two` (`LocIndep k G → |B| ≤ k + 2`), `maxDef_split_le`
+  (`MaxDef G ≤ |B| − 1`);
+* conclusion: `IsolatedPair`, `closeToBipartite_split_iff` (the exact value, `τ(G) ∈ {|B| − 1,
+  |B| − 2}`), `closeToBipartite_split_cardB_sub_two_iff`;
+* new instance: **`erdos73On_of_splitPartition`, constant `k + 1`**, plus
+  `closeToBipartite_of_splitPartition_of_isolatedPair` (constant `k`);
+* Part 4: the witness `K_{k+2,k+2}` minus a perfect matching, where the constant `k + 1` is attained
+  for every `k ≥ 1`; the three `Finset` computations that finish its `LocIndep` proof are recorded
+  as the one remaining step of the axis.
+
+Toolchain notes:
+
+* `DecidableEq V` is declared once at the top of the file (`instDecidableEqSplitGraph`), exactly as
+  `JSPProblem/Deficiency.lean` does it, because the statements mention `X ∩ A`;
+* `Nat.sub_le_sub_left : n ≤ m → ∀ k, k − m ≤ k − n` is the "bigger subtrahend, smaller result"
+  lemma and `Nat.sub_le_sub_right` the other one — the names are the opposite of what the argument
+  order suggests;
+* `IsolatedPair` must be read with the deletion set `B \ {b₁, b₂}` in mind: a witness
+  `CloseToBipartite (|B| − 2) G` has `Z ⊆ B` (proved in `not_closeToBipartite_of_split_no_isolatedPair`
+  by counting), which is what makes the isolated-pair statement an equivalence;
+* a split graph may have edges *between* the two sides — the claim `α(G[X]) ≥ 1 + |X ∩ A|` is false
+  and Lean rejected it; only `α ≥ |X ∩ A|` and `α ≥ 1` are available, and they are enough.

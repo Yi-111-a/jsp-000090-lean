@@ -439,3 +439,36 @@ On this class the hypothesis and the conclusion of Erdős #73 coincide, and the 
 **connected** for `t ≥ 2`, so it is not covered by any anticomplete-decomposition instance of the
 earlier rounds.  `jsp_000090_main` remains undeclared and `JSP90.OddCycleErdosPosa r` (Reed–
 Robertson–Seymour–Thomas) is unchanged: the remaining obstruction is the general, 3-connected case.
+
+## Round 107 note (`lean/JSPProblem/Split.lean`)
+
+New attack family, the **split-graph axis**: `V = A ⊔ B` with `A` independent and `B` a clique.  It
+is the connected class whose odd cycles straddle a partition — the class none of the additive axes
+(rounds 98–106) reaches — and it is the **first class whose optimal constant is strictly larger than
+`k`** while the odd cycles are still described by one local rule ("a triangle is a clique edge plus a
+common neighbour on the independent side").  Proved, with 0 sorry/admit (32 declarations):
+
+* `JSP90.SplitPartition G A B` and `card_eq_card_inter_add_card_inter_splitPartition` (`|X| = |X ∩ A|
+  + |X ∩ B|`): the class and its counting lemma;
+* `JSP90.cardB_le_locIndep_add_two` — **Erdős's hypothesis sees only the size of the clique side**
+  (`LocIndep k G → |B| ≤ k + 2`; this is the *only* use of the hypothesis, applied to `X = B`), and
+  `JSP90.maxDef_split_le` (`MaxDef G ≤ |B| − 1`);
+* `JSP90.IsolatedPair G A B` — the deciding local object: a pair of clique vertices with **no**
+  common neighbour in `A`;
+* `JSP90.closeToBipartite_split_iff` — **the exact value of the conclusion on this class**:
+  `CloseToBipartite m G ↔ |B| ≤ m + 1 ∨ (|B| ≤ m + 2 ∧ IsolatedPair G A B)`, i.e. `τ(G) = |B| − 1`,
+  or `|B| − 2` when an isolated pair exists; the `|B| − 2` clause is an equivalence
+  (`closeToBipartite_split_cardB_sub_two_iff`), and the machinery is the triangle obstruction
+  `not_isBipartite_deleteFinset_of_commonNeighbour` plus the injection
+  `cardBsdiff_le_two_of_isBipartite_deleteFinset`;
+* **`JSP90.erdos73On_of_splitPartition` — a NEW INSTANCE OF THE HEADLINE THEOREM with the constant
+  `k + 1`** (no odd-girth, packing, degree or decomposition hypothesis), with the sharper form
+  `closeToBipartite_of_splitPartition_of_isolatedPair` (constant `k`);
+* Part 4 of the file records the **witness** on which the constant `k + 1` is attained for every
+  `k ≥ 1` — `K_{k+2,k+2}` minus a perfect matching, `A = {(i, false)}`, `B = {(i, true)}` — together
+  with the three `Finset` computations still missing (its `LocIndep` proof).  One intermediate claim
+  was **refuted** while writing the file: `α(G[X]) ≥ 1 + |X ∩ A|` is false (a split graph may have
+  edges *between* the two sides), and the deficiency bound uses only `α ≥ |X ∩ A|` and `α ≥ 1`.
+
+`jsp_000090_main` remains undeclared and `JSP90.OddCycleErdosPosa r` (Reed–Robertson–Seymour–Thomas)
+is unchanged: the remaining obstruction is the general, 3-connected case.

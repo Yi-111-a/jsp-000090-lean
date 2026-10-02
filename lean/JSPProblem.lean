@@ -891,6 +891,30 @@ deliberately not declared.
      (kTriangles k)) ↔ k ≤ m`, so the constant `k` is machine-checked optimal and the lower bound
      `f(k) ≥ k` is re-derived (`JSP90.erdos73_pieceMaxDef_notBelowK`).
 
+
+/-!
+## `JSPProblem/Split.lean` (round 107) — the SPLIT-GRAPH axis
+
+`JSP90.SplitPartition G A B` (`V = A ⊔ B`, `A` independent, `B` a clique) is the class on which both
+sides of Erdős #73 have an exact value, and it is the first class whose optimal constant is
+*strictly larger* than `k` while the odd cycles are still described by one local rule ("a triangle is
+a clique edge plus a common neighbour on the independent side"):
+
+* `JSP90.cardB_le_locIndep_add_two` — `LocIndep k G → |B| ≤ k + 2` (the hypothesis, used once);
+* `JSP90.maxDef_split_le` — `MaxDef G ≤ |B| − 1`;
+* `JSP90.IsolatedPair G A B` — a pair of clique vertices with **no** common neighbour in `A`;
+* `JSP90.closeToBipartite_split_iff` — **the exact value of the conclusion**: `τ(G) = |B| − 1`, or
+  `|B| − 2` when an isolated pair exists (`closeToBipartite_split_cardB_sub_two_iff`);
+* **`JSP90.erdos73On_of_splitPartition` — a new instance of the headline theorem, constant `k + 1`**,
+  plus the sharper `closeToBipartite_of_splitPartition_of_isolatedPair` (constant `k`);
+* `JSPProblem/Split.lean`'s Part 4 records the witness `K_{k+2,k+2}` minus a perfect matching, on which
+  the constant `k + 1` is attained for every `k ≥ 1`, with the exact `Finset` computations still
+  missing.
+
+One intermediate claim was refuted by Lean while writing the file (`α(G[X]) ≥ 1 + |X ∩ A|`): a split
+graph may have edges *between* the two sides, so the deficiency bound uses only `α ≥ |X ∩ A|` and
+`α ≥ 1`.  The refutation is recorded in the file.
+-/
 -/
 import JSPProblem.Definitions
 import JSPProblem.Reed
@@ -948,3 +972,4 @@ import JSPProblem.Cluster
 import JSPProblem.ClusterSharp
 import JSPProblem.Exact
 import JSPProblem.Multi
+import JSPProblem.Split
