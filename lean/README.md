@@ -1522,3 +1522,74 @@ Toolchain notes (round 108):
 * `Finset.mem_filter.mp` cannot be applied to `h : S ∈ indepSets G X` from another module; the new
   `JSP90.isIndepSet_of_mem_indepSets` (added to `Deficiency.lean` in this round) is the form to use;
 * `Erdős73On` must be instantiated at `.{0}` for a `Fin (k+2) × Bool` witness.
+
+## Round 109 — `JSPProblem/Chain.lean`: the DECREASE at a hard 1-cut, and the block-cut bound
+
+Attack family 50.  Round 108 closed the class axis (every class instance now has both sides
+computed exactly) and named the packing-number axis as the only one with real content left.  This
+round works there, on the part of it that round 48 left open: **how much the packing bound drops at
+a 1-cut**, and **what a chain of 1-cuts costs**.
+
+`JSPProblem/Connect.lean` had, along the 1-cut axis, a *count* of the charged parts
+(`OneSplit.card_nonBipartiteParts_le`: at most `r` of the parts of a 1-cut are non-bipartite) and an
+instance with the constant `1 + m · r`.  Neither says the packing bound *decreases*.  It does, and
+by a computable amount:
+
+* **`JSP90.OneSplit.packing_part_le`** — under a packing bound `r`, a non-bipartite part `T_i` of a
+  1-cut with `s` non-bipartite parts has packing number `≤ r + 1 − s`.  Proof: a nonempty packing
+  inside `T_i`, together with one odd cycle in each of the *other* non-bipartite parts, is a packing
+  of `G` (the parts are pairwise disjoint), of size `|𝒞| + (s − 1)`, whence `|𝒞| + s − 1 ≤ r`.
+  The counting object is `JSP90.OneSplit.oddCycle_family_erase`: one odd cycle in each other
+  non-bipartite part, pairwise disjoint, and *as many as there are parts*
+  (`Finset.card_image_of_injOn` from the disjointness and nonemptiness).
+* `JSP90.OneSplit.packing_part_le_lt` — for `2 ≤ s` the bound is **strictly** smaller than `r`: the
+  classical induction step at a cut vertex.
+* `JSP90.OneSplit.packing_part_no_decrease_of_oneSide` — for `s = 1` the bound is inherited
+  *unchanged*.  This is the machine-checked form of round 48's negative result number 1 and it says
+  precisely where the descent may stop.
+* **`JSP90.closeToBipartite_of_1split_of_decreasing`** — **a new instance of the headline theorem**:
+  the `s` non-bipartite parts being `m`-close to bipartite and a packing bound `r` on `G` force
+  `CloseToBipartite (1 + s · m) G`, with the hypothesis on the parts needed only at the **decreased**
+  bound `r + 1 − s`.  `erdos73On_of_1split_of_decreasing` is the composition rule
+  (`LocIndep k G` version), `closeToBipartite_of_1split_of_decreasing_pack` the packing version.
+
+Part 3 proves the block-cut bound for the **hard** chains, i.e. the levels at which the descent
+applies:
+
+* `JSP90.HardCert G d` — a decomposition of `V` by `d` successive 1-cuts, **each with at least two
+  non-bipartite parts** (written with an explicit finset `Q` of such parts, avoiding the
+  `DecidablePred`-dependent `OneSplit.nonBipartiteParts`);
+* `JSP90.exists_packing_of_hardCert` — **a non-bipartite graph with such a chain of depth `d + 1`
+  has `d + 1` pairwise vertex-disjoint odd cycles**;
+* **`JSP90.hardCert_isBipartite_of_packing_le`** — **a packing bound `r` forbids a hard chain of
+  `r + 1` cuts**: this is round 48's named missing lemma `oneDepth_le_of_packing` *in the form in
+  which it is true*, and it is what the recursion of
+  `JSP90.oddCycleErdosPosa_of_noOneCut_of_bounded_oneDepth` needs.
+
+A machine-checked negative result came out of writing it: the descent was first attempted in Erdős's
+own parameter, and Lean refuted it, because `LocIndep` is monotone **increasing** in `k`:
+
+* **`JSP90.locIndep_param_cannot_be_lowered`** — `LocIndep 1 (K_3)` holds and `¬ LocIndep 0 (K_3)`
+  (`LocIndep 0` ⟺ bipartite, `JSPProblem/OddCycle.lean` `locIndep_zero_isBipartite`).
+
+So the classical induction runs on the packing number, never on `LocIndep`'s parameter; that is why
+every statement of the file is in the packing language, which is also the language of
+`JSP90.OddCycleErdosPosa r`.
+
+`jsp_000090_main` is still not declared and `JSP90.OddCycleErdosPosa r` is unchanged.  What remains
+is located exactly: the **one-sided chains** (cut vertices with a single non-bipartite side).  They
+cannot be bounded by the packing number — a triangle with a pendant path has packing number `1` and
+arbitrarily long such chains (`JSPProblem/Triangle.lean` `locIndep_piece_of_triangle`,
+`OneSplit.one_nonBipartitePiece`) — and are handled in the classical proof by the block-cut tree and
+the short-C-path lemma.
+
+Toolchain notes are in the header of `JSPProblem/Chain.lean`; the three that cost the most time:
+
+* a `def` whose body is `∃ (a : A) (b : B), …` needs a comma before the body (as in `OneDepth`), and
+  a nested `∃ (x : A) (y : B), …` inside such a binder list does not parse;
+* `Finset.Disjoint s t` is the membership form here, so `↔ s ∩ t = ∅` is
+  `Finset.disjoint_iff_inter_eq_empty` with `.mp` turning `Disjoint` into `∩ = ∅`; `intro` cannot
+  unfold `Finset.inter`, so one writes `Finset.mem_inter.mpr ⟨…⟩` and contradicts by `rw` + `simp`;
+* `Finset.card_erase_of_mem : #(s.erase a) = #s − 1` (not `+ 1 = #s`), `Finset.card_pos` and
+  `Finset.card_ne_zero` are plain implications, and `Finset.notMem_empty` (not
+  `Finset.mem_empty_iff_false`) is the "not in ∅" lemma.

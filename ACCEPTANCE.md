@@ -3118,3 +3118,62 @@ incantations are (a) `simp only [Finset.mem_inter] at hp`, which matches the ins
 metavariable, (b) `refine ⟨a, ?_⟩` instead of `⟨a, by …⟩`, (c) naming the finsets (`s := _`, `t := _`),
 and (d) binding intermediates with `have`.  `JSP90.exists_mem_sdiff_pair_of_card_ge_three` of
 `Split.lean` is unusable from `SplitSharp.lean` for the same reason.
+
+---
+
+## Round 109 — `JSPProblem/Chain.lean`: the DECREASE at a hard 1-cut, and the block-cut bound
+
+Attack family 50, on the **packing-number axis**.  What is new is quantitative: round 48's 1-cut
+axis (a) counted the charged parts and (b) named one missing lemma, `oneDepth_le_of_packing`.
+
+### The new theorem of this round
+
+**`JSP90.OneSplit.packing_part_le`** — *the decreasing lemma*.  If every packing of odd cycles of `G`
+has at most `r` members, `sp` is a 1-cut of `G`, `s` is the number of its non-bipartite parts and
+`i` is one of them, then **every packing of odd cycles inside `T_i` has at most `r + 1 − s`
+members**.  Proof: a nonempty packing inside `T_i` together with one odd cycle in each of the
+*other* non-bipartite parts is a packing of `G` — the parts are pairwise disjoint — of size
+`|𝒞| + (s − 1)`, so `|𝒞| + s − 1 ≤ r`.  For `s = 2` this is a **strict** decrease
+(`OneSplit.packing_part_le_lt`), and it is the induction step of the classical proof at a cut
+vertex, which was not available in this development before this round.
+
+Consequences:
+
+* `OneSplit.packing_part_no_decrease_of_oneSide` — at a **one-sided** 1-cut (`s = 1`) the bound is
+  inherited unchanged: the descent stalls.  This is the machine-checked form of round 48's negative
+  result number 1.
+* **`JSP90.closeToBipartite_of_1split_of_decreasing`** — **a new instance of the headline theorem**
+  along the 1-cut axis: if the `s ≥ 2` non-bipartite parts are `m`-close to bipartite then a packing
+  bound `r` forces `CloseToBipartite (1 + s · m) G`, and the hypothesis on the parts is needed only
+  at the **decreased** bound `r + 1 − s` (rather than at `r`, as in round 48's
+  `oddCycleErdosPosa_of_1split_of_bounded_pieces`).  The constant is independent of the number of
+  parts, and no bound on the odd girth, packing weight or number of branch vertices is used.
+
+### The block-cut bound, proved for the hard chains
+
+* `HardCert G d` — a decomposition by `d` successive 1-cuts, each with at least two non-bipartite
+  parts;
+* **`exists_packing_of_hardCert`** — a non-bipartite graph with such a chain of depth `d + 1` has
+  `d + 1` pairwise disjoint odd cycles;
+* **`hardCert_isBipartite_of_packing_le`** — a packing bound `r` forbids a hard chain of `r + 1`
+  cuts.  This is round 48's named missing lemma `oneDepth_le_of_packing` **in the form in which it
+  is true**, and with it the *hard* half of the block-cut bound is a theorem.
+
+### A machine-checked negative result
+
+`JSP90.locIndep_param_cannot_be_lowered` — `LocIndep 1 (K_3)` holds while `¬ LocIndep 0 (K_3)`
+(`LocIndep 0` ⟺ bipartite).  The classical descent therefore **cannot** be stated in Erdős's own
+parameter, because `LocIndep` is monotone *increasing* in `k`; it runs on the packing number.  This
+is why every statement of this file is in the packing language, which is also the language in which
+the research statement `JSP90.OddCycleErdosPosa r` lives.
+
+### What is *not* proved
+
+`jsp_000090_main` is not declared and `JSP90.OddCycleErdosPosa r` is unchanged.  The remaining
+obstruction is located exactly: the **one-sided chains** (cut vertices with a single non-bipartite
+side).  They cannot be bounded by the packing number — a triangle with a pendant path has packing
+number `1` and arbitrarily long such chains — and in the classical proof they are handled by the
+block-cut tree and the short-C-path lemma (a C-path of length `≤ 2r + 1` between two disjoint odd
+cycles).  `lake build` succeeds (1260 jobs), **0 `sorry`, 0 `admit`**, so `score.py --strict-prize`
+reports `build_ok = true, partial_ok = true, missing_theorems = ["jsp_000090_main"]`.  No award
+claim is made.

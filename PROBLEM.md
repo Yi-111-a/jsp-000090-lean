@@ -494,3 +494,33 @@ The corrected witness `JSP90.splitWitness n` on `Fin n × Bool` — the same two
 
 `jsp_000090_main` remains undeclared and `JSP90.OddCycleErdosPosa r` (Reed–Robertson–Seymour–Thomas)
 is unchanged: the remaining obstruction is the general, 3-connected case.
+
+## Round 109 — `JSPProblem/Chain.lean`: the decrease at a hard 1-cut, and the block-cut bound
+
+The class axis is closed on both sides (rounds 104–108), so this round works on the packing-number
+axis, on its *quantitative* content: what a 1-cut does to the packing bound.
+
+* **`JSP90.OneSplit.packing_part_le`**: under a packing bound `r`, a non-bipartite part `T_i` of a
+  1-cut whose `s` non-bipartite parts satisfies **packing number of `G[T_i]` ≤ `r + 1 − s`**.  For
+  `s = 2` the bound strictly decreases (`packing_part_le_lt`); the input is
+  `OneSplit.oddCycle_family_erase`, one odd cycle in each of the other non-bipartite parts,
+  pairwise disjoint and as many as there are parts;
+* **`JSP90.OneSplit.packing_part_no_decrease_of_oneSide`**: at a one-sided 1-cut (`s = 1`) the bound
+  is inherited unchanged — the descent stalls, the machine-checked form of round 48's negative
+  result number 1;
+* **`JSP90.closeToBipartite_of_1split_of_decreasing`**: a new instance of the headline theorem along
+  the 1-cut axis whose hypothesis on the parts is needed only at the **decreased** bound
+  `r + 1 − s`, with the constant `1 + s · m`, independent of the number of parts and with no bound
+  on the odd girth, packing weight or number of branch vertices;
+* **`JSP90.hardCert_isBipartite_of_packing_le`**: a packing bound `r` forbids a chain of `r + 1`
+  cut vertices *each of which separates two non-bipartite sides*
+  (`exists_packing_of_hardCert`: such a chain gives `r + 1` disjoint odd cycles).  This is round
+  48's named missing lemma `oneDepth_le_of_packing` in the form in which it is true;
+* **`JSP90.locIndep_param_cannot_be_lowered`** (machine-checked negative result): `LocIndep 1 (K_3)`
+  holds while `¬ LocIndep 0 (K_3)`, so the descent cannot be stated in Erdős's own parameter — it
+  runs on the packing number.
+
+The remaining obstruction is located exactly: the **one-sided chains** (cut vertices with a single
+non-bipartite side), which cannot be bounded by the packing number and need the block-cut tree and
+the short-C-path lemma.  `jsp_000090_main` remains undeclared and
+`JSP90.OddCycleErdosPosa r` is unchanged.

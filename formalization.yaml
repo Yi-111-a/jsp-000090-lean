@@ -2,28 +2,38 @@ jsp_id: JSP-000090
 catalog_url: https://github.com/TheJustinSunPrize/awards
 status: wip
 prize_ready: false
-last_round: 108
+last_round: 109
 last_round_summary: |
-  Round 108 -- THE SPLIT-GRAPH WITNESS, AND THE LOWER BOUND f(k) >= k + 1 (attack family 49).  New
-  module lean/JSPProblem/SplitSharp.lean (29 declarations, 0 sorry/admit, lake build OK with 1259
-  jobs), imported from the root module JSPProblem.lean, plus one line in lean/JSPProblem/Deficiency.lean
-  (isIndepSet_of_mem_indepSets) and a correction in place of round 107's Part 4.  Round 107 had named
-  the witness on which the constant k+1 of erdos73On_of_splitPartition is attained and left its
-  LocIndep proof undone; that witness was WRONG (K_{k+2,k+2} minus a perfect matching is bipartite, so
-  its "clique side" carries no edge and it is not a split graph at all, and the independent set it
-  proposed is not independent).  The correct witness is JSP90.splitWitness n on Fin n x Bool, with
-  Adj p q <-> p.1 != q.1 and not (p.2 = false and q.2 = false): A = {(i,false)} independent, B =
-  {(i,true)} a clique, cross edge a_i ~ b_j iff i != j.  Proved: splitWitness_splitPartition,
-  not_isolatedPair_splitWitness, locIndep_splitWitness (LocIndep k (splitWitness (k+2))), indepCard_two
-  and maxDef_splitWitness (MaxDef (splitWitness (k+2)) = k, the exact value of the hypothesis),
-  closeToBipartite_splitWitness, not_closeToBipartite_splitWitness, closeToBipartite_iff_splitWitness
-  (CloseToBipartite m (splitWitness (k+2)) <-> k+1 <= m) and -- THE HEADLINE OF THIS ROUND --
-  not_erdos73On_splitWitness (~Erdos73On k k for every k >= 1, i.e. the constant f(k) of Erdos #73
-  satisfies f(k) >= k+1), the first machine-checked lower bound on that constant strictly larger than
-  the f(k) >= k of rounds 39/104 and the first statement about the answer itself rather than about a
-  class; erdos73On_of_splitPartition_optimal closes the axis.  NOT proved: jsp_000090_main; the
-  blocker JSP90.OddCycleErdosPosa r (Reed-Robertson-Seymour-Thomas, 3-connected case) is unchanged,
-  and f(k) >= k+1 is a lower bound whereas the theorem needs a finite f(k).
+  Round 109 -- THE DECREASE AT A HARD 1-CUT, AND THE BLOCK-CUT BOUND (attack family 50).  New
+  module lean/JSPProblem/Chain.lean (18 declarations, 0 sorry/admit, lake build OK with 1260 jobs),
+  imported from the root module JSPProblem.lean.  Round 108 closed the class axis and named the
+  packing-number axis; this round works on its quantitative content.  What JSPProblem/Connect.lean
+  (round 48) had along the 1-cut axis was a COUNT of the charged parts
+  (OneSplit.card_nonBipartiteParts_le) and an instance with the constant 1 + m*r; what it lacked is
+  how much the packing bound DROPS at a 1-cut.  Proved: OneSplit.oddCycle_family_erase (one odd
+  cycle in each of the other non-bipartite parts, pairwise disjoint, as many as there are parts),
+  -- THE HEADLINE OF THIS ROUND -- OneSplit.packing_part_le (under a packing bound r a non-bipartite
+  part of a 1-cut with s non-bipartite parts has packing number at most r + 1 - s, so for s = 2 the
+  packing number STRICTLY DECREASES: packing_part_le_lt), OneSplit.packing_part_no_decrease_of_oneSide
+  (at a one-sided 1-cut, s = 1, the bound is inherited unchanged -- the descent stalls, the
+  machine-checked form of round 48's negative result), and closeToBipartite_of_1split_of_decreasing,
+  erdos73On_of_1split_of_decreasing, closeToBipartite_of_1split_of_decreasing_pack -- A NEW INSTANCE
+  OF THE HEADLINE THEOREM along the 1-cut axis whose hypothesis on the parts is needed only at the
+  DECREASED bound r + 1 - s (constant 1 + s*m, independent of the number of parts, no bound on the
+  odd girth, packing weight or branch vertices).  Part 3 proves THE BLOCK-CUT BOUND for the hard
+  chains: HardCert G d (d successive 1-cuts each separating two non-bipartite sides),
+  exists_packing_of_hardCert (such a chain of length d+1 gives d+1 pairwise disjoint odd cycles) and
+  hardCert_isBipartite_of_packing_le (a packing bound r forbids a hard chain of r+1 cuts) -- round
+  48's named missing lemma oneDepth_le_of_packing IN THE FORM IN WHICH IT IS TRUE.  A
+  MACHINE-CHECKED NEGATIVE RESULT was found on the way:
+  JSP90.locIndep_param_cannot_be_lowered shows LocIndep 1 (K_3) while ~LocIndep 0 (K_3), i.e. the
+  classical descent cannot be stated in Erdos's own parameter (LocIndep is monotone INCREASING in
+  k); every statement of the file is therefore in the packing language.  NOT proved:
+  jsp_000090_main; the blocker JSP90.OddCycleErdosPosa r is unchanged, and the remaining obstruction
+  is located exactly: the ONE-SIDED chains (a single non-bipartite side at a cut vertex), which
+  cannot be bounded by the packing number (triangle with a pendant path: packing number 1, arbitrary
+  chain length) and need the block-cut tree and the short-C-path lemma.
+
 
 github_owner: Yi-111-a
 lean_repository: https://github.com/Yi-111-a/jsp-000090-lean

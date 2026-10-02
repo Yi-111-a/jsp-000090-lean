@@ -946,6 +946,47 @@ Round 107's Part 4 text (the `K_{k+2,k+2}` minus a perfect matching) has been co
 was bipartite, so it was never a split graph, and the independent set it proposed was not
 independent.  `jsp_000090_main` is still not declared — the *upper* bound on `f(k)`, i.e. Erdős #73
 itself, is unchanged.
+
+## `JSPProblem/Chain.lean` (round 109) — the DECREASE at a hard 1-cut, and the block-cut bound
+
+The **fiftieth** attack family, and the first one to work on the *quantitative* content of the
+classical descent along the 1-cut axis of `JSPProblem/Connect.lean` (round 48).  What that axis had
+was a *count* of the charged parts (`OneSplit.card_nonBipartiteParts_le`) and an instance with the
+constant `1 + m * r`; what it lacked is **how much the packing bound drops** at a 1-cut.
+
+* **`JSP90.OneSplit.packing_part_le`** — **THE DECREASING LEMMA.**  Under a packing bound `r`, a
+  non-bipartite part `T_i` of a 1-cut whose `s` non-bipartite parts are all non-bipartite satisfies
+  `packing number of G[T_i] ≤ r + 1 - s`: a packing inside the part, together with one odd cycle in
+  each of the *other* non-bipartite parts, is a packing of `G` (the parts are pairwise disjoint), so
+  `|𝒞| + (s − 1) ≤ r`.  For `s = 2` the bound **strictly** decreases
+  (`JSP90.OneSplit.packing_part_le_lt`).  The input is
+  `JSP90.OneSplit.oddCycle_family_erase`: one odd cycle in each of the other non-bipartite parts,
+  pairwise disjoint, and as many as there are parts;
+* **`JSP90.OneSplit.packing_part_no_decrease_of_oneSide`** — at a *one-sided* 1-cut (`s = 1`) the
+  bound is inherited unchanged: the descent genuinely stalls there.  This is the machine-checked
+  form of round 48's negative result number 1;
+* **`JSP90.closeToBipartite_of_1split_of_decreasing`** — **a new instance of the headline theorem**
+  along the 1-cut axis whose hypothesis on the parts is needed only at the **decreased** bound
+  `r + 1 − s`, constant `1 + s * m`, independent of the number of parts, with no bound on the odd
+  girth, packing weight or number of branch vertices;
+* **`JSP90.HardCert`**, **`JSP90.exists_packing_of_hardCert`**, **`JSP90.hardCert_isBipartite_of_packing_le`**
+  — **the block-cut bound, proved for the hard chains**: a chain of `d` successive 1-cuts *each of
+  which separates two non-bipartite sides* gives `d` pairwise disjoint odd cycles, so a packing bound
+  `r` forbids a hard chain of `r + 1` cuts.  This is round 48's named missing lemma
+  `oneDepth_le_of_packing` **in the form in which it is true**, and it is the form the recursion of
+  `JSP90.oddCycleErdosPosa_of_noOneCut_of_bounded_oneDepth` needs;
+* **`JSP90.locIndep_param_cannot_be_lowered`** — **a machine-checked negative result found while
+  writing this file**: the classical descent cannot be stated in Erdős's own parameter, because
+  `LocIndep` is monotone *increasing* in `k`; the witness is `LocIndep 1 (K_3)` together with
+  `¬ LocIndep 0 (K_3)` (`LocIndep 0` ⟺ bipartite).  Every statement of the file is therefore in the
+  packing language, which is also the language in which the research statement
+  `JSP90.OddCycleErdosPosa r` lives.
+
+What remains: **the one-sided chains** (cut vertices with a single non-bipartite side).  They cannot
+be bounded by the packing number — a triangle with a pendant path has packing number `1` and
+arbitrarily long such chains — and are handled in the classical proof by the block-cut tree and the
+short-C-path lemma.  `jsp_000090_main` is still not declared and `JSP90.OddCycleErdosPosa r` is
+unchanged.
 -/
 import JSPProblem.Definitions
 import JSPProblem.Reed
@@ -1005,3 +1046,4 @@ import JSPProblem.Exact
 import JSPProblem.Multi
 import JSPProblem.Split
 import JSPProblem.SplitSharp
+import JSPProblem.Chain
