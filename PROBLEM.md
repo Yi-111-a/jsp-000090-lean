@@ -419,3 +419,23 @@ The missing statement is unchanged: `jsp_000090_main` is still not declared and
 `JSP90.OddCycleErdosPosa r` (the 3-connected case) is untouched — this file relates the two sides of
 Erdős #73 to each other over covers, it does not bound the transversal of a graph whose pieces are
 themselves not covered.
+
+## Round 106 note (`lean/JSPProblem/Multi.lean`)
+
+New attack family, the **complete multipartite axis**.  `multi t n` = the complete multipartite
+graph with `t` parts of `n` vertices (`Fin t × Fin n`).  Proved, with 0 sorry/admit:
+
+* `MaxDef (multi t n) = (t - 2) * n` — the exact value of Erdős's hypothesis on this class
+  (`JSP90.maxDef_multi`, `JSP90.locIndep_multi_iff`);
+* `CloseToBipartite m (multi t n) ↔ (t - 2) * n ≤ m` — the exact value of the conclusion
+  (`JSP90.closeToBipartite_iff_multi`), via the characterisation
+  `JSP90.isBipartite_deleteFinset_multi_iff` ("`G − X` is bipartite iff its surviving vertices lie in
+  at most two parts");
+* **`JSP90.erdos73On_of_multi`** — a new instance of the headline theorem with the **optimal
+  constant `f(k) = k`**, with its optimality machine-checked (`JSP90.erdos73On_of_multi_optimal`,
+  `JSP90.not_closeToBipartite_multi`).
+
+On this class the hypothesis and the conclusion of Erdős #73 coincide, and the class is
+**connected** for `t ≥ 2`, so it is not covered by any anticomplete-decomposition instance of the
+earlier rounds.  `jsp_000090_main` remains undeclared and `JSP90.OddCycleErdosPosa r` (Reed–
+Robertson–Seymour–Thomas) is unchanged: the remaining obstruction is the general, 3-connected case.

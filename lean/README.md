@@ -1374,3 +1374,61 @@ machine-checked optimal on the lower-bound witness `kTriangles k`.
   bipartite" lemma needed by `JSP90.closeToBipartite_of_clique`.
 * `JSP90.maxDef_eq_sum_of_cover` needs `set_option maxHeartbeats 4000000` (the induction over a finset
   of finsets is expensive); the rest of the file is fast.
+
+## Round 106 — `JSPProblem/Multi.lean`: the COMPLETE MULTIPARTITE axis
+
+New file (30 declarations, 0 sorry/admit, `lake build` OK with 1257 jobs), imported from the root
+module `JSPProblem.lean`.  Round 105 proved that both sides of Erdős #73 are exactly additive over
+an **anticomplete** cover and recorded its own limit: an anticomplete cover with two nonempty pieces
+*is* a disconnection, so the additive axis only pays for disconnected graphs.  This round attacks
+the complementary, **connected** family: the complete multipartite graph.
+
+* `JSP90.multi t n` — the complete multipartite graph with `t` parts of `n` vertices on
+  `Fin t × Fin n`, with `multiPart`, `mem_multiPart_iff`, `card_multiPart`, `multiPart_disjoint`,
+  `isIndepSet_multiPart`;
+* `JSP90.card_eq_sum_card_multiPart` — `|X| = ∑ i, |X ∩ P_i|` (the counting lemma, by induction on
+  `X`), and `JSP90.card_le_mul_indepCard_multi` — `|X| ≤ t * α(G[X])`;
+* `JSP90.indepCard_le_multi` — `α(G[X]) ≤ n` (an independent set lies in one part);
+* **`JSP90.maxDef_multi`** — `MaxDef (multi t n) = (t - 2) * n`, the exact value of Erdős's
+  hypothesis on this class, with `JSP90.locIndep_multi_iff`;
+* `JSP90.not_isBipartite_of_tri` (pigeonhole on `Fin 2`), `JSP90.liveParts`,
+  `JSP90.liveParts_le_two_of_isBipartite` (the colours of the live parts inject into `Fin 2`),
+  `JSP90.deadParts`, `JSP90.card_deadParts_add_liveParts`, `JSP90.isBipartite_multi_of_cover`,
+  `JSP90.isBipartite_multi_of_le_two`, and
+  **`JSP90.isBipartite_deleteFinset_multi_iff`** — `G − X` is bipartite iff its surviving vertices lie
+  in at most two parts;
+* **`JSP90.closeToBipartite_iff_multi`** — `CloseToBipartite m (multi t n) ↔ (t - 2) * n ≤ m`, the
+  exact value of the conclusion on this class;
+* **`JSP90.erdos73On_of_multi`** (+ `_univ`, `_optimal`, `not_closeToBipartite_multi`) — **a new
+  instance of the headline theorem with the optimal constant `f(k) = k`**, on a class which is
+  *connected* for `t ≥ 2` (so no anticomplete-decomposition instance applies) and is not a cluster
+  graph for `n ≥ 2`.
+
+`#print axioms` on all of these gives only `[propext, Classical.choice, Quot.sound]`.
+
+### Toolchain notes (this round)
+
+* `Finset.mem_filter` does **not** apply to a membership in a `def` that unfolds to a `filter`: the
+  expected type is `p ∈ filter q s ↔ p ∈ s ∧ q p` and the `p ∈ s` conjunct has to be discharged
+  (`by rw [liveParts, Finset.mem_filter]; simp`, or `Finset.mem_filter.mpr ⟨Finset.mem_univ _, _⟩`).
+  Anonymous constructors `⟨x, h⟩` for a goal `x ∈ (def …)` are *not* usable: the elaborator unfolds
+  `def` and then `Membership.mem` and hits `List.Mem` (a two-constructor inductive) — always go
+  through `Finset.mem_image`/`Finset.mem_filter` explicitly.
+* `Finset.Nonempty s` unfolds to a `Quot.lift`-level membership, so `hp.1` after
+  `obtain ⟨p, hp⟩ := h` fails; use `Finset.sdiff_eq_empty_iff_subset` and
+  `Finset.not_nonempty_iff_eq_empty.mp` instead of projecting.
+* `Nat.sub_mul : (n - m) * k = n * k - m * k` has the *subtrahend first*: `(t - 2) * n` is
+  `Nat.sub_mul t 2 n`, and `Nat.mul_le_mul_left n h` (coefficient first),
+  `Nat.sub_le_sub_left h k` (hypothesis first, then the minuend).
+* `Finset.card_erase_of_mem : a ∈ s → #(s.erase a) = #s - 1`, and a single `rw` rewrites *all*
+  occurrences of the pattern, so both `erase`s go at once.
+* `Finset.card_union_add_card_inter (s t) : #(s ∪ t) + #(s ∩ t) = #s + #t` — `.symm` is the direction
+  that rewrites a sum into a union.
+* `JSP90.card_biUnion_eq_sum` (Cluster.lean) is stated with *that file's* `DecidableEq` instance, so
+  its conclusion cannot be matched against a `Finset.biUnion` elaborated elsewhere; the counting
+  identity is proved locally instead (by induction on the finset of parts).
+* `Set.InjOn f s` unfolds to a **five**-binder `∀ ⦃a⦄, a ∈ s → ⦃b⦄, b ∈ s → f a = f b → a = b`, so
+  `Finset.card_le_card_of_injOn` must be given `intro i hi j hj heq`.
+* `Classical.choose` never reduces, so a colouring built as `d (Classical.choose h)` cannot be
+  rewritten to `d p`; the witness properties have to be fetched with `Classical.choose_spec`.
+* A file that opens a `noncomputable section` needs a bare `end` for it before `end <Namespace>`.

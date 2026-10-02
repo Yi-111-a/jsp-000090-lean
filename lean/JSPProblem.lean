@@ -834,7 +834,26 @@ deliberately not declared.
      `JSP90.erdos73_cluster_notBelowK` shows no `m < k` works.  This file declares **no** `DecidableEq`
      instance (the round-103 toolchain note: a file with a local instance cannot state anything over
      `Fin 3 × Fin k` that mentions an intersection).
- * `JSPProblem.Exact` — **the EXACT-ADDITIVITY axis** (round 105, one new attack family).  It proves
+ * `JSPProblem.Multi` (round 106) — the **complete multipartite axis**: `multi t n` is the complete
+  multipartite graph with `t` parts of `n` vertices on `Fin t × Fin n`;
+  - `JSP90.card_eq_sum_card_multiPart` / `JSP90.card_le_mul_indepCard_multi` — the counting lemmas:
+    a vertex set splits over the parts (`|X| = ∑ i, |X ∩ P_i|`) and has size at most `t * α(G[X])`;
+  - `JSP90.indepCard_le_multi` — `α(G[X]) ≤ n`, because an independent set lies in one part;
+  - **`JSP90.maxDef_multi`** — `MaxDef (multi t n) = (t - 2) * n`, the *exact value of Erdős's
+    hypothesis* on the complete multipartite graphs, with `JSP90.locIndep_multi_iff`;
+  - `JSP90.not_isBipartite_of_tri`, `JSP90.isBipartite_multi_of_le_two`,
+    `JSP90.isBipartite_multi_of_cover` and **`JSP90.isBipartite_deleteFinset_multi_iff`** — the
+    *exact value of the conclusion's side*: `G − X` is bipartite iff the vertices it keeps lie in at
+    most two parts (the counting steps being `JSP90.liveParts_le_two_of_isBipartite`,
+    `JSP90.card_deadParts_add_liveParts`);
+  - **`JSP90.closeToBipartite_iff_multi`** — `CloseToBipartite m (multi t n) ↔ (t - 2) * n ≤ m`,
+    the exact value of the conclusion of Erdős #73 on this class;
+  - **`JSP90.erdos73On_of_multi`** — *a new instance of the headline theorem with the optimal
+    constant `f(k) = k`*, with `JSP90.erdos73On_of_multi_univ`,
+    `JSP90.erdos73On_of_multi_optimal` and `JSP90.not_closeToBipartite_multi` for its optimality.
+    This class is **connected** for `t ≥ 2`, so none of the anticomplete-decomposition instances of
+    rounds 42–48 and 104–105 applies to it;
+* `JSPProblem.Exact` — **the EXACT-ADDITIVITY axis** (round 105, one new attack family).  It proves
    the statement that `JSPProblem/Deficiency.lean` records as *missing* — the **equality**
    `MaxDef G = MaxDef (G[A]) + MaxDef (G[B])` over an anticomplete decomposition of the vertices —
    and pushes the same statement through the conclusion, so that *both* sides of Erdős #73 split
@@ -928,3 +947,4 @@ import JSPProblem.Budget
 import JSPProblem.Cluster
 import JSPProblem.ClusterSharp
 import JSPProblem.Exact
+import JSPProblem.Multi
