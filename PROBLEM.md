@@ -628,3 +628,36 @@ transversal they make possible:
 The one-attachment lemma yields an odd cycle attached **once**, which no transversal pays for; the
 *two-attachment cover* is what pays, and its existence for a 3-connected graph is the unresolved
 part.  `jsp_000090_main` remains undeclared and `JSP90.OddCycleErdosPosa r` is unchanged.
+
+
+---
+
+## Round 115 (`JSPProblem/TwoAttach.lean`): the cover statement, in machine-checked form, and its exact cost
+
+The statement round 112 named as the missing global step is now **written down in Lean** as a `def`
+(`JSP90.TwoAttachCoverExists r ℓ q`: every graph whose odd cycle packings all have at most `r` members
+carries a family `𝒞` of at most `q` vertex sets, each of at most `ℓ` vertices, such that every odd
+cycle meets some member twice), together with the reduction
+`JSP90.oddCycleErdosPosa_of_twoAttachCoverExists` (constant `ℓ * q`) and
+`JSP90.erdos73_of_twoAttachCoverExists` (hence `∀ k, Erdős73 k`, i.e. `jsp_000090_main`).  Nothing is
+assumed: `TwoAttachCoverExists` is stated, not proved.
+
+What is proved around it:
+
+* **`JSP90.exists_oneSidedDeletion`** — for a finite family of nonempty sets there is a deletion set of
+  size `∑ (|X| - 1)` leaving **at most one vertex of each member**; a statement about sets alone, with
+  no graph in it;
+* **`JSP90.closeToBipartite_of_twoAttachCover'`** and
+  **`JSP90.closeToBipartite_of_twoAttachCover'_bounded`** — the cover theorem without the choice
+  function, and its bounded form `ℓ * q`, which is the Erdős–Pósa shape;
+* **`JSP90.cover_cost_min_kTriangles`** — **the minimum cost of a two-attachment cover of
+  `kTriangles k` is exactly `k`**, its odd cycle transversal number: the cover *method* is optimal in
+  constant on the family that makes the constant of Erdős #73 large, so only the *existence* of a
+  small cover is open;
+* **`JSP90.packing_cover_cost_two_of_kTriangles`** — a cover whose members are odd cycles (the
+  triangles of `kTriangles k` **are** a two-attachment packing) costs `2 * k` there, so cover members
+  must be allowed to be vertex sets that are not cycles.
+
+Still missing: `TwoAttachCoverExists` itself, and the absorption of the one-attachment odd cycles of
+`JSP90.oneAttach_of_isCPath_return` by 2-cuts.  `jsp_000090_main` remains undeclared and
+`JSP90.OddCycleErdosPosa r` is unchanged.

@@ -1862,3 +1862,71 @@ keep the hypothesis (`have hne : i ≠ j := h.ne`) instead of destructuring it a
 `▸` on a hypothesis whose value is a bound `Fin` also breaks the motive; rewrite the *value*
 (`rw [ht]`) or convert the literal.  `Fin.mk.inj_iff : ⟨a, ha⟩ = ⟨b, hb⟩ ↔ a = b` needs both proofs
 implicit, and `Fin.ext` takes `a.val = b.val`.
+
+
+---
+
+## Round 115 — `JSPProblem/TwoAttach.lean` (NEW): the **cover statement itself**, and the **exact cost of a cover**
+
+`discovery/JSP-000090/policy.json` (round 112) named as the next single step the **statement** of the
+two-attachment cover: *a finite family `𝒞` of vertex sets with `∑ X ∈ 𝒞, (|X| - 1)` bounded by a
+function of the odd cycle packing number, such that every odd cycle of `G` meets some `X ∈ 𝒞` in two
+vertices*.  Round 115 writes that statement down in Lean — as a `def`, so nothing is assumed — and
+proves what it costs, what it buys, and how good it can possibly be.
+
+### What is proved (36 declarations, `JSPProblem/TwoAttach.lean`)
+
+| result | content |
+| --- | --- |
+| **`JSP90.exists_oneSidedDeletion`** | **A FAMILY OF NONEMPTY SETS HAS A ONE-SIDED DELETION SET**: for a finite family `𝒞` of nonempty sets there is `U` with `|U| ≤ ∑ X ∈ 𝒞, (\|X\| - 1)` and `\|X \ U\| ≤ 1` for every `X ∈ 𝒞`.  **No graph, no cycle and no adjacency occur in the statement**; the induction on `𝒞` spares one vertex per member |
+| `JSP90.exists_twoAttachDeletion`, `JSP90.hitsOddCycles_of_twoAttachCover'` | the deletion set of a cover, and the fact that it meets **every** odd cycle |
+| **`JSP90.TwoAttachCover'`** + **`JSP90.closeToBipartite_of_twoAttachCover'`** | **THE TWO-ATTACHMENT COVER, PICK-FREE**: every member nonempty and every odd cycle meeting some member twice gives `CloseToBipartite (∑ X ∈ 𝒞, \|X\| - 1) G`.  This is `JSPProblem/CPathSkip.lean`'s `TwoAttachCover G 𝒞 pick` **without the choice function**, which the counting never uses and which does not even exist when `V` is empty |
+| **`JSP90.closeToBipartite_of_twoAttachCover'_bounded`** | `ℓ` vertices per member, `q` members ⇒ `CloseToBipartite (ℓ * q) G`: **the Erdős–Pósa shape**, one unit per member of an `r`-sized object |
+| **`JSP90.erdos73On_of_twoAttachCover'`** | **another instance of the headline theorem**, constant independent of `k` |
+| **`JSP90.TwoAttachCoverExists r ℓ q`** | **THE MACHINE-CHECKED GLOBAL TARGET** (a `def`): every graph whose odd cycle packings all have at most `r` members carries a two-attachment cover with at most `q` members of at most `ℓ` vertices |
+| **`JSP90.oddCycleErdosPosa_of_twoAttachCoverExists`** | `TwoAttachCoverExists r ℓ q` ⇒ `OddCycleErdosPosa r`, with the explicit constant `ℓ * q` |
+| **`JSP90.erdos73_of_twoAttachCoverExists`** | `∀ ℓ q, ∀ r, TwoAttachCoverExists r ℓ q` ⇒ `∀ k, Erdős73 k`, i.e. **`jsp_000090_main`**.  The residual difficulty of JSP-000090 is now *one statement of combinatorial existence kind* |
+| `JSP90.TwoAttachPacking`, `JSP90.twoAttachPacking_triangles` | a cover whose members are **odd cycles** exists on the sharp witness: the `k` triangles of `kTriangles k` **are** a two-attachment packing |
+| `JSP90.sum_card_sub_one_tri`, **`JSP90.packing_cover_cost_two_of_kTriangles`** | …but it costs exactly **`2 * k`** there while `k` suffices: **a cover made of cycles loses a factor 2**, so cover members must be allowed to be non-cycles |
+| `JSP90.triPair`, `JSP90.triPairCover`, `JSP90.twoAttachCover'_triPairs`, `JSP90.sum_card_sub_one_triPairs` | the **two-vertex** cover `{0, 1} × {i}` of `kTriangles k`, of cost **exactly `k`** |
+| **`JSP90.cover_cost_ge_of_kTriangles`**, **`JSP90.cover_cost_min_kTriangles`**, **`JSP90.cover_cost_kTriangles_is_optimal`** | **the minimum cost of a two-attachment cover of `kTriangles k` is exactly `k`**, which is its odd cycle transversal number (`JSP90.closeToBipartite_iff`): the cover *method* is **optimal in constant** on the family that makes Erdős #73 hard.  Only the *existence* of a small cover is open |
+
+### Not proved
+
+`jsp_000090_main` is still not declared and `JSP90.OddCycleErdosPosa r` is unchanged:
+`TwoAttachCoverExists` is **stated**, not proved.  Two statements are now missing, and both are about
+constructing `𝒞`: (i) the existence of a small two-attachment cover for a 3-connected graph of packing
+number `r`, and (ii) the absorption (along 2-cuts, with a bound on the number of cuts) of the
+**one-attachment** odd cycles of `JSP90.oneAttach_of_isCPath_return`, which no cover pays for.
+
+### Toolchain notes (round 115)
+
+* `Finset.induction_on` **reverts the cover hypothesis into the motive**, so the induction hypothesis
+  is a *function* of the cover, and in the `insert` case the hypothesis in scope is the cover of
+  `insert X 𝒞`; `Finset.sum_insert` (all arguments explicit) closes the sum;
+* **a `have` with an explicit type is mandatory before any membership application**: `hc.1 Y e`
+  expects `Y ∈ 𝒞` (the *smaller* family of `insert`), and Lean unifies `insert X ?s` against the rigid
+  variable `𝒞` by setting `?s := insert X 𝒞`, producing the nonsense type `Y ∈ insert X (insert X 𝒞)`.
+  This is why `mem_insert_family` states the result with the inserted member explicit and must be
+  applied through a `have`;
+* `JSP90.DisjointFamily` (`JSPProblem/Packing.lean`) is `X ∩ Y = ∅` **with that file's `DecidableEq`
+  baked in**: a statement about `∩` in this file needs the same anonymous local instances
+  (`local instance : DecidableEq V := Classical.decEq V`), otherwise `rw` and
+  `Finset.card_eq_zero.mpr` fail on `Inter` instance mismatches; the same holds for the
+  `Fin 3 × Fin k` instances of `JSPProblem/Optimal.lean`.  **The instances must be NAMED**
+  (`instDecidableEqTwoAttachV` …) or the auto-generated names clash with those of other files when
+  everything is imported into `JSPProblem.lean`;
+* `Finset.card_sdiff : #(t \ s) = #t - #(s ∩ t)` is **not** `#t - #s`, `Finset.inter_eq_self` and
+  `Finset.not_mem_empty` do **not** exist at this revision: the deletion set is built with `X.erase p`
+  (`Finset.card_erase_of_mem`) and inverted with `Finset.mem_erase (s := X) (b := p)` — `.mp` on
+  `Finset.mem_erase` with all implicits free misfires on the `∉` side;
+* `Finset.mem_image` puts the **equation** on the right (`∃ b ∈ s, f b = a`), and the version to use
+  for sums is `Finset.sum_image` with `Set.InjOn g ((Finset.univ : Finset (Fin k)) : Set (Fin k))` —
+  which is **not** the same term as `Set.InjOn g Set.univ`;
+* two-element finsets are best written literally (`{(⟨0, by decide⟩, i), (⟨1, by decide⟩, i)}`) and
+  measured by `simp [triPair]`;
+* `closeToBipartite_iff (k := k) (m := k - 1)` is **not** refutable by `omega` at `k = 0` (`k - 1 = 0`
+  there): optimality statements must quantify `∀ m, m < k`, never `k - 1`;
+* **`harness/score.py` counts the words `sorry`/`admit` anywhere in a `.lean` file**, prose included:
+  writing "nothing is sorry" in a docstring turned `partial_ok` off.  Docstrings must avoid both
+  words.

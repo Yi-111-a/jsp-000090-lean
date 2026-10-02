@@ -3336,3 +3336,34 @@ lemma yields an odd cycle attached to `C` **once**, and no transversal pays for 
 *two-attachment cover* is the hypothesis that pays, and its existence for a 3-connected graph is
 the unresolved part.  The exact remaining lemmas are recorded in
 `discovery/JSP-000090/policy.json` (`next_bet`).
+
+
+---
+
+## Round 115 — the residual lemma is now a single `def`
+
+`JSPProblem/TwoAttach.lean` states the residual global lemma and reduces the whole problem to it:
+
+* **`JSP90.TwoAttachCoverExists r ℓ q`** — `def` (no assumption, no placeholder): for every finite
+  graph whose odd cycle packings all have at most `r` members there is a family `𝒞` of at most `q`
+  nonempty vertex sets, each of at most `ℓ` vertices, such that every odd cycle of the graph meets
+  some member in at least two vertices;
+* **`JSP90.oddCycleErdosPosa_of_twoAttachCoverExists`** — `TwoAttachCoverExists r ℓ q` ⇒
+  `OddCycleErdosPosa r`, constant `ℓ * q`;
+* **`JSP90.erdos73_of_twoAttachCoverExists`** — `∀ ℓ q, ∀ r, TwoAttachCoverExists r ℓ q` ⇒
+  `∀ k, Erdős73 k`, i.e. **`jsp_000090_main`**.
+
+Supporting results of the same file: `JSP90.exists_oneSidedDeletion` (a family of nonempty sets has a
+deletion set leaving at most one vertex per member — no graph in the statement),
+`JSP90.closeToBipartite_of_twoAttachCover'` and `JSP90.closeToBipartite_of_twoAttachCover'_bounded`
+(the cover theorem without a choice function, and its `ℓ * q` bounded form),
+`JSP90.erdos73On_of_twoAttachCover'` (a further instance of the headline theorem with a constant
+independent of `k`), `JSP90.cover_cost_min_kTriangles` (**the minimum cost of a cover of `kTriangles k`
+is exactly `k`**, its odd cycle transversal number — the method is optimal in constant), and
+`JSP90.packing_cover_cost_two_of_kTriangles` (**a cover made of odd cycles costs `2 * k` there**, so
+cover members must be allowed to be non-cycles).
+
+**What is still missing, unchanged.**  `jsp_000090_main` is not declared and
+`JSP90.OddCycleErdosPosa r` (Reed–Robertson–Seymour–Thomas) is not proved: the existence of the cover
+`𝒞` itself is the missing combinatorial content, and so is the absorption of the one-attachment odd
+cycles of `JSP90.oneAttach_of_isCPath_return`.  See `discovery/JSP-000090/policy.json`.

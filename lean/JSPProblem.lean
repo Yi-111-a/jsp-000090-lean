@@ -1101,6 +1101,50 @@ alone.  The two-attachment **cover** of round 112 still needs its global existen
 one-attachment odd cycles of `JSP90.oneAttach_of_isCPath_return` still need to be absorbed by a
 2-cut.  `JSP90.OddCycleErdosPosa r` and `jsp_000090_main` are unchanged.
 
+## `JSPProblem/TwoAttach.lean` (round 115) — the **cover statement itself**, in machine-checked form,
+   and the **exact cost of a cover**
+
+The **fifty-fifth** attack family, and the one `discovery/JSP-000090/policy.json` named as the next
+single step: *state the cover statement*.  `JSPProblem/CPathSkip.lean` (round 112) had the
+two-attachment cover as a **hypothesis**; this file isolates what it costs, what it buys, and what
+is still missing — and it settles the two design questions about the cover route.
+
+* **`JSP90.exists_oneSidedDeletion`** — **A FAMILY OF NONEMPTY SETS HAS A ONE-SIDED DELETION SET**:
+  for a finite family `𝒞` of nonempty sets there is `U` with `|U| ≤ ∑ X ∈ 𝒞, (|X| - 1)` and
+  `|X \ U| ≤ 1` for every `X ∈ 𝒞`.  **No graph occurs in this statement** — the induction spares one
+  vertex per member;
+* **`JSP90.TwoAttachCover'`** and **`JSP90.closeToBipartite_of_twoAttachCover'`** — the
+  two-attachment cover **without the choice function** of round 112 (`TwoAttachCover G 𝒞 pick`), for
+  which the pick is unnecessary and ill-defined when `V` is empty; the transversal is the deletion set
+  of the lemma above (`JSP90.hitsOddCycles_of_twoAttachCover'`), of cost `∑ X ∈ 𝒞, |X| - 1`;
+* **`JSP90.closeToBipartite_of_twoAttachCover'_bounded`** — `ℓ` vertices per member and `q` members
+  give `CloseToBipartite (ℓ * q) G`: **the Erdős–Pósa shape**, one unit per member of an `r`-sized
+  object.  With **`JSP90.erdos73On_of_twoAttachCover'`** this is another instance of the headline
+  theorem, with a constant independent of `k`;
+* **`JSP90.TwoAttachCoverExists r ℓ q`** — **THE MACHINE-CHECKED GLOBAL TARGET**, a `def` (nothing
+  assumed, no placeholder): every graph whose odd cycle packings all have at most `r` members carries a
+  two-attachment cover with at most `q` members of at most `ℓ` vertices.  Then
+  **`JSP90.oddCycleErdosPosa_of_twoAttachCoverExists`** (constant `ℓ * q`) and
+  **`JSP90.erdos73_of_twoAttachCoverExists`**: `∀ ℓ q, ∀ r, TwoAttachCoverExists r ℓ q` implies
+  `∀ k, Erdős73 k`, i.e. `jsp_000090_main`.  **The residual difficulty of JSP-000090 is now one
+  statement of combinatorial existence kind**;
+* **`JSP90.TwoAttachPacking`, `JSP90.twoAttachPacking_triangles`, `JSP90.sum_card_sub_one_tri`,
+  `JSP90.packing_cover_cost_two_of_kTriangles`** — a cover whose members are **odd cycles** (a
+  two-attachment *packing*) exists on the sharp witness, but costs exactly **`2 * k`** there, while
+  `k` suffices: the members of a cover must be allowed to be **non-cycles**;
+* **`JSP90.triPairCover`, `JSP90.twoAttachCover'_triPairs`, `JSP90.cover_cost_ge_of_kTriangles`,
+  `JSP90.cover_cost_min_kTriangles`, `JSP90.cover_cost_kTriangles_is_optimal`** — the two-vertex cover
+  `{0, 1} × {i}` of `kTriangles k` costs **exactly `k`**, and **no cover of `kTriangles k` costs less
+  than `k`**: the minimum cover cost is the odd cycle transversal number, so the cover *method* is
+  optimal in constant on the family that makes Erdős #73 hard.  Only the *existence* of a small cover
+  is open.
+
+What remains: `TwoAttachCoverExists` itself.  Together with the round-114 obstruction — the
+one-attachment odd cycles of `JSP90.oneAttach_of_isCPath_return` must be absorbed by a 2-cut before a
+cover can be built, and that absorption is bounded by nothing here — the two missing statements are
+now *both* about the construction of `𝒞`.  `JSP90.OddCycleErdosPosa r` and `jsp_000090_main` are
+unchanged.
+
 -/
 import JSPProblem.Definitions
 import JSPProblem.Reed
@@ -1165,3 +1209,4 @@ import JSPProblem.Piece
 import JSPProblem.CPath
 import JSPProblem.CPathSkip
 import JSPProblem.CPathPair
+import JSPProblem.TwoAttach

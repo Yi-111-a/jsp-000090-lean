@@ -106,27 +106,25 @@ build:
     module: lean/JSPProblem/CPathPair.lean
     attack_family: 54
     status: wip
-    new_declarations: 52
+    new_declarations: 36
     sorry: 0
     admit: 0
     headline_results:
-      - JSP90.IsCPathPair (the FAN AT DEPTH TWO: two internally vertex-disjoint C-paths to a common target)
-      - JSP90.IsCPathPair.inter_ne (the two interiors never meet)
-      - JSP90.arcPairFun (the two-path arc cycle, a generalisation of JSPProblem/Fan.lean's arcFun)
-      - JSP90.arcPairFun_inj (the two-path arc cycle is simple)
-      - JSP90.arcPairFun_adj (every step is an edge, including the closing step)
-      - JSP90.arcPair_isOddCycle and JSP90.card_arcPair (an odd cycle with exactly e + d1 + d2 vertices)
-      - JSP90.exists_oddCycle_twoAttach_of_isCPathPair (MADER'S TWO-ATTACHMENT LEMMA)
-      - JSP90.arc_sum_ge_of_shortest (a shortest odd cycle is thick)
-      - JSP90.oddArc_eq_two_of_fan_of_shortest (the odd arc of a fan has length m - 2)
-      - JSP90.shortArc_of_pairFan (the short-arc lemma re-derived from Mader's lemma)
-      - JSP90.IsCPath_edgePath and JSP90.isCPathPair_of_adj (a fan is derived from two adjacencies)
-      - JSP90.twoAttach_kTriangles_one (the two-attachment hypothesis holds on kTriangles 1)
-      - JSP90.not_twoAttach_kTriangles_two (MACHINE-CHECKED NEGATIVE RESULT: no odd cycle of kTriangles 2 is two-attached)
+      - JSP90.TwoAttachCover' and JSP90.closeToBipartite_of_twoAttachCover' (the two-attachment cover WITHOUT the choice function of round 112)
+      - JSP90.exists_oneSidedDeletion (a family of nonempty sets has a deletion set leaving at most one vertex per member; no graph in the statement)
+      - JSP90.closeToBipartite_of_twoAttachCover'_bounded (cover with l vertices per member and q members gives CloseToBipartite (l*q) G: the Erdos-Posa shape)
+      - JSP90.TwoAttachCoverExists r l q (THE MACHINE-CHECKED GLOBAL TARGET, a def: no assumption)
+      - JSP90.oddCycleErdosPosa_of_twoAttachCoverExists (TwoAttachCoverExists r l q implies OddCycleErdosPosa r, constant l*q)
+      - JSP90.erdos73_of_twoAttachCoverExists (hence forall k, Erdos73 k, i.e. jsp_000090_main)
+      - JSP90.erdos73On_of_twoAttachCover' (another instance of the headline theorem, constant independent of k)
+      - JSP90.twoAttachPacking_triangles and JSP90.sum_card_sub_one_tri (the triangles of kTriangles k ARE a two-attachment packing, of cost 2k)
+      - JSP90.packing_cover_cost_two_of_kTriangles (a cover made of odd cycles loses a factor 2: members must be allowed to be non-cycles)
+      - JSP90.cover_cost_ge_of_kTriangles and JSP90.cover_cost_min_kTriangles (the MINIMUM cost of a cover of kTriangles k is exactly k, its odd cycle transversal number)
+      - JSP90.cover_cost_kTriangles_is_optimal (the cover method is optimal in constant on the sharp witness)
     next_step:
-      - the two-attachment COVER of round 112 for a 3-connected graph (unchanged global step): Mader's lemma supplies one odd cycle through a fan vertex, not the hypothesis for every odd cycle
+      - the existence of the cover itself: JSP90.TwoAttachCoverExists r l q for a 3-connected graph of odd cycle packing number r (unchanged global step, now a def)
       - the absorption of the ONE-attachment odd cycles (JSP90.oneAttach_of_isCPath_return) along 2-cuts, with the bound on the number of such 2-cuts
-      - a non-vacuity witness for the two-attachment hypothesis on a connected graph (a wheel): the odd cycles of a wheel all meet the rim twice
+      - a non-vacuity witness for a two-attachment cover on a CONNECTED graph (the wheel): every odd cycle of a wheel meets the rim twice
       - JSP90.OddCycleErdosPosa r (unchanged: this is the missing jsp_000090_main)
     prize_ready: false
     missing_theorems: [jsp_000090_main]
