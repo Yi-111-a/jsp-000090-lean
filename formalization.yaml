@@ -2,38 +2,47 @@ jsp_id: JSP-000090
 catalog_url: https://github.com/TheJustinSunPrize/awards
 status: wip
 prize_ready: false
-last_round: 119
+last_round: 120
 last_round_summary: |
-  Round 119 -- THE PETAL SET: THE ONE-ATTACHMENT ODD CYCLES AND A QUANTITATIVE ABSORPTION STEP
-  (attack family 57).  New module lean/JSPProblem/Petal.lean (21 declarations, 0 sorry/admit, lake
-  build OK with 1268 jobs), imported from the root module JSPProblem.lean.  Round 118's next_bet asked
-  for the counting half of the Mader step (how many one-attachment odd cycles hang off a shortest odd
-  cycle); this round does not count them but introduces the finite quantity that controls them --
-  JSP90.PetalSet G C, the set of vertices of C lying ALONE on some odd cycle of G (the attachment
-  points of the petals) -- and proves the transversal certificate and the absorption step built on it.
-  New objects: JSP90.OneAttach G C D (a petal: an odd cycle meeting C in exactly one vertex) and
-  JSP90.PetalSet G C, with petalSet_subset, card_petalSet_le_card, petalSet_empty_of_isBipartite and
-  oneAttach_mem_petalSet.  HEADLINE 1: JSP90.petalSet_transversal -- if every odd cycle of G meets the
-  odd cycle C, then a SUBSET of C with at most |C| - 1 + |PetalSet G C| vertices meets every odd cycle
-  of G (certificate C.erase c u PetalSet G C, for any c in C).  HEADLINE 2:
-  JSP90.closeToBipartite_of_residue_petalSet -- the residue absorption step of round 40
-  (CloseToBipartite q (G - C) => CloseToBipartite (q + |C|) G) becomes
-  CloseToBipartite (q + |PetalSet G C| + (|C| - 1)) G, and closeToBipartite_of_residue_petalSet_zero
-  gives q + |C| - 1, ONE VERTEX BETTER THAN ROUND 40, in the case of an empty petal set; so the |C|
-  term is only ever needed to pay for the attachment points.  ALSO: erdos73On_of_petalSet, a NEW INSTANCE
-  OF THE HEADLINE THEOREM with the growing parameter a (CloseToBipartite (a + |C| - 1) G, constant
-  independent of k, and LocIndep not even needed for that step); erdos73On_of_petalSet_of_residue, the
-  two-parameter instance; closeToBipartite_of_petalSet_empty and closeToBipartite_of_twoAttach', which
-  RE-DERIVE round 111's two-attachment transversal (bound |C| - 1) because the two-attachment
-  hypothesis is exactly "PetalSet G C is empty"; and JSP90.IsOddCycle.of_finset_ext /
-  of_finset_eq, transport lemmas that remove the round-53 DecidableEq-instance pitfall for any later
-  concrete witness.  NOT proved: the bound |PetalSet G C| <= phi(k) -- with the absorption step now
-  quantified, this is the single missing lemma and it is PURELY NUMERICAL; the nine-vertex witness
-  that the petal term cannot be dropped (triangle with a pendant triangle at each vertex) was
-  elaborated this round but dropped from the build, its construction and the four elaboration pitfalls
-  being recorded in discovery/JSP-000090/policy.json.  NOT proved: jsp_000090_main (still not
-  declared) and JSP90.OddCycleErdosPosa r, which is unchanged; round 119 improves the absorption step,
-  not the theorem.
+  Round 120 -- THE CHARGING OF THE ATTACHMENT SET AGAINST THE DEFICIENCY, A NEW INSTANCE WITH CONSTANT
+  k + |C| - 1, AND THE TWO MACHINE-CHECKED WITNESSES ROUND 119 PROMISED (attack family 58).  TWO new
+  modules, 132 declarations, 0 sorry/admit, lake build OK with 1270 jobs:
+  lean/JSPProblem/PetalFinite.lean (32 declarations; the two concrete witnesses with the COMPUTABLE
+  DecidableEq instance: g7 on Fin 7, K_4 on {0,1,2,3} with an independent set {4,5,6} where
+  4 ~ {0,3}, 5 ~ {1,3}, 6 ~ {2,3}; and prop on Fin 9, the propeller, the triangle 0-1-2-0 with a
+  pendant triangle at each vertex; plus the exhaustive LocIndep decisions locIndep_two_g7,
+  not_locIndep_one_g7, locIndep_three_prop, not_locIndep_two_prop) and
+  lean/JSPProblem/PetalBound.lean (100 declarations; the general theory with the CLASSICAL instance,
+  which is the one baked into JSP90.IsOddCycle and JSP90.mem_petalSet).  HEADLINE 1 (negative):
+  JSP90.not_petalSet_le_maxDef_g7 -- in g7 the attachment set PetalSet g7 {0,1,2} has THREE vertices
+  while MaxDef g7 = 2, so |PetalSet G C| <= MaxDef G is FALSE; any function phi with
+  |PetalSet G C| <= phi (MaxDef G) must satisfy phi 2 >= 3.  The round-119 numerical blocker cannot be
+  closed by comparing the attachment set with the deficiency.  HEADLINE 2 (positive): the attachment
+  points lying on a PACKING of petals number at most MaxDef G
+  (JSP90.card_petalSet_inter_biUnion_le_card, card_petalSet_inter_biUnion_le_maxDef), hence
+  JSP90.card_petalSet_le_maxDef_of_cover proves |PetalSet G C| <= MaxDef G under a packing cover, and
+  JSP90.closeToBipartite_of_petalPackingCover / erdos73On_of_petalPackingCover is A NEW INSTANCE OF THE
+  HEADLINE THEOREM with the constant k + |C| - 1 (triangle level k + 2, odd-girth form k + l - 1), with
+  the class-level def JSP90.OneCyclePetal G l and the reduction erdos73On_of_oneCyclePetal.  HEADLINE 3
+  (the nine-vertex witness promised by round 119): the propeller satisfies the residue hypothesis
+  (every odd cycle meets C), PetalSet prop C = C, and its odd cycle transversal number is exactly
+  3 = |C|, so JSP90.not_closeToBipartite_two_prop_of_cardC refutes CloseToBipartite (|C| - 1) prop: the
+  |C| - 1 term of JSP90.closeToBipartite_of_petalSet_empty, and hence round 111's two-attachment
+  transversal, cannot be dropped once petals exist; the propeller's three pendant triangles ARE a
+  packing of petals covering the attachment set, so the new instance applies to it
+  (JSP90.erdos73On_propeller, JSP90.oneCyclePetal_prop).  ALSO: JSP90.isOddCycle_triple (a pairwise
+  adjacent triple of distinct vertices is an odd cycle, generic), JSP90.card_petalSet_le_maxDef_add
+  and JSP90.exists_petal_hits_biUnion_offC (what a maximal petal packing does NOT pay for: the
+  attachment points whose petals all pass through a common point of the packing OFF C), and the
+  decide-free helper set for concrete Fin witnesses (fin_ne_val, fin_mem_triple, mem_first_triple /
+  mem_mid_triple / mem_last_triple, fin_inter_tri_tri, card_triple, inter_eq_singleton).
+  NOT proved: the packing cover of the attachment set, i.e. a function phi(k) such that PetalSet G C is
+  covered by at most phi(k) pairwise disjoint petals -- the single remaining step to JSP90.OneCyclePetal
+  and hence to the reduction of round 115.  JSP90.OddCycleErdosPosa r (Reed-Robertson-Seymour-Thomas) is
+  unchanged and jsp_000090_main is NOT declared: the harness keeps reporting
+  missing_theorems = ["jsp_000090_main"], score.py --strict-prize reports build_ok = true, sorry = 0,
+  admit = 0, partial_ok = true, prize_ready = false.  #print axioms on the headline declarations gives
+  only [propext, Classical.choice, Quot.sound].  status remains wip; no award claim is made.
 github_owner: Yi-111-a
 lean_repository: https://github.com/Yi-111-a/jsp-000090-lean
 branch: main

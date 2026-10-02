@@ -3528,3 +3528,88 @@ be `O(k)`, so `JSP90.erdos73On_of_petalSet` does not close Erdős #73.
 `build_ok = true, sorry = 0, admit = 0, partial_ok = true`.  `#print axioms` on the six headline
 declarations of the round gives only `[propext, Classical.choice, Quot.sound]`.
 `formalization.yaml` remains `status: wip`, `prize_ready: false`.  No award claim is made.
+
+---
+
+## Round 120 — `lean/JSPProblem/PetalBound.lean` + `lean/JSPProblem/PetalFinite.lean`: the
+# attachment set is NOT charged against the deficiency, and a new instance with constant `k + |C| - 1`
+
+Round 119 left one concrete blocker: the absorption step is `q + |PetalSet G C| + (|C| - 1)`, so the
+missing lemma is a *numerical* one — a function `phi(k)` with `|PetalSet G C| ≤ phi(k)` — and the
+nine-vertex witness promised for that step was not in the build.  This round answers both halves.
+Two new files, 132 declarations, **0 sorry / 0 admit**, `lake build` OK (1270 jobs).
+
+### Part 1–2 — the charging lemmas and a NEW INSTANCE of the headline theorem
+
+A *petal* of an odd cycle `C` is an odd cycle meeting `C` in exactly one vertex (`JSP90.OneAttach`);
+`PetalSet G C` is the set of attachment points.  Two attachment points covered by a **packing** of
+petals must be covered by *different* members, so
+
+* **`JSP90.card_petalSet_inter_biUnion_le_card`** — the attachment points lying on a family `𝒟` of
+  petals number at most `|𝒟|`;
+* **`JSP90.card_petalSet_inter_biUnion_le_maxDef`** — and at most `MaxDef G`, because a packing of
+  petals is a packing of odd cycles and `JSP90.card_le_of_maxDef_le` charges a packing of odd cycles
+  against the deficiency (`LocIndep k G` ↔ `MaxDef G ≤ k`);
+* **`JSP90.card_petalSet_le_maxDef_of_cover`** — hence **`|PetalSet G C| ≤ MaxDef G`** whenever the
+  attachment set is covered by a packing of petals: the shape of the round-119 bound, under one
+  extra (packing) hypothesis;
+* **`JSP90.card_petalSet_le_maxDef_add`** — the general form, leaving exactly the attachment points
+  the packing misses;
+* **`JSP90.exists_petal_hits_biUnion_offC`** — **what a maximal petal packing does NOT pay for**:
+  every attachment point outside the packing carries a petal meeting the packing **off `C`**;
+* **`JSP90.closeToBipartite_of_petalSet_le_maxDef`** — the bridge: *any* bound on the attachment set
+  in terms of `MaxDef G` turns into Erdős's conclusion.
+
+From the first of these, **a new instance of the headline theorem**:
+
+* **`JSP90.closeToBipartite_of_petalPackingCover` / `JSP90.erdos73On_of_petalPackingCover`** with the
+  constant **`k + |C| - 1`** — Erdős's hypothesis, an odd cycle `C` meeting every odd cycle of `G`, and
+  a packing of petals covering the attachment set;
+* its triangle level **`JSP90.closeToBipartite_of_petalPackingCover_triangle`, constant `k + 2`**, and
+  the odd-girth form `…_of_card_le` (`k + ℓ - 1`);
+* **`JSP90.OneCyclePetal G ℓ`** — the class-level statement, a `def` and **not** assumed (the shape of
+  round 115's `TwoAttachCoverExists`), with the reduction `JSP90.erdos73On_of_oneCyclePetal`.
+
+### Part 3–4 — the nine-vertex propeller: the `|C| - 1` term is not enough once petals exist
+
+`prop` (`JSPProblem/PetalFinite.lean`) is the triangle `0 - 1 - 2 - 0` with a pendant triangle at each
+of its vertices.  With `C = {0, 1, 2}` the three pendant triangles are petals, and
+
+* `maxDef_prop : MaxDef prop = 3`, `petalSet_propC : PetalSet prop propC = propC`,
+  `isBipartite_delete_propC` — so every odd cycle of `prop` meets `C` (`hitsOddCycles_propC`);
+* `closeToBipartite_three_prop` and **`not_closeToBipartite_two_prop`**: the odd cycle transversal
+  number of the propeller is exactly `3 = |C|`.  Hence
+  **`JSP90.not_closeToBipartite_two_prop_of_cardC`** refutes `CloseToBipartite (|C| - 1) G` on a graph
+  whose attachment set is non-empty: the `|C| - 1` bound of `JSP90.closeToBipartite_of_petalSet_empty`
+  — and with it the two-attachment transversal of round 111 — genuinely needs its hypothesis.  This is
+  the witness promised by round 119;
+* the three pendant triangles **are** a packing of petals covering the attachment set
+  (`isOddCycleFamily_propPetals`, `prop_petalPackingCover`), so the new instance applies to `prop`:
+  `erdos73On_propeller` gives `CloseToBipartite (3 + |C| - 1) = CloseToBipartite 5 prop`, and
+  `oneCyclePetal_prop` realises the class-level statement.
+
+### Part 5 — the seven-vertex `g7`: the attachment set is LARGER than the deficiency
+
+`g7` is `K_4` on `{0, 1, 2, 3}` with an independent set `{4, 5, 6}`, where `4 ~ {0, 3}`, `5 ~ {1, 3}`,
+`6 ~ {2, 3}`.  With `C = {0, 1, 2}` the triangles `{0, 3, 4}`, `{1, 3, 5}`, `{2, 3, 6}` are petals, and
+
+* `maxDef_g7 : MaxDef g7 = 2`, `petalSet_g7C : PetalSet g7 g7C = g7C`, `card_petalSet_g7C = 3`;
+* **`JSP90.not_petalSet_le_maxDef_g7 : ¬ (|PetalSet g7 g7C| ≤ MaxDef g7)`** — a machine-checked
+  refutation of the first guess at the round-119 bound: any `phi` with
+  `|PetalSet G C| ≤ phi (MaxDef G)` must have `phi 2 ≥ 3`, so `phi` is neither `MaxDef` nor
+  `MaxDef / 2`;
+* `not_inter_empty_g7T0_g7T1` and `not_oddCycleFamily_g7Petals`: the three petals all contain the
+  vertex `3`, so they are **not** a packing — the packing-cover hypothesis is real content, and it is
+  exactly what `g7` fails.
+
+### What is *not* proved
+
+`PetalSet G C ⊆ ⋃ 𝒟` for a packing of petals (`JSP90.OneCyclePetal`) is **not** available in general:
+`JSP90.card_petalSet_le_maxDef_add` and `JSP90.exists_petal_hits_biUnion_offC` say exactly what is
+missing — the attachment points whose petals all pass through a point of the packing outside `C`.
+`JSP90.OddCycleErdosPosa r` (Reed–Robertson–Seymour–Thomas) and `jsp_000090_main` are unchanged, and
+`jsp_000090_main` is **not** declared, so the harness keeps reporting
+`missing_theorems = ["jsp_000090_main"]`; `score.py --strict-prize` reports
+`build_ok = true, sorry = 0, admit = 0, partial_ok = true, prize_ready = false`.  `#print axioms` on
+the headline declarations of the round gives only `[propext, Classical.choice, Quot.sound]`.
+`formalization.yaml` remains `status: wip`, `prize_ready: false`.  No award claim is made.

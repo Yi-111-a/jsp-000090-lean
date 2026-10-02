@@ -1246,3 +1246,5 @@ import JSPProblem.TwoAttach
 import JSPProblem.Petals
 import JSPProblem.CriticalSharp
 import JSPProblem.Petal
+import JSPProblem.PetalFinite
+import JSPProblem.PetalBound
