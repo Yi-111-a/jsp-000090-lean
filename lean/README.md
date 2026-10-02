@@ -1445,9 +1445,9 @@ is connected, neither a cluster graph nor multipartite nor a disjoint union of o
   |B| − 2}`), `closeToBipartite_split_cardB_sub_two_iff`;
 * new instance: **`erdos73On_of_splitPartition`, constant `k + 1`**, plus
   `closeToBipartite_of_splitPartition_of_isolatedPair` (constant `k`);
-* Part 4: the witness `K_{k+2,k+2}` minus a perfect matching, where the constant `k + 1` is attained
-  for every `k ≥ 1`; the three `Finset` computations that finish its `LocIndep` proof are recorded
-  as the one remaining step of the axis.
+* Part 4: the witness on which the constant `k + 1` is attained.  **Round 108 found this text wrong**
+  (the graph named there is bipartite, hence not a split graph) and replaced it; see
+  `JSPProblem/SplitSharp.lean` below.
 
 Toolchain notes:
 
@@ -1461,3 +1461,64 @@ Toolchain notes:
   by counting), which is what makes the isolated-pair statement an equivalence;
 * a split graph may have edges *between* the two sides — the claim `α(G[X]) ≥ 1 + |X ∩ A|` is false
   and Lean rejected it; only `α ≥ |X ∩ A|` and `α ≥ 1` are available, and they are enough.
+
+
+## `JSPProblem/SplitSharp.lean` (round 108) — the witness of the split-graph axis, and `f(k) ≥ k + 1`
+
+The **correct** witness for round 107's split-graph instance.  On `Fin n × Bool`:
+
+```
+JSP90.splitWitness n      Adj p q ↔ p.1 ≠ q.1 ∧ ¬ (p.2 = false ∧ q.2 = false)
+JSP90.swA n               the independent side {(i, false)}
+JSP90.swB n               the clique side     {(i, true)}
+```
+
+so the cross edge `a_i ~ b_j` is present exactly when `i ≠ j`.  Proved:
+
+* `splitWitness_splitPartition` — it *is* a split graph, `n` vertices on each side;
+* `not_isolatedPair_splitWitness` — every pair of `B` has a common neighbour in `A` when `3 ≤ n`;
+* **`locIndep_splitWitness` — `LocIndep k (splitWitness (k + 2))`**, for every `k`;
+* `indepCard_two`, **`maxDef_splitWitness` — `MaxDef (splitWitness (k + 2)) = k`**;
+* `closeToBipartite_splitWitness`, `not_closeToBipartite_splitWitness`,
+  **`closeToBipartite_iff_splitWitness` — `CloseToBipartite m (splitWitness (k + 2)) ↔ k + 1 ≤ m`**;
+* **`not_erdos73On_splitWitness` — `¬ Erdős73On k k` for `k ≥ 1`, i.e. `f(k) ≥ k + 1`**: the first
+  machine-checked lower bound on the constant of Erdős #73 that is strictly larger than the
+  `f(k) ≥ k` of rounds 39/104;
+* `erdos73On_of_splitPartition_optimal` — the constant `k + 1` of round 107's instance is optimal.
+
+Toolchain notes (round 108):
+
+* **The instance `JSP90.instDecidableEqSplitGraph` of `Split.lean` survives in its `.olean`** and is
+  found by instance search for *any* type, so an intersection built in `SplitSharp.lean` and one
+  built in `Split.lean` do **not** match.  Consequence: the only intersection that may appear in a
+  statement here is the one inside the goal `SplitPartition (splitWitness n) (swA n) (swB n)`, proved
+  in place with `simp only [Finset.mem_inter] at hp` (simp matches the instance argument with a
+  metavariable, an application does not).  For the same reason
+  `JSP90.exists_mem_sdiff_pair_of_card_ge_three` of `Split.lean` is unusable here and the difference
+  set is rebuilt directly.
+* Every application (`Prod.ext`, `Finset.mem_union.mpr`, `Finset.mem_insert.mpr`, `absurd`,
+  `Finset.card_le_card`) is elaborated **backwards** from the expected type, and anonymous
+  constructor arguments (`⟨a, b⟩`, `Or.inl a`) are elaborated *before* the expected type is known:
+  whenever the finsets are not pinned by the goal, instance search then runs on a metavariable and
+  picks the wrong `DecidableEq`.  Use `refine ⟨a, ?_⟩`, name the finsets (`s := _`, `t := _`), and
+  bind intermediates with `have`.
+* `Prod.mk.inj` does not exist at this revision (`Prod.ext_iff.mp` instead); `hnot.1` is
+  unavailable when `hnot : ¬ G.Adj p q` (`Adj` is a conjunction only after `intro`); `intro` does
+  not work on an equation goal (use `by_contra`, `h ▸ …`, or `absurd`);
+* membership in a `Finset` is `Quot.lift`-based, so `p ∈ s ∩ t` has **no** projections — use
+  `Finset.mem_inter.mp/.mpr`, and apply a `Finset.Subset` to a point *before*
+  `Finset.mem_union.mp`; `Finset.mem_insert.mpr h` for `h : p ∈ insert b t` gives `p = b ∨ p ∈ t`;
+* `Finset.card_union_add_card_inter : #(s ∪ t).card + #(s ∩ t).card = #s + #t` (union first, so a goal
+  `s.card + t.card = _` needs `←`, and `←` rewrites the *leftmost* occurrence);
+  `Finset.nonempty_iff_ne_empty.mpr` takes `s ≠ ∅`; `Finset.card_pos.mp` takes `0 < #s`;
+  `Finset.not_mem_empty` does not exist (`Finset.eq_empty_iff_forall_notMem` takes `x` explicitly);
+* `Prod.fst` is injective on each side, so `Finset.card_image_iff.mpr` (the `Set.InjOn` witness is
+  `fun _ ha _ hb hab => …`) gives the sizes of the index sets — no `Finset.filter` is needed;
+* `omega` cannot evaluate `#{c}`, `(0 : Fin (k + 2))` or `Fin.val ⟨0, _⟩` numerals: introduce the
+  index as `set i0 : Fin (k + 2) := ⟨0, hk⟩ with hi0` and simplify singleton cards with
+  `have hone : 2 * ({c} : Finset _).card = 2 := by simp; rw [hone]`;
+* `(j, true).2 = false` is refuted by neither `simp` nor `omega`: use `JSP90.bool_false_ne_true` /
+  `JSP90.not_eq_false_of_eq_true` (`by simp` *does* refute `false = true`);
+* `Finset.mem_filter.mp` cannot be applied to `h : S ∈ indepSets G X` from another module; the new
+  `JSP90.isIndepSet_of_mem_indepSets` (added to `Deficiency.lean` in this round) is the form to use;
+* `Erdős73On` must be instantiated at `.{0}` for a `Fin (k+2) × Bool` witness.

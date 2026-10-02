@@ -54,9 +54,12 @@ JSP90.erdos73On_of_splitPartition    A NEW INSTANCE OF THE HEADLINE THEOREM, con
 ```
 
 and then, in Part 4, the **witness family** on which the constant `k + 1` is attained for every
-`k ≥ 1` is *stated and analysed* (`K_{k+2,k+2}` minus a perfect matching): the three `Finset`
-computations that finish its `LocIndep` proof are recorded there, with the exact lemma names, as the
-one remaining step of this axis.
+`k ≥ 1`.  **Part 4 of this file was wrong and was corrected in round 108**: its witness was
+bipartite and hence not a split graph at all.  The correct witness, `JSP90.splitWitness n` of
+`JSPProblem/SplitSharp.lean` (the same two sides, with the "clique" side *actually* a clique), now
+carries `locIndep_splitWitness`, `maxDef_splitWitness = k`,
+`closeToBipartite_iff_splitWitness : CloseToBipartite m (splitWitness (k+2)) ↔ k+1 ≤ m` and
+**`not_erdos73On_splitWitness : ¬ Erdős73On k k`, i.e. the lower bound `f(k) ≥ k + 1`**.
 
 ## What is *not* proved
 
@@ -70,9 +73,9 @@ genuine instance of the headline theorem, not a degenerate one; but split graphs
 
 ## Toolchain notes
 
-* The witness lives on `(Fin (k+2) × Fin (k+2)) ⊕ Fin (k+2)`; its two parts are `Finset.image`s of
-  `Finset.univ`, so `Finset.card_image_of_injective` gives their sizes (`card_splitWitnessInd`,
-  `card_splitWitnessClique`) and no `Finset.filter` is needed anywhere in this file.
+* (Round 108.) The witness of `JSPProblem/SplitSharp.lean` lives on `Fin n × Bool`; its two parts
+  are `Finset.image`s of `Finset.univ`, so `Finset.card_image_of_injective` gives their sizes and no
+  `Finset.filter` is needed anywhere in that file.
 * `DecidableEq V` is declared once, at the top of the file, exactly as `JSPProblem/Deficiency.lean`
   does it (`local instance instDecidableEqDef`): the statements below mention `X ∩ A`, so the
   instance has to exist at statement level.  The witness section adds its own instance for
@@ -614,37 +617,28 @@ theorem closeToBipartite_of_splitPartition_of_isolatedPair {k : ℕ} (hk : LocIn
   refine closeToBipartite_mono (by omega)
     (closeToBipartite_of_split_isolatedPair h hb₁ hb₂ hne hnc)
 
-/-! ## Part 4 — the witness family: what is left, and why it is left
+/-! ## Part 4 — the witness family: **DONE in round 108**, and this text was wrong
 
-The constant `k + 1` of `erdos73On_of_splitPartition` is meant to be **attained** for every `k ≥ 1`,
-and the construction is settled; only the `Finset` bookkeeping of its `LocIndep` proof is missing
-here.  The witness is
+**Everything in this part was wrong and has been replaced by `JSPProblem/SplitSharp.lean`
+(round 108).**  The graph analysed below — `K_{n,n}` with a perfect matching removed, sides
+`A = {(i, false)}`, `B = {(i, true)}`, cross edge `(i, false) ~ (j, true)` iff `i ≠ j` — is
+*bipartite* (at `n = 3` it is `C_6`): its "clique side" `B` carries **no** edge, so it is not a
+split graph at all and the instance of this file does not apply to it.  The step *"otherwise `CX`
+has an index that `AX` does not use … and `S = AX ∪ {that one clique vertex}` is independent"* is
+false for the same reason — the cross edge `a_i ~ b_j` is **present** when `i ≠ j`, so an
+independent set containing `b_j` contains **at most** `a_j`, not all of `AX`.
 
-> `splitWitness k` on `Fin (k+2) × Bool` — the complete bipartite graph `K_{n,n}`, `n = k+2`, with a
-> perfect matching removed.  The **independent side** is `A = {(i, false)}`, the **clique side** is
-> `B = {(i, true)}`, and `(i, false) ~ (j, true)` exactly when `i ≠ j`.
+The correct witness is `JSP90.splitWitness n` of `SplitSharp.lean`: the same two sides, with `B` a
+clique as well, i.e. `p ~ q ↔ p.1 ≠ q.1 ∧ ¬ (p.2 = false ∧ q.2 = false)`.  There,
 
-and everything needed is recorded here so that the next round can finish it mechanically:
+* `JSP90.splitWitness_splitPartition` — it *is* a split graph, with `n` vertices on each side;
+* `JSP90.locIndep_splitWitness` — **`LocIndep k (splitWitness (k + 2))`** holds;
+* `JSP90.maxDef_splitWitness` — `MaxDef (splitWitness (k + 2)) = k`, the exact value;
+* `JSP90.closeToBipartite_iff_splitWitness` — **`CloseToBipartite m (splitWitness (k+2)) ↔ k+1 ≤ m`**;
+* `JSP90.not_erdos73On_splitWitness` — **`¬ Erdős73On k k`**, i.e. `f(k) ≥ k + 1` for `k ≥ 1`.
 
-* `A` and `B` are disjoint and cover the vertex set, `A` is independent and `B` is a clique, each of
-  size `n = k + 2`; this is the hypothesis of `closeToBipartite_of_splitPartition`;
-* **`LocIndep k` holds, indeed with `k = 0`.**  For a vertex set `X`, let `AX = X ∩ A`,
-  `CX = X ∩ B`.  If `|AX| ≥ |CX|` take the independent set `S = AX`; otherwise `CX` has an index
-  that `AX` does not use (the map `v ↦ v.1` is injective on both sides), and `S = AX ∪ {that one
-  clique vertex}` is independent, with `2 |S| + k ≥ |X|` because `|CX| ≤ n = k + 2`.  The two
-  counting lemmas the proof needs are `Finset.card_image_iff` for `v ↦ v.1` on each side and
-  `Finset.not_subset.mp`;
-* **`CloseToBipartite (k + 1)` holds**: delete all of `B` but one vertex (the residue is the star
-  centred at the survivor), which is `closeToBipartite_of_splitPartition`;
-* **`¬CloseToBipartite k` holds as soon as `k ≥ 1`**: every pair `b_i ≠ b_j` of `B` has the common
-  neighbour `a_m` for any `m ∉ {i, j}`, which exists because `|B| = k + 2 ≥ 3` — the index lemma is
-  `exists_mem_sdiff_pair_of_card_ge_three` of this file — so
-  `not_closeToBipartite_of_split_no_isolatedPair` applies with
-  `2 ≤ |B| = k + 2`.
-
-So `CloseToBipartite m (splitWitness k) ↔ k + 1 ≤ m` for `k ≥ 1`, and the constant `k + 1` is
-machine-checked optimal on the class.  What is *not* proved in this file is exactly those three
-`Finset` computations; nothing else on this axis is missing. -/
+So the constant `k + 1` of `erdos73On_of_splitPartition` is now machine-checked optimal
+(`JSP90.erdos73On_of_splitPartition_optimal`), and nothing else on this axis is missing. -/
 
 
 end

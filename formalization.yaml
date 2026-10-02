@@ -2,26 +2,29 @@ jsp_id: JSP-000090
 catalog_url: https://github.com/TheJustinSunPrize/awards
 status: wip
 prize_ready: false
-last_round: 106
+last_round: 108
 last_round_summary: |
-  Round 106 -- THE COMPLETE MULTIPARTITE axis (attack family 47).  New module lean/JSPProblem/Multi.lean
-  (30 declarations, 0 sorry/admit, lake build OK with 1257 jobs), imported from the root module JSPProblem.lean.
-  Round 105 proved that both sides of Erdos #73 are exactly additive over an ANTICOMPLETE cover and recorded its
-  own limit: such a cover with two nonempty pieces IS a disconnection, so the additive axis only pays for
-  disconnected graphs.  This round attacks the connected complement of that family, the complete multipartite
-  graph multi t n = K_{n,...,n} on Fin t x Fin n, and settles it exactly: JSP90.maxDef_multi
-  (MaxDef (multi t n) = (t-2)*n, the maximum deficiency of a complete multipartite graph is the number of
-  vertices in excess of two per part), JSP90.locIndep_multi_iff, the characterisation
-  JSP90.isBipartite_deleteFinset_multi_iff (G - X is bipartite iff its surviving vertices lie in at most two
-  parts, via JSP90.liveParts, JSP90.liveParts_le_two_of_isBipartite, JSP90.deadParts,
-  JSP90.card_deadParts_add_liveParts and JSP90.isBipartite_multi_of_cover), and hence
-  JSP90.closeToBipartite_iff_multi (CloseToBipartite m (multi t n) <-> (t-2)*n <= m): on this class the hypothesis
-  and the conclusion of Erdos #73 COINCIDE.  NEW INSTANCE OF THE HEADLINE THEOREM: JSP90.erdos73On_of_multi /
-  _univ -- LocIndep k (multi t n) -> CloseToBipartite k (multi t n), the OPTIMAL constant f(k) = k, on a class
-  which is connected for t >= 2 (so none of the anticomplete-decomposition instances applies) and is not a
-  cluster graph for n >= 2; JSP90.erdos73On_of_multi_optimal and JSP90.not_closeToBipartite_multi
-  machine-check the optimality.  NOT proved: jsp_000090_main; the blocker JSP90.OddCycleErdosPosa r
-  (Reed-Robertson-Seymour-Thomas, 3-connected case) is unchanged.
+  Round 108 -- THE SPLIT-GRAPH WITNESS, AND THE LOWER BOUND f(k) >= k + 1 (attack family 49).  New
+  module lean/JSPProblem/SplitSharp.lean (29 declarations, 0 sorry/admit, lake build OK with 1259
+  jobs), imported from the root module JSPProblem.lean, plus one line in lean/JSPProblem/Deficiency.lean
+  (isIndepSet_of_mem_indepSets) and a correction in place of round 107's Part 4.  Round 107 had named
+  the witness on which the constant k+1 of erdos73On_of_splitPartition is attained and left its
+  LocIndep proof undone; that witness was WRONG (K_{k+2,k+2} minus a perfect matching is bipartite, so
+  its "clique side" carries no edge and it is not a split graph at all, and the independent set it
+  proposed is not independent).  The correct witness is JSP90.splitWitness n on Fin n x Bool, with
+  Adj p q <-> p.1 != q.1 and not (p.2 = false and q.2 = false): A = {(i,false)} independent, B =
+  {(i,true)} a clique, cross edge a_i ~ b_j iff i != j.  Proved: splitWitness_splitPartition,
+  not_isolatedPair_splitWitness, locIndep_splitWitness (LocIndep k (splitWitness (k+2))), indepCard_two
+  and maxDef_splitWitness (MaxDef (splitWitness (k+2)) = k, the exact value of the hypothesis),
+  closeToBipartite_splitWitness, not_closeToBipartite_splitWitness, closeToBipartite_iff_splitWitness
+  (CloseToBipartite m (splitWitness (k+2)) <-> k+1 <= m) and -- THE HEADLINE OF THIS ROUND --
+  not_erdos73On_splitWitness (~Erdos73On k k for every k >= 1, i.e. the constant f(k) of Erdos #73
+  satisfies f(k) >= k+1), the first machine-checked lower bound on that constant strictly larger than
+  the f(k) >= k of rounds 39/104 and the first statement about the answer itself rather than about a
+  class; erdos73On_of_splitPartition_optimal closes the axis.  NOT proved: jsp_000090_main; the
+  blocker JSP90.OddCycleErdosPosa r (Reed-Robertson-Seymour-Thomas, 3-connected case) is unchanged,
+  and f(k) >= k+1 is a lower bound whereas the theorem needs a finite f(k).
+
 github_owner: Yi-111-a
 lean_repository: https://github.com/Yi-111-a/jsp-000090-lean
 branch: main

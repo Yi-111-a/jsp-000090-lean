@@ -148,6 +148,16 @@ theorem sub_of_mem_indepSets {G : SimpleGraph V} {X S : Finset V} (hS : S ∈ in
     S ⊆ X :=
   Finset.mem_powerset.mp (Finset.mem_filter.mp hS).1
 
+/-- **A member of `indepSets G X` is an independent set of `G`.**
+
+Outside this file the statement `(Finset.mem_filter.mp hS).2` cannot be applied to `hS` directly:
+`indepSets` is not unfolded, so the filter predicate and its `DecidablePred` stay metavariables and
+instance search fails.  This lemma is the form to use from another module. -/
+theorem isIndepSet_of_mem_indepSets {G : SimpleGraph V} {X S : Finset V}
+    (hS : S ∈ indepSets G X) : G.IsIndepSet S := by
+  rw [indepSets] at hS
+  exact (Finset.mem_filter.mp hS).2
+
 /-- **`indepCard G X = α(G[X])`**, the size of a largest independent subset of `X`.  This is the
 `α` of Erdős's hypothesis, as a natural number. -/
 noncomputable def indepCard (G : SimpleGraph V) (X : Finset V) : ℕ :=

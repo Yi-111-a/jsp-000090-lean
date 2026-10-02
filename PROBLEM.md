@@ -464,11 +464,33 @@ common neighbour on the independent side").  Proved, with 0 sorry/admit (32 decl
 * **`JSP90.erdos73On_of_splitPartition` — a NEW INSTANCE OF THE HEADLINE THEOREM with the constant
   `k + 1`** (no odd-girth, packing, degree or decomposition hypothesis), with the sharper form
   `closeToBipartite_of_splitPartition_of_isolatedPair` (constant `k`);
-* Part 4 of the file records the **witness** on which the constant `k + 1` is attained for every
-  `k ≥ 1` — `K_{k+2,k+2}` minus a perfect matching, `A = {(i, false)}`, `B = {(i, true)}` — together
-  with the three `Finset` computations still missing (its `LocIndep` proof).  One intermediate claim
-  was **refuted** while writing the file: `α(G[X]) ≥ 1 + |X ∩ A|` is false (a split graph may have
-  edges *between* the two sides), and the deficiency bound uses only `α ≥ |X ∩ A|` and `α ≥ 1`.
+* Part 4 of the file records the **witness** on which the constant `k + 1` is attained.  **Round 108
+  refuted that part**: the graph named there (`K_{k+2,k+2}` minus a perfect matching) is *bipartite*,
+  so its "clique side" carries no edge and it is not a split graph at all; moreover the independent
+  set it proposed is not independent, because the cross edge `a_i ~ b_j` is present when `i ≠ j`.
+
+## Round 108 — `JSPProblem/SplitSharp.lean`: the correct witness, and `f(k) ≥ k + 1`
+
+The corrected witness `JSP90.splitWitness n` on `Fin n × Bool` — the same two sides
+`A = {(i, false)}` (independent) and `B = {(i, true)}` (a clique), with `Adj p q ↔ p.1 ≠ q.1 ∧
+¬ (p.2 = false ∧ q.2 = false)` — settles the axis exactly:
+
+* `JSP90.splitWitness_splitPartition`: it is a split graph with `n` vertices on each side;
+* `JSP90.not_isolatedPair_splitWitness`: every pair of `B` has a common neighbour in `A`
+  (`3 ≤ n`), so no isolated pair exists;
+* **`JSP90.locIndep_splitWitness`: `LocIndep k (splitWitness (k + 2))`** — the hypothesis holds, so
+  the witness is in range; the only counting input is
+  `|X ∩ A| + |X ∩ B| = |I ∩ J| + |I ∪ J|` for `I = (X ∩ A).image fst`, `J = (X ∩ B).image fst`;
+* **`JSP90.maxDef_splitWitness`: `MaxDef (splitWitness (k + 2)) = k`** — the exact value of Erdős's
+  hypothesis on this graph, so the witness is tight for `LocIndep` as `kTriangles k` is;
+* **`JSP90.closeToBipartite_iff_splitWitness`: `CloseToBipartite m (splitWitness (k + 2)) ↔ k + 1 ≤
+  m`** for `k ≥ 1` — the exact value of the conclusion;
+* **`JSP90.not_erdos73On_splitWitness`: `¬ Erdős73On k k` for every `k ≥ 1`**, i.e. the constant
+  `f(k)` of Erdős #73 satisfies **`f(k) ≥ k + 1`**.  This is the first machine-checked lower bound
+  on that constant strictly larger than the `f(k) ≥ k` of rounds 39/104, and it is a statement about
+  the answer to the problem, not only about a class;
+* `JSP90.erdos73On_of_splitPartition_optimal`: the constant `k + 1` of round 107's split-graph
+  instance is **optimal**.
 
 `jsp_000090_main` remains undeclared and `JSP90.OddCycleErdosPosa r` (Reed–Robertson–Seymour–Thomas)
 is unchanged: the remaining obstruction is the general, 3-connected case.

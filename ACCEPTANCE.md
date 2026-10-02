@@ -3049,3 +3049,72 @@ New: `lean/JSPProblem/Cluster.lean` (40 declarations) and `lean/JSPProblem/Clust
 The required theorem `jsp_000090_main` (`Erdős73` for every `k`, i.e. `JSP90.OddCycleErdosPosa r`
 for the 3-connected case) is **still missing**; nothing in this round removes a hypothesis for
 arbitrary graphs.
+
+---
+
+## Round 108 — `JSPProblem/SplitSharp.lean`: the witness of the split-graph axis, and **`f(k) ≥ k + 1`**
+
+New file `lean/JSPProblem/SplitSharp.lean` (29 declarations, 0 `sorry`/`admit`, `lake build` OK with
+1259 jobs), imported from the root module `JSPProblem.lean`.  One line of `lean/JSPProblem/Deficiency.lean`
+was also added (`isIndepSet_of_mem_indepSets`), and round 107's `Part 4` was **corrected in place**.
+
+### A mathematical correction
+
+Round 107 named, as the witness on which the constant `k + 1` of `erdos73On_of_splitPartition` is
+attained, the graph "`K_{k+2,k+2}` minus a perfect matching", sides `A = {(i, false)}`,
+`B = {(i, true)}`, with `(i, false) ~ (j, true)` exactly when `i ≠ j`.  **That graph is bipartite**
+(at `n = 3` it is `C_6`): its "clique side" `B` carries no edge at all, so it is not a split graph
+and round 107's instance does not apply to it.  The independent set round 107 proposed is not
+independent either, because the cross edge `a_i ~ b_j` is **present** when `i ≠ j`: an independent
+set containing `b_j` contains *at most* `a_j`, not all of `X ∩ A`.
+
+### The correct witness, and what is now proved
+
+`JSP90.splitWitness n` on `Fin n × Bool`, `Adj p q ↔ p.1 ≠ q.1 ∧ ¬ (p.2 = false ∧ q.2 = false)`:
+`A = {(i, false)}` is independent, `B = {(i, true)}` is a clique, and `a_i ~ b_j` iff `i ≠ j`.
+
+* `JSP90.splitWitness_splitPartition` — it **is** a split graph, with `n` vertices on each side;
+* `JSP90.not_isolatedPair_splitWitness` — every pair of `B` has a common neighbour in `A`
+  (`3 ≤ n`), so the `|B| − 2` regime of `closeToBipartite_split_iff` is unavailable;
+* **`JSP90.locIndep_splitWitness` — `LocIndep k (splitWitness (k + 2))`** for every `k`.  The only
+  counting input is `|X ∩ A| + |X ∩ B| = |I ∩ J| + |I ∪ J|` for the index sets
+  `I = (X ∩ A).image Prod.fst` and `J = (X ∩ B).image Prod.fst`, together with
+  `|I ∩ J| ≤ min |X ∩ A| |X ∩ B|` and `|I ∪ J| ≤ n`; the size-two independent set is the **edge**
+  `{a_j, b_j}`, which exists precisely because the matching edge is absent;
+* **`JSP90.indepCard_two` / `JSP90.maxDef_splitWitness` — `MaxDef (splitWitness (k + 2)) = k`**, the
+  *exact value* of Erdős's hypothesis on this graph: it is tight, just as `kTriangles k` is;
+* `JSP90.closeToBipartite_splitWitness` and `JSP90.not_closeToBipartite_splitWitness`, together with
+  **`JSP90.closeToBipartite_iff_splitWitness` — `CloseToBipartite m (splitWitness (k + 2)) ↔ k + 1 ≤
+  m`** for `k ≥ 1`: the exact value of the conclusion;
+* **`JSP90.not_erdos73On_splitWitness` — `¬ Erdős73On k k` for every `k ≥ 1`.**  `Erdős73On k k` is
+  the assertion "every finite graph satisfying `LocIndep k` is the union of a bipartite graph and at
+  most `k` vertices", so this theorem says that **the constant `f(k)` of Erdős #73 satisfies
+  `f(k) ≥ k + 1`**.  It is the first machine-checked lower bound on that constant that is *strictly
+  larger* than the `f(k) ≥ k` of rounds 39/104, and — unlike every instance of the last thirty
+  rounds — it is a statement about the answer to the problem, not only about a class;
+* `JSP90.erdos73On_of_splitPartition_optimal` — the constant `k + 1` of round 107's split-graph
+  instance is **optimal**.
+
+So on this family the hypothesis allows `k` while the conclusion needs `k + 1`: it is the first
+witness in this development on which the two sides of Erdős #73 do *not* coincide.
+
+### What is *not* proved
+
+The *upper* bound on `f(k)` — i.e. Erdős #73 itself, `jsp_000090_main` — is unchanged, and so is
+`JSP90.OddCycleErdosPosa r` (Reed–Robertson–Seymour–Thomas, the 3-connected case).  `f(k) ≥ k + 1`
+is a lower bound; the theorem needs a finite `f(k)`.  `jsp_000090_main` is therefore still **not**
+declared, `score.py --strict-prize` reports
+`build_ok = true, sorry = 0, admit = 0, partial_ok = true, missing_theorems = ["jsp_000090_main"]`,
+`formalization.yaml` remains `status: wip`, `prize_ready: false`.  No award claim is made.
+
+### A toolchain finding worth recording
+
+`JSP90.instDecidableEqSplitGraph`, the `local instance` of `Split.lean`, **survives in the `.olean`
+and is found by instance search for *any* type**.  An intersection built in a later module and one
+built in `Split.lean` therefore do *not* match, and `Finset.mem_inter.mp`, `Finset.mem_union.mpr`,
+`Finset.disjoint_iff_inter_eq_empty.mp` and `Finset.card_union_of_disjoint` all fail when the finsets
+are not already pinned by the goal: the instance is synthesised on a metavariable first.  The working
+incantations are (a) `simp only [Finset.mem_inter] at hp`, which matches the instance argument with a
+metavariable, (b) `refine ⟨a, ?_⟩` instead of `⟨a, by …⟩`, (c) naming the finsets (`s := _`, `t := _`),
+and (d) binding intermediates with `have`.  `JSP90.exists_mem_sdiff_pair_of_card_ge_three` of
+`Split.lean` is unusable from `SplitSharp.lean` for the same reason.
