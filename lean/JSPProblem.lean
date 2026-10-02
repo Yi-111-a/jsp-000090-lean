@@ -1210,3 +1210,4 @@ import JSPProblem.CPath
 import JSPProblem.CPathSkip
 import JSPProblem.CPathPair
 import JSPProblem.TwoAttach
+import JSPProblem.Petals
