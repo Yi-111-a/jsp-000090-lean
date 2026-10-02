@@ -101,3 +101,32 @@ build:
       - JSP90.OddCycleErdosPosa r (unchanged: this is the missing jsp_000090_main)
     prize_ready: false
     missing_theorems: [jsp_000090_main]
+
+  round_114:
+    module: lean/JSPProblem/CPathPair.lean
+    attack_family: 54
+    status: wip
+    new_declarations: 52
+    sorry: 0
+    admit: 0
+    headline_results:
+      - JSP90.IsCPathPair (the FAN AT DEPTH TWO: two internally vertex-disjoint C-paths to a common target)
+      - JSP90.IsCPathPair.inter_ne (the two interiors never meet)
+      - JSP90.arcPairFun (the two-path arc cycle, a generalisation of JSPProblem/Fan.lean's arcFun)
+      - JSP90.arcPairFun_inj (the two-path arc cycle is simple)
+      - JSP90.arcPairFun_adj (every step is an edge, including the closing step)
+      - JSP90.arcPair_isOddCycle and JSP90.card_arcPair (an odd cycle with exactly e + d1 + d2 vertices)
+      - JSP90.exists_oddCycle_twoAttach_of_isCPathPair (MADER'S TWO-ATTACHMENT LEMMA)
+      - JSP90.arc_sum_ge_of_shortest (a shortest odd cycle is thick)
+      - JSP90.oddArc_eq_two_of_fan_of_shortest (the odd arc of a fan has length m - 2)
+      - JSP90.shortArc_of_pairFan (the short-arc lemma re-derived from Mader's lemma)
+      - JSP90.IsCPath_edgePath and JSP90.isCPathPair_of_adj (a fan is derived from two adjacencies)
+      - JSP90.twoAttach_kTriangles_one (the two-attachment hypothesis holds on kTriangles 1)
+      - JSP90.not_twoAttach_kTriangles_two (MACHINE-CHECKED NEGATIVE RESULT: no odd cycle of kTriangles 2 is two-attached)
+    next_step:
+      - the two-attachment COVER of round 112 for a 3-connected graph (unchanged global step): Mader's lemma supplies one odd cycle through a fan vertex, not the hypothesis for every odd cycle
+      - the absorption of the ONE-attachment odd cycles (JSP90.oneAttach_of_isCPath_return) along 2-cuts, with the bound on the number of such 2-cuts
+      - a non-vacuity witness for the two-attachment hypothesis on a connected graph (a wheel): the odd cycles of a wheel all meet the rim twice
+      - JSP90.OddCycleErdosPosa r (unchanged: this is the missing jsp_000090_main)
+    prize_ready: false
+    missing_theorems: [jsp_000090_main]

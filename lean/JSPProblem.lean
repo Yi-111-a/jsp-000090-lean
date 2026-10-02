@@ -1055,6 +1055,52 @@ Still open: the one-attachment lemma gives an odd cycle attached to `C` **once**
 a 3-connected graph is the unresolved part.  `JSP90.OddCycleErdosPosa r` and `jsp_000090_main` are
 unchanged.
 
+## `JSPProblem/CPathPair.lean` (round 114) — the FAN at DEPTH TWO: MADER'S TWO-ATTACHMENT LEMMA
+
+Round 112 named the missing depth-two step, and this file delivers it.  No Menger theorem is used;
+the two arcs between the attachment points are counted, and the parity decides which one closes up
+into an odd cycle.
+
+* **`JSP90.IsCPathPair`** — **THE OBJECT: THE FAN AT DEPTH TWO.**  Two `C`-paths `p`, `q` to a
+  common target `x ∉ C`, ending at **distinct** vertices `f i`, `f j` of `C`, whose vertex sets meet
+  only in `{f i, f j, x}`: the classical "two internally vertex-disjoint `C`-paths" formulation of
+  a fan.  `JSP90.IsCPathPair.d1_pos` / `d2_pos` (a length-0 `C`-path would put its target on `C`),
+  `JSP90.IsCPathPair.eq_fi_of_mem_supset_p_mem_C` (the first path meets `C` in exactly its first
+  vertex) and **`JSP90.IsCPathPair.inter_ne`** (the two interiors never meet) complete its API;
+* **`JSP90.arcPairFun`** — **THE TWO-PATH ARC CYCLE**, the closed walk
+  `f j → arc of length `e` → f i → p → x → q → f j` carried by `Fin (e + d1 + d2) → V`.  For
+  `d1 = d2 = 1` this is `JSPProblem/Fan.lean`'s `arcFun`, so the constructor **generalises** it to
+  two paths of arbitrary length.  `JSP90.arcPairFun_inj` (the walk is **simple**), and
+  `JSP90.arcPairFun_adj` (every step is an edge, including the closing step `q 1 ~ q 0 = f j`);
+* **`JSP90.arcPair_isOddCycle`** — the two-path arc cycle is an **odd cycle** of `G` when
+  `e + d1 + d2` is odd, and `JSP90.card_arcPair` gives its **exact** number of vertices;
+* **`JSP90.exists_oddCycle_twoAttach_of_isCPathPair` — MADER'S TWO-ATTACHMENT LEMMA.**  If `x` has
+  two internally vertex-disjoint `C`-paths to two distinct vertices `f i`, `f j` of an odd cycle
+  `C`, then **`x` lies on an odd cycle of `G` through both `f i` and `f j`**.  This is the *second*
+  attachment point, the resource `discovery/JSP-000090/policy.json` asked for after rounds 111–112
+  (which produced only one-attachment odd cycles), and the first odd cycle of `G` this development
+  builds through a vertex at `C`-distance `≥ 2`.  The parity is pure counting
+  (`JSP90.mod_two_of_sum_odd`): the two candidate totals add up to `m + 2 (d1 + d2)`, which is odd;
+* **`JSP90.arc_sum_ge_of_shortest` — A SHORTEST ODD CYCLE IS THICK**: at a shortest odd cycle of
+  length `m`, `m ≤ e + d1 + d2` for the odd arc.  In the fan case this forces
+  **`JSP90.oddArc_eq_two_of_fan_of_shortest`: the odd arc has length exactly `m - 2`**, and hence
+  **`JSP90.shortArc_of_pairFan`** — the short-arc lemma of `JSPProblem/Fan.lean`, re-derived here
+  from the two-path arc cycle and its vertex count (an independent route, and a check on the new
+  machinery).  The depth-one input is now *derived*, not assumed:
+  `JSP90.IsCPath_edgePath` (a length-1 `C`-path is an edge) and `JSP90.isCPathPair_of_adj` (a vertex
+  adjacent to two distinct vertices of `C` **is** a fan);
+* **`JSP90.twoAttach_kTriangles_one`** — the two-attachment hypothesis *holds* on `kTriangles 1`:
+  `CloseToBipartite 2 (kTriangles 1)`, so round 111's transversal is not vacuous;
+* **`JSP90.not_twoAttach_kTriangles_two` — MACHINE-CHECKED NEGATIVE RESULT**: on
+  `kTriangles 2` **no** odd cycle is two-attached, i.e. the hypothesis of
+  `JSP90.closeToBipartite_of_twoAttach` is not automatic and needs real content.
+
+Still open: Mader's lemma produces an odd cycle through `x` meeting `C` twice, but it does not make
+the two-attachment *hypothesis* hold for every odd cycle of `G`, so no transversal follows from it
+alone.  The two-attachment **cover** of round 112 still needs its global existence statement, and the
+one-attachment odd cycles of `JSP90.oneAttach_of_isCPath_return` still need to be absorbed by a
+2-cut.  `JSP90.OddCycleErdosPosa r` and `jsp_000090_main` are unchanged.
+
 -/
 import JSPProblem.Definitions
 import JSPProblem.Reed
@@ -1118,3 +1164,4 @@ import JSPProblem.Chain
 import JSPProblem.Piece
 import JSPProblem.CPath
 import JSPProblem.CPathSkip
+import JSPProblem.CPathPair

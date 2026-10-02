@@ -1810,3 +1810,55 @@ takes `⟨a ≠ b, a ∈ s⟩` (**inequality first**), `Finset.mem_inter.mpr` ta
 gives `Nonempty → ≠ ∅` and `.mpr` the converse; `Nonempty` is a `def`, so it must be applied through
 `∃`-destructuring, and a `y ∈ s` is a `Quot.lift` application and **cannot be applied as a function** —
 use `rw [Finset.mem_inter] at h` first and then `.1` / `.2`.
+
+---
+
+## Round 114 — `JSPProblem/CPathPair.lean` (attack family 54): the FAN at depth two, Mader's
+## two-attachment lemma
+
+Round 112 named the depth-two step, and this file delivers it.  **No Menger theorem** is used: the
+two arcs between the two attachment points are *counted*, and the parity decides which of the two
+closed walks `arc + p + q` is an odd cycle.
+
+| result | content |
+| --- | --- |
+| **`IsCPathPair`** | **THE OBJECT: THE FAN AT DEPTH TWO.**  Two `C`-paths `p`, `q` to a common target `x ∉ C`, ending at **distinct** vertices `f i`, `f j` of `C`, whose vertex sets meet only in `{f i, f j, x}` |
+| `IsCPathPair.d1_pos`, `IsCPathPair.d2_pos` | both lengths are positive — a length-0 `C`-path would put its target on `C` |
+| `IsCPathPair.eq_fi_of_mem_supset_p_mem_C`, `IsCPathPair.eq_fj_of_mem_supset_q_mem_C` | each path meets `C` in exactly its first vertex |
+| **`IsCPathPair.inter_ne`** | **the two interiors never meet** — the internal-disjointness, in the form the constructor uses |
+| **`arcPairFun`** | **THE TWO-PATH ARC CYCLE**: the closed walk `f j → (arc of length `e`) → f i → p → x → q → f j` on `Fin (e + d1 + d2)`.  For `d1 = d2 = 1` it is `JSPProblem/Fan.lean`'s `arcFun`, so it **generalises** that constructor to two paths of arbitrary length |
+| **`arcPairFun_inj`** | **the two-path arc cycle is simple** |
+| **`arcPairFun_adj`** | every step is an edge, including the closing step `q 1 ~ q 0 = f j` |
+| **`arcPair_isOddCycle`** | the two-path arc cycle is an **odd cycle** of `G` when `e + d1 + d2` is odd |
+| `card_arcPair` | it has **exactly** `e + d1 + d2` vertices |
+| **`exists_oddCycle_twoAttach_of_isCPathPair`** | **MADER'S TWO-ATTACHMENT LEMMA**: if `x` has two internally vertex-disjoint `C`-paths to two distinct vertices of an odd cycle `C`, then `x` lies on an **odd cycle of `G` through both attachment points** |
+| **`arc_sum_ge_of_shortest`** | **a shortest odd cycle is thick**: `m ≤ e + d1 + d2` for the odd arc |
+| **`oddArc_eq_two_of_fan_of_shortest`** | in the fan case the odd arc has length exactly `m - 2` |
+| **`shortArc_of_pairFan`** | **the short-arc lemma re-derived** from Mader's lemma and the vertex count (independent of `JSPProblem/Fan.lean`'s route) |
+| `IsCPath_edgePath`, `isCPathPair_of_adj` | the depth-one input is now *derived*: a length-1 `C`-path is an edge, and a vertex adjacent to two distinct vertices of `C` **is** a fan |
+| **`twoAttach_kTriangles_one`** | the two-attachment hypothesis **holds** on `kTriangles 1`: `CloseToBipartite 2 (kTriangles 1)` |
+| **`not_twoAttach_kTriangles_two`** | **MACHINE-CHECKED NEGATIVE RESULT**: on `kTriangles 2` **no** odd cycle is two-attached — round 111's hypothesis is not automatic |
+
+`lake build` OK (1264 jobs), **0 sorry, 0 admit**.
+
+**Not proved this round.**  Mader's lemma produces an odd cycle through `x` meeting `C` twice, but it
+does **not** make the two-attachment *hypothesis* of `closeToBipartite_of_twoAttach` hold for every
+odd cycle of `G`, so no transversal follows from it alone; the global existence of the two-attachment
+**cover** of round 112 is still the missing step, together with the absorption of the
+one-attachment odd cycles.  `jsp_000090_main` and `JSP90.OddCycleErdosPosa r` are unchanged.
+
+**Toolchain notes (round 114).**  The `omega` of the pinned revision reads a ℕ *variable* as a
+nonneg integer, so it can **not** prove `0 < a + b`, `1 < n + 1` or `a < a + b` from `a, b ≥ 0`
+alone — every "one summand is positive" step needs a real strict hypothesis
+(`JSP90.lt_add_of_pos`) or `Nat.zero_lt_succ`.  `Nat.sub_mod` does not exist at this revision.  An
+opaque index proof (`by omega` inside `⟨·, ·⟩ : Fin _`) has a type mentioning its index, so **`rw`
+must never abstract a subterm of that index** (it reports "motive is not type correct"); the working
+pattern is to convert whole `Fin` literals with `Fin.mk.inj_iff.mpr` and `rw` those.  Conversely,
+**state index-based lemmas over a natural `t` with an explicit `ht : t < …`** rather than over
+`Fin (e + d1 + d2)`: the `.val` of a literal is then absent from the conclusion and the goal, which
+is what makes the literal conversions typecheck.  `obtain ⟨a, b, c⟩ := h` **clears** `h` when the
+pattern is a full constructor application, so a later use of `h` fails with "unknown identifier";
+keep the hypothesis (`have hne : i ≠ j := h.ne`) instead of destructuring it away.  `rw` with a
+`▸` on a hypothesis whose value is a bound `Fin` also breaks the motive; rewrite the *value*
+(`rw [ht]`) or convert the literal.  `Fin.mk.inj_iff : ⟨a, ha⟩ = ⟨b, hb⟩ ↔ a = b` needs both proofs
+implicit, and `Fin.ext` takes `a.val = b.val`.

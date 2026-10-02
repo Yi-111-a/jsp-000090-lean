@@ -3257,6 +3257,42 @@ and `jsp_000090_main` are unchanged; the two-attachment class does not contain a
 
 ---
 
+## Round 114 — `JSPProblem/CPathPair.lean`: MADER'S TWO-ATTACHMENT LEMMA (the FAN at depth two)
+
+The single missing structural lemma named by round 112's `policy.json` — *"the depth-two
+attachment: for `x` not on `C` with two internally vertex-disjoint `C`-paths to distinct vertices of
+`C`, their union with one of the two arcs of `C` is an odd cycle"* — is now **proved**, together with
+the parity split that says *exactly one* of the two arcs does the job:
+
+* `JSP90.IsCPathPair` (the object: two internally vertex-disjoint `C`-paths to a common target) and
+  `JSP90.IsCPathPair.inter_ne` (the two interiors never meet);
+* `JSP90.arcPairFun` + `JSP90.arcPairFun_inj` + `JSP90.arcPairFun_adj` + `JSP90.arcPair_isOddCycle`
+  + `JSP90.card_arcPair`: the closed walk `arc + p + q` is a **simple odd cycle** of `G` with exactly
+  `e + d1 + d2` vertices — a strict generalisation of `JSPProblem/Fan.lean`'s `arc_isOddCycle`;
+* **`JSP90.exists_oddCycle_twoAttach_of_isCPathPair` — MADER'S TWO-ATTACHMENT LEMMA**: `x` lies on
+  an odd cycle of `G` through both attachment points.  The two candidate totals add up to
+  `m + 2 (d1 + d2)`, which is odd, so exactly one of them is odd (`JSP90.mod_two_of_sum_odd`);
+* `JSP90.arc_sum_ge_of_shortest` (**a shortest odd cycle is thick**),
+  `JSP90.oddArc_eq_two_of_fan_of_shortest` (the odd arc of a fan has length `m - 2`) and
+  `JSP90.shortArc_of_pairFan` (the short-arc lemma re-derived from Mader's lemma), with the depth-one
+  input *derived* by `JSP90.IsCPath_edgePath` and `JSP90.isCPathPair_of_adj`;
+* `JSP90.twoAttach_kTriangles_one` (the hypothesis holds on `kTriangles 1`) and
+  **`JSP90.not_twoAttach_kTriangles_two`** (machine-checked negative result: on `kTriangles 2` no odd
+  cycle is two-attached).
+
+**What this does not give.**  A transversal.  Mader's lemma supplies one odd cycle through a fan
+vertex; the two-attachment *cover* of round 112 (`JSP90.closeToBipartite_of_twoAttachCover`) needs the
+hypothesis for **every** odd cycle of `G`.  The remaining statements are therefore
+
+* `JSP90.twoAttachCover_exists` — for an odd cycle `C` of a graph `G`, a finite family `𝒞` of vertex
+  sets with `∑_{X ∈ 𝒞} (|X| - 1)` bounded by a function of the odd cycle packing number, such that
+  every odd cycle of `G` meets some `X ∈ 𝒞` in two vertices (the statement round 112 named); and
+* the absorption of the one-attachment odd cycles `JSP90.oneAttach_of_isCPath_return` along 2-cuts
+  (`JSP90.VertexSplit.closeToBipartite_two_of_nonBipartiteParts`), with the bound on the number of
+  such 2-cuts.
+
+Neither is proved; `JSP90.OddCycleErdosPosa r` and `jsp_000090_main` are unchanged.
+
 ## Round 112 — `JSPProblem/CPathSkip.lean`: the C-path shortcut, the shortest C-path is induced, the closed C-path is an odd cycle, and the TWO-ATTACHMENT COVER
 
 Round 111's `policy.json` named four concrete next lemmas.  **All four are now proved**, with

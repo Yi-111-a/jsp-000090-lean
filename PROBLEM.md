@@ -551,6 +551,50 @@ the step named by `policy.json` (the shortest `C`-path is induced) is the next r
 `IsCPath.skip` → `IsCPath.Shortest` → `IsCPath.induced_of_shortest`.  `jsp_000090_main` is still not
 declared.
 
+## Round 114 note (`lean/JSPProblem/CPathPair.lean`, attack family 54) — the FAN at depth two:
+## Mader's two-attachment lemma
+
+Round 112 named the missing depth-two step, and this file delivers it.  **No Menger theorem** is
+used: the two arcs between the two attachment points are counted, and the parity decides which of the
+two closed walks `arc + p + q` is an odd cycle.  52 declarations, 0 sorry/admit:
+
+* **`JSP90.IsCPathPair`** — **THE OBJECT: THE FAN AT DEPTH TWO.**  Two `C`-paths `p`, `q` to a
+  common target `x ∉ C`, ending at **distinct** vertices `f i`, `f j` of `C`, whose vertex sets meet
+  only in `{f i, f j, x}`.  `IsCPathPair.d1_pos`/`d2_pos` (a length-0 `C`-path would put its target
+  on `C`), `IsCPathPair.eq_fi_of_mem_supset_p_mem_C` (the first path meets `C` in exactly its first
+  vertex) and **`IsCPathPair.inter_ne`** (the two interiors never meet);
+* **`JSP90.arcPairFun`** — **THE TWO-PATH ARC CYCLE**, the closed walk
+  `f j → (arc of length `e`) → f i → p → x → q → f j` on `Fin (e + d1 + d2)`.  For `d1 = d2 = 1` it is
+  `JSPProblem/Fan.lean`'s `arcFun`, so the constructor **generalises** it to two paths of arbitrary
+  length.  `arcPairFun_inj` (**the walk is simple**), `arcPairFun_adj` (**every step is an edge**,
+  including the closing step `q 1 ~ q 0 = f j`), `arcPair_isOddCycle` and `card_arcPair` (**exactly**
+  `e + d1 + d2` vertices);
+* **`JSP90.exists_oddCycle_twoAttach_of_isCPathPair` — MADER'S TWO-ATTACHMENT LEMMA**: if `x` has two
+  internally vertex-disjoint `C`-paths to two distinct vertices of an odd cycle `C`, then `x` lies on
+  an **odd cycle of `G` through both attachment points**.  This is the *second* attachment point, the
+  resource round 112 asked for (rounds 111–112 produced only one-attachment odd cycles), and the
+  first odd cycle of `G` this development builds through a vertex at `C`-distance `≥ 2`.  The parity
+  is pure counting (`JSP90.mod_two_of_sum_odd`): the two candidate totals add up to
+  `m + 2 (d1 + d2)`, which is odd;
+* **`JSP90.arc_sum_ge_of_shortest` — A SHORTEST ODD CYCLE IS THICK**: at a shortest odd cycle of
+  length `m`, `m ≤ e + d1 + d2` for the odd arc; in the fan case this forces
+  **`JSP90.oddArc_eq_two_of_fan_of_shortest`**, the odd arc has length exactly `m - 2`, and hence
+  **`JSP90.shortArc_of_pairFan`** — the short-arc lemma of `JSPProblem/Fan.lean`, re-derived here
+  from the two-path arc cycle and its vertex count.  The depth-one input is now *derived*, not
+  assumed: `IsCPath_edgePath` (a length-1 `C`-path is an edge) and `isCPathPair_of_adj` (a vertex
+  adjacent to two distinct vertices of `C` **is** a fan);
+* **`JSP90.twoAttach_kTriangles_one`** — the two-attachment hypothesis *holds* on `kTriangles 1`
+  (`CloseToBipartite 2 (kTriangles 1)`), so round 111's transversal is not vacuous, and
+* **`JSP90.not_twoAttach_kTriangles_two`** — **machine-checked negative result**: on `kTriangles 2`
+  **no** odd cycle is two-attached, so round 111's hypothesis is not automatic and needs real
+  content.
+
+Mader's lemma is a *resource*, not a transversal: it exhibits an odd cycle through `x` meeting `C`
+twice, but it does not make the two-attachment hypothesis hold for every odd cycle of `G`.  The
+two-attachment **cover** of round 112 still needs its global existence statement, together with the
+absorption of the one-attachment odd cycles.  `jsp_000090_main` remains undeclared and
+`JSP90.OddCycleErdosPosa r` (Reed–Robertson–Seymour–Thomas) is unchanged.
+
 ## Round 112 note (`lean/JSPProblem/CPathSkip.lean`, attack family 53)
 
 Round 111 defined Mader's `C`-path and left three named lemmas.  All three are now proved, plus the
