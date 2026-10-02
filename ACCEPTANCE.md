@@ -3220,3 +3220,37 @@ non-bipartite pieces — so `|nonBipartitePieces| ≤ k` is false and no `f(k)` 
 `jsp_000090_main` remains **not** declared, so the harness keeps reporting
 `missing_theorems = ["jsp_000090_main"]`.  What is left is `JSP90.OddCycleErdosPosa r` for the graphs
 with **no cut vertex** (the 2-connected case).
+
+---
+
+## Round 111 — `JSPProblem/CPath.lean`: the **C-PATH** and the **TWO-ATTACHMENT transversal**
+
+Attack family 52, following the single step `discovery/JSP-000090/policy.json` named after round 110.
+The file formalises **Mader's C-path** and turns it into a transversal bound, so it contributes a new
+instance of the headline theorem and not only new vocabulary:
+
+* **`JSP90.IsCPath`** — the object: a simple path of `d` steps from the vertex `f i` of a cycle `C`
+  to the vertex `x ∉ C`, none of whose other vertices lies on `C`; its API (`IsCPath.card`,
+  `IsCPath.adj_step`, `IsCPath.notMem_interior`) records that it has `d + 1` vertices, `d` edges and
+  no interior vertex on `C`;
+* **`JSP90.IsCPath.extend`** — a C-path may be **extended by one edge**;
+* **`JSP90.IsOddCycle.exists_edge_avoiding`** — a cycle of length `≥ 3` has an edge avoiding any
+  prescribed vertex of it;
+* **`JSP90.closeToBipartite_of_twoAttach`** — **THE TWO-ATTACHMENT TRANSVERSAL**: if every odd cycle
+  of `G` meets the odd cycle `C` in at least two vertices, then `CloseToBipartite (|C| - 1) G`;
+* **`JSP90.erdos73On_of_twoAttach`** — a **new instance of the headline theorem**: with
+  `LocIndep k G` and that attachment hypothesis, `CloseToBipartite (|C| - 1) G`, with the constant
+  **independent of `k`** — the first transversal bound in this development that does not grow with
+  Erdős's local parameter, against `ℓ * k` of `JSP90.erdos73On_of_bounded_odd_girth`.
+
+`lake build` completes (1262 jobs) with **0 `sorry`, 0 `admit`**, so `score.py --strict-prize` reports
+`build_ok = true, partial_ok = true, missing_theorems = ["jsp_000090_main"]`; `formalization.yaml`
+remains `status: wip`, `prize_ready: false`.  No award claim is made.
+
+**What is not proved.**  The second half of the named step — *the shortest `C`-path is induced* —
+requires `JSP90.IsCPath.skip` (a chord shortens the path), `JSP90.IsCPath.Shortest` (minimality) and
+`JSP90.IsCPath.induced_of_shortest`; the index arithmetic of the splice
+(`skipPath`, `skipPath_le`, `skipPath_gt`, `skipPath_end`, `skip_idx_lt`, `skip_idx_inj`) is written
+out in the file and compiles, the theorem bodies did not close within the round, and those five names
+are the concrete next steps recorded in `discovery/JSP-000090/policy.json`.  `JSP90.OddCycleErdosPosa r`
+and `jsp_000090_main` are unchanged; the two-attachment class does not contain all 2-connected graphs.

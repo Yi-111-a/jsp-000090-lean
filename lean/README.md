@@ -1723,3 +1723,41 @@ no `sorryAx`.
 * `Finset.ext z` + `fin_cases z` + `simp` is the reliable way to prove `s ∩ t = ∅` for literal finsets
   here: `decide` gets stuck in `List.filter … |>.isPerm`, and `Finset.mem_inter.mp` re-synthesises a
   *different* `DecidableEq` instance from the one baked into the literal.
+
+---
+
+## Round 111 — `JSPProblem/CPath.lean`: the **C-PATH** (Mader's object) and the TWO-ATTACHMENT transversal
+
+Attack family 52, and the **fifty-second** independent route to `JSP90.OddCycleErdosPosa r`.  Round
+110 closed the cut-vertex axis, and `discovery/JSP-000090/policy.json` named the next single step:
+
+> a first sub-step: formalise the **C-path** itself (a path from a vertex of `C` to `x` with all
+> internal vertices outside `C`) and prove that **the shortest C-path is induced**.
+
+This file does the object and turns it into a **new transversal bound**.
+
+| result | content |
+| --- | --- |
+| `JSP90.IsCPath` | **THE OBJECT**: a simple path of `d` steps from the vertex `f i` of a cycle `C` to the vertex `x ∉ C`, no other vertex on `C` |
+| `IsCPath.card`, `IsCPath.adj_step`, `IsCPath.notMem_interior`, `IsCPath.notMem_end` | `d + 1` vertices, `d` edges, no interior vertex on `C` |
+| **`IsCPath.extend`** | a `C`-path may be **extended by one edge** (`d → d + 1`) |
+| **`IsOddCycle.exists_edge_avoiding`** | a cycle of length `≥ 3` has an edge avoiding any prescribed vertex of it |
+| **`closeToBipartite_of_twoAttach`** | **THE TWO-ATTACHMENT TRANSVERSAL**: every odd cycle of `G` meeting one odd cycle `C` in ≥ 2 vertices forces `CloseToBipartite (|C| - 1) G` |
+| **`erdos73On_of_twoAttach`** | **a new instance of the headline theorem**, constant `|C| - 1`, **independent of `k`** — the first transversal bound here that does not grow with Erdős's local parameter (against `ℓ * k` of `erdos73On_of_bounded_odd_girth`) |
+
+`lake build` OK (1262 jobs), **0 sorry, 0 admit**.
+
+**Not proved this round.**  The *shortest `C`-path is induced* needs
+`IsCPath.skip` → `IsCPath.Shortest` → `IsCPath.induced_of_shortest`; the index arithmetic
+(`skipPath`, `skipPath_le`, `skipPath_gt`, `skipPath_end`, `skip_idx_lt`, `skip_idx_inj`) is written
+out and compiles, the theorem bodies did not close inside the round budget, and the five missing names
+are recorded in `discovery/JSP-000090/policy.json`.  `IsCPath.concat` (the splice) is cut for the same
+reason.  `jsp_000090_main` and `JSP90.OddCycleErdosPosa r` are unchanged.
+
+**Toolchain notes.**  `Nat.succ n` is not syntactically `n + 1`, so every `Fin` index proof has to be
+given in the `n + 1` form (`lt_d_succ`, `zero_lt_d_succ`, `Nat.lt_succ_of_le`); `omega` cannot see
+through `Fin.val` (`zero_lt_fin_mk'` bridges this) and cannot handle `% (d + 1)` with `d` a variable
+(use `apply Fin.ext` + `Nat.mod_eq_of_lt`).  A `def … := fun j => if j.val = n then … else …` gets an
+`ite` (no hypothesis in the `else` branch, so `omega` fails); write `if _h : …` to get a `dite`.
+`Nat.find` is unusable for the length of a shortest `C`-path, because `Nat.find` needs a
+`DecidablePred` and existential quantification over *functions* is not decidable.

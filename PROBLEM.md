@@ -539,3 +539,14 @@ of its pieces; the composition rule then costs **no `+1`** for the cut vertex
 `JSP90.closeToBipartite_iff_of_twoSideCuts`) — this is the machine-checked block-cut reduction, so the
 short-`C`-path lemma that `policy.json` demanded for the one-sided chains is **not needed**.
 `JSP90.wf_locIndep_one_two_nonBipartitePieces` records why no `f(k)` comes out of the piece count.
+
+## Round 111 note (attack family 52)
+
+`JSPProblem/CPath.lean` introduces **Mader's C-path** (`JSP90.IsCPath`), proves that a C-path may be
+extended by one edge, and derives the **two-attachment transversal**: if every odd cycle of `G`
+meets one odd cycle `C` in at least two vertices, then `G` is the union of a bipartite graph and at
+most `|C| - 1` vertices — a bound **independent of `k`**, the first such bound in this development.
+It is a new instance of the headline theorem (`JSP90.erdos73On_of_twoAttach`).  The second half of
+the step named by `policy.json` (the shortest `C`-path is induced) is the next round's target:
+`IsCPath.skip` → `IsCPath.Shortest` → `IsCPath.induced_of_shortest`.  `jsp_000090_main` is still not
+declared.

@@ -57,3 +57,22 @@ build:
   toolchain_file: lean/lean-toolchain
   command: lake build
 
+  round_111:
+    module: lean/JSPProblem/CPath.lean
+    attack_family: 52
+    status: wip
+    new_declarations: 32
+    sorry: 0
+    admit: 0
+    headline_results:
+      - JSP90.IsCPath (Mader's C-path) with card / adj_step / notMem_interior / notMem_end
+      - JSP90.IsCPath.extend (a C-path may be extended by one edge)
+      - JSP90.IsOddCycle.exists_edge_avoiding
+      - JSP90.closeToBipartite_of_twoAttach (the two-attachment transversal, bound |C| - 1)
+      - JSP90.erdos73On_of_twoAttach (new instance of the headline theorem, constant independent of k)
+    next_step:
+      - JSP90.IsCPath.skip (a chord shortens the C-path)
+      - JSP90.IsCPath.Shortest and JSP90.IsCPath.induced_of_shortest (the shortest C-path is induced)
+      - JSP90.IsCPath.ne_iff_last and JSP90.IsCPath.isOddCycle_return
+    prize_ready: false
+    missing_theorems: [jsp_000090_main]

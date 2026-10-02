@@ -987,6 +987,33 @@ be bounded by the packing number — a triangle with a pendant path has packing 
 arbitrarily long such chains — and are handled in the classical proof by the block-cut tree and the
 short-C-path lemma.  `jsp_000090_main` is still not declared and `JSP90.OddCycleErdosPosa r` is
 unchanged.
+## `JSPProblem/CPath.lean` (round 111) — the **C-PATH** (Mader's object) and the TWO-ATTACHMENT transversal
+
+The **fifty-second** attack family, and the one `discovery/JSP-000090/policy.json` named as the next
+single step: formalise the **C-path** — a path from a vertex of the odd cycle `C` to a vertex
+`x ∉ C` whose other vertices all avoid `C`.
+
+* **`JSP90.IsCPath`** — the object itself, with its API (`IsCPath.card`, `IsCPath.adj_step`,
+  `IsCPath.notMem_interior`): a `C`-path of length `d` has `d + 1` vertices, `d` edges, and **no
+  vertex other than the first one lies on `C`**;
+* **`JSP90.IsCPath.extend`** — a `C`-path may be **extended by one edge**, the classical step from
+  length `d` to length `d + 1`;
+* **`JSP90.IsOddCycle.exists_edge_avoiding`** — a cycle of length `≥ 3` has an edge avoiding any
+  prescribed vertex of it;
+* **`JSP90.closeToBipartite_of_twoAttach`** — **THE TWO-ATTACHMENT TRANSVERSAL**: if every odd cycle
+  of `G` meets one odd cycle `C` in at least two vertices, then `G` is `(|C| - 1)`-close to
+  bipartite, and
+* **`JSP90.erdos73On_of_twoAttach`** — **a new instance of the headline theorem**, with the constant
+  `|C| - 1`, **independent of `k`** (the first transversal bound in this development that does not
+  grow with Erdős's local parameter, against `ℓ * k` of
+  `JSP90.erdos73On_of_bounded_odd_girth`).
+
+Still open: `policy.json`'s second half — *the shortest `C`-path is induced* — needs
+`IsCPath.skip`, `IsCPath.Shortest`, `IsCPath.induced_of_shortest`, `IsCPath.ne_iff_last` and
+`IsCPath.isOddCycle_return`; the index arithmetic of the first two (`skipPath`, `skip_idx_lt`,
+`skip_idx_inj`) is written out in the file and the three lemmas are named as the next concrete step in
+`discovery/JSP-000090/policy.json`.  `JSP90.OddCycleErdosPosa r` and `jsp_000090_main` are unchanged.
+
 -/
 import JSPProblem.Definitions
 import JSPProblem.Reed
@@ -1048,3 +1075,4 @@ import JSPProblem.Split
 import JSPProblem.SplitSharp
 import JSPProblem.Chain
 import JSPProblem.Piece
+import JSPProblem.CPath
