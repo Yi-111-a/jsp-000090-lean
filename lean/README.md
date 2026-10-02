@@ -1263,3 +1263,114 @@ constant `f(k) = k`.
 The headline theorem `jsp_000090_main` (`Erdős73` for every `k`, i.e. `JSP90.OddCycleErdosPosa r` for
 the 3-connected case) is **unchanged**: this round removes no restriction on `G` in general, only on
 a class on which the answer is already explicit.
+
+## Round 105 — `lean/JSPProblem/Exact.lean`: the EXACT-ADDITIVITY axis
+
+**Attack family 46.**  `JSPProblem/Deficiency.lean` proves only the *sub*-additivity of the maximum
+deficiency over an anticomplete decomposition and says so explicitly:
+
+> *"The *converse* (equality for `MaxDef`) is not proved here …"*
+
+Round 104 re-derived the equality inside the much narrower hypothesis "every piece is a clique",
+which is why its counting apparatus (`piecesMet`, `inj_pieces_choice`, `card_le_piecesMet`, …) runs to
+forty declarations.  This file settles the equality **in general**, and then pushes the *same*
+statement through the conclusion, so that both sides of Erdős #73 split exactly over a cover.
+
+### The missing equality
+
+```lean
+JSP90.maxDefIn_anticoverIn_add : AnticoverIn G s A B →
+    maxDefIn G s = maxDefIn G (s ∩ A) + maxDefIn G (s ∩ B)
+JSP90.maxDef_anticover_add     : Anticover G A B →
+    MaxDef G = MaxDef (G[A]) + MaxDef (G[B])
+```
+
+The mechanism is **attainment**, not monotonicity: `defOf G X = |X| − 2 α(G[X])` is a *truncated*
+subtraction and is only subadditive over such a split (counterexample in the `Deficiency.lean`
+header: `K_3 ⊔ K_1`, deficiency `0` on the vertex set, `1` on the triangle).  For the maximum the
+truncation cannot bite, because `JSP90.exists_eq_maxDefIn` gives on each side a vertex set attaining
+its own maximum, and a side of deficiency `p > 0` satisfies `|X| ≥ 2 α(G[X])`, so the two sides pay
+for themselves separately.
+
+**What is false, and is recorded in the file header:** `defOf` is *not* monotone under vertex sets.
+For `G` a triangle plus two isolated vertices the triangle has `defOf = 1` and the whole vertex set
+has `defOf = 0`; so `maxDefIn G U = defOf G U` and `MaxDef G = |V| − 2 α(G)` are both false, and the
+route suggested in `Deficiency.lean` ("a vertex of `X \ s` is isolated in `G[s]`, so adding it …
+leaves `defOf` unchanged") is not the one taken.
+
+### The linear split on an `AnticoverIn`
+
+`JSP90.card_indepCard_anticoverIn_add` — for `Y ⊆ s` with `A ⊔ B = s` anticomplete,
+`|Y| = |Y ∩ A| + |Y ∩ B|` and `α(G[Y]) = α(G[Y ∩ A]) + α(G[Y ∩ B])` *exactly*.  This is the
+generalisation of `JSP90.card_indepCard_anticover_add` (stated there only for `Y ⊆ V`), and
+`JSP90.card_indepCard_anticover_add_of_anticover` recovers the old statement as the case `s = V`.
+
+### The finitary form, on the hypothesis side
+
+```lean
+JSP90.maxDef_eq_sum_of_cover : AnticoverCoverFamily G 𝒬 → (cover) →
+    MaxDef G = ∑ X ∈ 𝒬, MaxDef (G[X])                     -- induction on the family
+JSP90.locIndep_cover_iff     : LocIndep k G ↔ (∑ X ∈ 𝒬, MaxDef (G[X])) ≤ k
+JSP90.maxDef_eq_sum_cost_of_cover : … pieces cliques of ≥ 2 vertices … →
+    MaxDef G = ∑ C ∈ 𝒬, (|C| - 2)                          -- ROUND 104'S THEOREM, NOW A COROLLARY
+JSP90.maxDef_clique / JSP90.closeToBipartite_of_clique : MaxDef (G[C]) = |C| - 2, and the transversal
+```
+
+### The finitary form, on the conclusion side
+
+```lean
+JSP90.closeToBipartite_of_cover_cost  : (∀ X ∈ 𝒬, CloseToBipartite (c X) (G[X])) →
+    CloseToBipartite (∑ X ∈ 𝒬, c X) G
+JSP90.closeToBipartite_iff_cost_cover : CloseToBipartite m G ↔
+    ∃ c, (∀ X ∈ 𝒬, CloseToBipartite (c X) (G[X])) ∧ (∑ X ∈ 𝒬, c X) ≤ m
+JSP90.card_sum_inter_le               : (∑ X ∈ 𝒬, |Z ∩ X|) ≤ |Z|   -- the disjointness counting
+```
+
+### The new instance, and its optimality
+
+```lean
+JSP90.PieceMaxDef G 𝒬 : AnticoverCoverFamily G 𝒬 ∧ cover ∧
+    ∀ X ∈ 𝒬, CloseToBipartite (MaxDef (G[X])) (G[X])
+
+JSP90.erdos73On_of_pieceMaxDef (+ _univ) : PieceMaxDef G 𝒬 → LocIndep k G → CloseToBipartite k G
+JSP90.closeToBipartite_iff_maxDef_of_pieceMaxDef : CloseToBipartite m G ↔ MaxDef G ≤ m
+JSP90.pieceMaxDef_of_cluster             : ClusterDecomposition G 𝒬 → PieceMaxDef G 𝒬
+JSP90.erdos73On_of_pieceMaxDef_optimal   : (LocIndep k (kTriangles k) → CloseToBipartite m (kTriangles k)) ↔ k ≤ m
+JSP90.erdos73_pieceMaxDef_notBelowK      : m < k → ¬ CloseToBipartite m (kTriangles k)
+```
+
+`PieceMaxDef` is the **cover closure of the class on which the hypothesis and the conclusion of
+Erdős #73 coincide**: the pieces pay their deficiency jointly because the deficiency splits over the
+cover and the per-piece deletion sets are disjoint.  It contains round 104's cluster class
+(`JSP90.pieceMaxDef_of_cluster`; strictly larger: `K_5 ⊔ K_{2,3}` is on it and is not a cluster
+graph), and every disjoint union of graphs of any proved class of that kind.  The constant `k` is
+machine-checked optimal on the lower-bound witness `kTriangles k`.
+
+### Toolchain notes from this round (for `policy.json`)
+
+* `Membership (Finset V) (Finset V)` **cannot be synthesised** from a file-local
+  `local instance : DecidableEq V` (Mathlib's `Finset.decidableEq` is not found by instance search in
+  this setting).  Consequences: `Finset.disjoint_iff_ne` is unusable (use
+  `JSP90.false_of_mem_inter`, proved once from `Finset.disjoint_iff_inter_eq_empty` +
+  `Finset.disjoint_left`); no lemma may be *stated* with `X ∈ s` for `X s : Finset V`; and `simp`
+  cannot reduce `X ∈ ∅` for `X : Finset V` (use `JSP90.not_mem_finsetEmpty`, proved by
+  `rw [Finset.mem_def]; simp`).  Membership in `Finset (Finset V)` (one level up) *is* available.
+* The `∉` in `JSP90.AnticoverIn` is **finset**-typed, so `⟨fun _ hxA hx' => …⟩` works for its first
+  field, but Mathlib's `Finset.Disjoint` is **Set**-typed (`a ⊆ s → a ⊆ t → False`): never apply
+  `Disjoint` as a function, use `Finset.disjoint_iff_inter_eq_empty` / `false_of_mem_inter`.
+* `Finset.mem_insert.mp h` with `h : Y ∈ insert X t` yields `Y = X ∨ Y ∈ t`; in the first branch the
+  contradiction comes from the *caller's* hypothesis (`x ∉ X`), **not** from `hX : X ∉ t`.
+* `Finset.sum_insert` takes the non-membership proof as an *argument*: `Finset.sum_insert hX`, not
+  `Finset.sum_insert`; and `Finset.sum_congr` takes `(s₁ = s₂)` first, so
+  `Finset.sum_congr rfl (fun X _ => …)`.
+* `Finset.inter_eq_left.mpr : s ⊆ t → s ∩ t = s` and `Finset.inter_eq_right.mpr : t ⊆ s → s ∩ t = t`
+  need explicit `(s₁ := _) (s₂ := _)` when the finsets are not determined by the goal.
+* `IsOddCycle.induceFinset (hC : IsOddCycle G C) (hsub : C ⊆ s)` and
+  `isOddCycle_sub_induceFinset` are the two conversions between an odd cycle of `G` and of `G[s]`;
+  together with `isOddCycle_sub_anticoverCover` they give the transversal half without any induction.
+* `CloseToBipartite` is `def`, so `HitsOddCycles` (also a `def`) must be applied as
+  `(hhits X hX) C hC`, not `hhits X hX C hC`.
+* `JSP90.isBipartite_induceFinset_of_card_le_two` (`JSPProblem/Weight.lean`) is the "≤ 2 vertices is
+  bipartite" lemma needed by `JSP90.closeToBipartite_of_clique`.
+* `JSP90.maxDef_eq_sum_of_cover` needs `set_option maxHeartbeats 4000000` (the induction over a finset
+  of finsets is expensive); the rest of the file is fast.

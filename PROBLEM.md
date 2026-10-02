@@ -380,3 +380,42 @@ largest class on which hypothesis and conclusion coincide.**
   union of odd cycles).
 
 The missing half is unchanged: `JSP90.OddCycleErdosPosa r`, i.e. `jsp_000090_main`.
+
+**Round 105 (`lean/JSPProblem/Exact.lean`, 26 declarations, 0 sorry/admit) — the EXACT-ADDITIVITY
+axis: the statement `JSPProblem/Deficiency.lean` records as *missing*.**  That file proves only
+`MaxDef G ≤ MaxDef (G[A]) + MaxDef (G[B])` over an anticomplete decomposition and says the converse
+"is not proved here"; round 104 had to re-derive the equality under the narrow hypothesis "every
+piece is a clique".  This file proves it in general and pushes the same statement through the
+conclusion, so that **both sides of Erdős #73 split exactly over an anticomplete cover**:
+
+* **`JSP90.maxDef_anticover_add : MaxDef G = MaxDef (G[A]) + MaxDef (G[B])`** (from
+  `JSP90.maxDefIn_anticoverIn_add`, stated for `AnticoverIn G s A B`), together with the linear split
+  `JSP90.card_indepCard_anticoverIn_add` (`|Y| = |Y ∩ A| + |Y ∩ B|` and
+  `α(G[Y]) = α(G[Y ∩ A]) + α(G[Y ∩ B])` over a split of a vertex set `s`), which generalises
+  `JSPProblem/Deficiency.lean`'s version, stated only for `Y ⊆ V`.  The mechanism is **attainment**,
+  not monotonicity: `defOf` is a truncated subtraction and is *not* monotone under vertex sets (the
+  file header records the machine-checked obstruction `K_3 ⊔ K_1`, and the false consequence
+  `maxDefIn G U = defOf G U`), but a vertex set attaining each side's maximum with positive
+  deficiency satisfies `|X| ≥ 2 α(G[X])`, so the two sides pay separately and no truncation occurs;
+* **`JSP90.maxDef_eq_sum_of_cover : MaxDef G = ∑ X ∈ 𝒬, MaxDef (G[X])`** for *any* pairwise
+  anticomplete cover of the vertices (induction on the family, one piece peeled at a time), with
+  `JSP90.locIndep_cover_iff` (the hypothesis splits) and `JSP90.maxDef_eq_sum_cost_of_cover`, so
+  **round 104's `maxDef_cluster` is now a corollary** of `JSP90.maxDef_clique`
+  (`MaxDef (G[C]) = |C| − 2` for a clique `C` of at least two vertices, with the transversal
+  `JSP90.closeToBipartite_of_clique`);
+* **the conclusion splits too**: `JSP90.closeToBipartite_of_cover_cost` and the *exact*
+  `JSP90.closeToBipartite_iff_cost_cover` — `CloseToBipartite m G ↔ ∃ c, (∀ X ∈ 𝒬,
+  CloseToBipartite (c X) (G[X])) ∧ ∑ c X ≤ m` — with `JSP90.card_sum_inter_le` for the counting;
+* **`JSP90.erdos73On_of_pieceMaxDef` — a NEW INSTANCE with the optimal constant `k`** on
+  `JSP90.PieceMaxDef G 𝒬`, the **cover closure of the class on which the hypothesis and the
+  conclusion of Erdős #73 coincide** (the pieces pay their deficiency jointly, because the deficiency
+  splits over the cover and the per-piece deletion sets are disjoint).  `JSP90.pieceMaxDef_of_cluster`
+  puts round 104's cluster class inside it (strictly: `K_5 ⊔ K_{2,3}` is on it and is not a cluster
+  graph), `JSP90.closeToBipartite_iff_maxDef_of_pieceMaxDef` gives hypothesis = conclusion on the
+  class, and **`JSP90.erdos73On_of_pieceMaxDef_optimal`** proves the constant `k` machine-checked
+  optimal on the lower-bound witness `kTriangles k`, re-deriving `f(k) ≥ k`.
+
+The missing statement is unchanged: `jsp_000090_main` is still not declared and
+`JSP90.OddCycleErdosPosa r` (the 3-connected case) is untouched — this file relates the two sides of
+Erdős #73 to each other over covers, it does not bound the transversal of a graph whose pieces are
+themselves not covered.

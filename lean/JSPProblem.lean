@@ -834,6 +834,43 @@ deliberately not declared.
      `JSP90.erdos73_cluster_notBelowK` shows no `m < k` works.  This file declares **no** `DecidableEq`
      instance (the round-103 toolchain note: a file with a local instance cannot state anything over
      `Fin 3 × Fin k` that mentions an intersection).
+ * `JSPProblem.Exact` — **the EXACT-ADDITIVITY axis** (round 105, one new attack family).  It proves
+   the statement that `JSPProblem/Deficiency.lean` records as *missing* — the **equality**
+   `MaxDef G = MaxDef (G[A]) + MaxDef (G[B])` over an anticomplete decomposition of the vertices —
+   and pushes the same statement through the conclusion, so that *both* sides of Erdős #73 split
+   exactly over an anticomplete cover.
+   - **THE MISSING EQUALITY `JSP90.maxDef_anticover_add`** (from
+     `JSP90.maxDefIn_anticoverIn_add`, with `AnticoverIn G s A B`: `maxDefIn G s = maxDefIn G (s ∩ A)
+     + maxDefIn G (s ∩ B)`).  The truncated subtraction `defOf G X = |X| − 2 α(G[X])` is only
+     *sub*additive over such a split (the file header of `JSPProblem/Deficiency.lean` gives the
+     counterexample `K_3 ⊔ K_1`); the obstruction disappears for the *maximum* because each side
+     carries a vertex set attaining its own maximum (`JSP90.exists_eq_maxDefIn`), and a side with
+     positive deficiency satisfies `|X| ≥ 2 α(G[X])`, so the two sides pay separately and nothing
+     truncates.  Note that `defOf` is **not** monotone under vertex sets (the file header gives the
+     machine-checked obstruction), so attainment — not monotonicity — is the mechanism;
+   - **THE LINEAR SPLIT ON AN `AnticoverIn`** `JSP90.card_indepCard_anticoverIn_add`: the vertices
+     *and* the independent numbers of `Y` split over an anticomplete split of a vertex set `s`,
+     `|Y| = |Y ∩ A| + |Y ∩ B|` and `α(G[Y]) = α(G[Y ∩ A]) + α(G[Y ∩ B])`; the `Anticover` version of
+     `JSPProblem/Deficiency.lean` is recovered as `JSP90.card_indepCard_anticover_add_of_anticover`;
+   - **THE FINITARY FORM `JSP90.maxDef_eq_sum_of_cover`**: `MaxDef G = ∑ X ∈ 𝒬, MaxDef (G[X])` for
+     *any* pairwise anticomplete cover of the vertices (induction on the family, one piece peeled off
+     at a time), together with `JSP90.locIndep_cover_iff` (the hypothesis splits) and
+     `JSP90.maxDef_eq_sum_cost_of_cover` — **round 104's `maxDef_cluster` is now a corollary** of
+     `JSP90.maxDef_clique` (`MaxDef (G[C]) = |C| − 2` for a clique `C` of at least two vertices);
+   - **THE CONCLUSION SPLITS EXACTLY TOO**: `JSP90.closeToBipartite_of_cover_cost` (the per-piece
+     costs add up) and `JSP90.closeToBipartite_iff_cost_cover` — `CloseToBipartite m G ↔ ∃ c,
+     (∀ X ∈ 𝒬, CloseToBipartite (c X) (G[X])) ∧ ∑ c X ≤ m` — the *exact* additive form of the
+     conclusion, with `JSP90.card_sum_inter_le` for the cardinality;
+   - **THE NEW INSTANCE `JSP90.erdos73On_of_pieceMaxDef`** (+ `_univ`): `LocIndep k G →
+     CloseToBipartite k G` on `JSP90.PieceMaxDef G 𝒬`, the class of graphs admitting an anticomplete
+     cover whose pieces are MaxDef-close to bipartite — **the cover closure of the class on which the
+     hypothesis and the conclusion of Erdős #73 coincide**, which contains round 104's cluster class
+     (`JSP90.pieceMaxDef_of_cluster`, strictly: `K_5 ⊔ K_{2,3}` is on it and is not a cluster graph)
+     and every disjoint union of graphs of any such class.  With
+     `JSP90.closeToBipartite_iff_maxDef_of_pieceMaxDef` (hypothesis = conclusion on the class) and
+     **`JSP90.erdos73On_of_pieceMaxDef_optimal`** — `(LocIndep k (kTriangles k) → CloseToBipartite m
+     (kTriangles k)) ↔ k ≤ m`, so the constant `k` is machine-checked optimal and the lower bound
+     `f(k) ≥ k` is re-derived (`JSP90.erdos73_pieceMaxDef_notBelowK`).
 
 -/
 import JSPProblem.Definitions
@@ -890,3 +927,4 @@ import JSPProblem.Greedy
 import JSPProblem.Budget
 import JSPProblem.Cluster
 import JSPProblem.ClusterSharp
+import JSPProblem.Exact
