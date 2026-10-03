@@ -4820,3 +4820,117 @@ Over **all** `903 792` graphs with `MaxDef ≤ 1` on `n ≤ 7` vertices:
 `jsp_000090_main` is **not** declared, so the harness keeps reporting
 `missing_theorems = ["jsp_000090_main"]`; `formalization.yaml` remains `status: wip`,
 `prize_ready: false`.  No award claim is made.
+
+---
+
+## Round 136 — `JSPProblem/AttachPoints.lean`: **the attachment points of a shortest odd cycle**, the
+fan-entry lemma, and a *strictly tighter* residual for the sharp case `k = 1`
+
+Attack family 65.  One new file (**25 declarations, 0 sorry/admit**), `lake build` OK with
+**1287 jobs**; `score.py --strict-prize` reports `build_ok = true, sorry = 0, admit = 0,
+partial_ok = true, missing_theorems = ["jsp_000090_main"]`.
+
+Round 135 reduced the sharp case `k = 1` to `JSP90.FanTwoResidual` (hypothesis: `2 ≤ |fan|`).  This
+round attacks it from a **new** direction: instead of the *fan* (`boundary G C`, the vertices outside
+the cycle that touch it) the object studied is the **attachment set**
+
+```lean
+JSP90.attachPoints G C = ⋃_{y ∈ boundary G C} (attachSet G C y)
+                       = { a ∈ C : a has a neighbour in boundary G C }
+```
+
+— the vertices **of the cycle** on which a fan vertex hangs (`JSP90.attachSet` is round 117's
+`JSPProblem/Book.lean`).  It is the mirror image of the fan: it always lies **on** `C`
+(`JSP90.subset_attachPoints_C`) and is disjoint from it (`JSP90.disjoint_attachPoints_boundary`).  On
+the six-vertex witness `fan4` of round 135 the fan is `{1, 2, 3}` while the attachment points are the
+single vertex `5`.
+
+### Part 1–2 — the key lemma: **fan entry**
+
+* **`JSP90.sub_inter_or_sdiff_of_isOddCycle`** — an odd cycle does not cross a vertex set: if no edge
+  of `G` joins `D ∩ X` to `D \ X`, then `D ⊆ D \ X` or `D ⊆ D ∩ X`.  (`JSP90.isOddCycle_sub_anticoverIn`
+  of round 106 applied to the induced graph on `D`.)
+* **`JSP90.exists_mem_boundary_neigh_inter_of_isOddCycle_ne_of_packing_one` — FAN ENTRY**: every odd
+  cycle `D ≠ C` contains a fan vertex `y` **together with a neighbour of `y` lying on `D ∩ C`**:
+
+  ```lean
+  ∃ y ∈ D ∩ boundary G C, (neighOf G {y} ∩ D ∩ C).Nonempty
+  ```
+
+  The proof is the classical two-line argument: by round 135's Part 2, `D` meets the fan; if no fan
+  vertex of `D` had a neighbour on `D ∩ C`, no edge would join `D ∩ C` to `D \ C` (an endpoint of such
+  an edge outside `C` *is* a fan vertex), so by Part 1 the cycle `D` would lie inside `C`
+  (impossible: `C` is shortest) or entirely off `C` (impossible: two vertex-disjoint odd cycles).
+
+### Part 3–5 — the attachment points are an odd-cycle transversal, and the instances
+
+* **`JSP90.hitsOddCycles_attachPoints_of_packing_one` — THE ATTACHMENT POINTS OF A SHORTEST ODD CYCLE
+  ARE AN ODD-CYCLE TRANSVERSAL** (`HitsOddCycles G (attachPoints G C)`).  Only
+  `JSP90.PackingNumberOne` is used, so this is available for **every** `k` with the packing condition
+  in place of Erdős's hypothesis;
+* `JSP90.hitsOddCycles_attachPoints_union_singleton_of_packing_one` — the same with one vertex of `C`
+  added, which also covers the **empty** fan;
+* `JSP90.closeToBipartite_of_attachPoints_le_of_packing_one` — the conclusion of Erdős #73 with the
+  constant `|attachPoints|`;
+* **`JSP90.closeToBipartite_one_of_attachPoints_le_one_of_packing_one` — A NEW INSTANCE WITH THE
+  CONSTANT `1`** (compare round 135's `|fan| + 1`, which is `4` on `fan4`);
+* **`JSP90.erdos73On_one_two_of_attachPoints_le_two_of_packing_one` — A NEW INSTANCE OF THE HEADLINE
+  THEOREM: THE OPTIMAL CONSTANT `2`, FOR EVERY `k`**, with no bound on odd girth, packing weight or
+  branch vertices;
+* `JSP90.hitsOddCycles_pair_of_attachPoints_sub` and
+  `JSP90.erdos73On_one_two_of_boundary_card_eq_two_of_attachPoints_le_two` — **the concrete provable
+  case of `FanTwoResidual`**: a fan of size `2` with at most two attachment points, the certificate
+  being the attachment set itself (two *named* vertices when they are given).
+
+The constant `1` is exactly tight: `|attachPoints| ≤ 1` forces `τ_odd = 1`, because the attachment
+points are then themselves a one-vertex transversal.
+
+### Part 6 — a **strictly tighter** residual: `JSP90.AttachThreeResidual`
+
+Because the cases `|boundary G C| = 0` and `|attachPoints| ≤ 2` are now theorems, the residual of the
+sharp case `k = 1` can be stated **with no hypothesis on the fan at all**:
+
+```lean
+JSP90.AttachThreeResidual : LocIndep 1 G → C shortest odd cycle → 3 ≤ |attachPoints G C| →
+                             ∃ X, |X| ≤ 2 ∧ X meets every odd cycle of G
+```
+
+* **`JSP90.erdos73On_one_two_of_attachThreeResidual`** — that single statement implies the **sharp**
+  `Erdős73On 1 2`;
+* **`JSP90.fanTwoResidual_of_attachThreeResidual`** — it implies round 135's `FanTwoResidual`, i.e. the
+  residual is now *provably weaker* than it was (`3 ≤ |attachPoints|` forces `2 ≤ |fan|`, and the rest
+  of `FanTwoResidual` is a theorem of this file).
+
+### Part 7 — `K₄`-freeness and the missing `|C| = 3` half of the fan bound
+
+* **`JSP90.card_isClique_le_two_add`** — under `LocIndep k`, **every clique has at most `k + 2`
+  vertices**, for **every** `k` (so `LocIndep 1` forbids `K_4`; the `IsNClique` forms are round 121's
+  `JSP90.not_isNClique_four_of_locIndep_one` / `not_isClique_card_four_of_locIndep_one`);
+* **`JSP90.card_attachSet_le_two_of_locIndep_one`** — at `LocIndep 1` a fan vertex of a **shortest**
+  odd cycle has at most **two** attachment points, **including when the cycle is a triangle**.  Round
+  35's `JSP90.card_inter_neigh_le_two` (via round 117's `JSP90.card_attachSet_le_two`) needs
+  `5 ≤ |C|`; the missing `|C| = 3` half is the `K₄`-free observation (an independent set of size `≥ 2`
+  cannot live in `{x} ∪ C` when `x` is adjacent to all three vertices, by
+  `JSP90.indep_card_le_of_odd_cycle`).  The search confirms both halves.
+
+### Measurements (exhaustive search outside Lean, `discovery/JSP-000090/r136.c`)
+
+Over **all** `986 787` graphs with `MaxDef ≤ 1` on `n = 7` vertices (and all smaller ones):
+
+* `Q1`: **0 failures** — the attachment points of a shortest odd cycle really are an odd-cycle
+  transversal (every odd cycle `D ≠ C` meets them), confirming Part 4;
+* `Q2`: `τ_odd ≤ 2` everywhere (0 failures);
+* `Q3`: `max_G min_C |attachPoints G C| = 4`, so the residual threshold `3` is **optimal**;
+* `Q4`: `max |N(x) ∩ C| = 2` both for `|C| = 3` and for `|C| ≥ 5`, confirming Part 7;
+* histogram of `min_C |attachPoints G C|` at `n = 7`: `0: 2299`, `1: 68460`, `2: 557676`,
+  `3: 254485`, `4: 630` — the residual is very far from vacuous;
+* `Q6`: the residual is non-vacuous already on **five** vertices: edges `0-2 0-3 0-4 1-2 1-3 1-4 2-3`
+  (a `K_{2,3}` plus one edge) has two shortest odd cycles, both triangles sharing the edge `2-3`, and
+  all three vertices of each are attachment points (`min_C |attachPoints| = 3`, while `τ_odd = 1`).
+
+### What is *not* proved
+
+`JSP90.AttachThreeResidual`, and behind it `JSP90.OddCycleErdosPosa r`
+(Reed–Robertson–Seymour–Thomas), the unchanged primary blocker.  `jsp_000090_main` is **not**
+declared, so the harness keeps reporting `missing_theorems = ["jsp_000090_main"]`;
+`formalization.yaml` remains `status: wip`, `prize_ready: false`.  No award claim is made.

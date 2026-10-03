@@ -234,3 +234,40 @@ build:
       - JSP90.OddCycleErdosPosa r (unchanged: this is the missing jsp_000090_main)
     prize_ready: false
     missing_theorems: [jsp_000090_main]
+  round_136:
+    module: lean/JSPProblem/AttachPoints.lean
+    attack_family: 65
+    status: wip
+    new_declarations: 25
+    sorry: 0
+    admit: 0
+    build_jobs: 1287
+    headline_results:
+      - JSP90.sub_inter_or_sdiff_of_isOddCycle (an odd cycle does not cross a vertex set)
+      - JSP90.exists_mem_boundary_neigh_inter_of_isOddCycle_ne_of_packing_one (FAN ENTRY: every odd cycle D != C contains a fan vertex y of C together with a neighbour of y lying on D n C)
+      - JSP90.attachPoints, JSP90.mem_attachPoints, JSP90.subset_attachPoints_C, JSP90.disjoint_attachPoints_boundary (the mirror image of the fan)
+      - JSP90.hitsOddCycles_attachPoints_of_packing_one (THE ATTACHMENT POINTS OF A SHORTEST ODD CYCLE ARE AN ODD-CYCLE TRANSVERSAL)
+      - JSP90.hitsOddCycles_attachPoints_union_singleton_of_packing_one (the empty-fan case)
+      - JSP90.closeToBipartite_of_attachPoints_le_of_packing_one (the conclusion of Erdos #73 with the constant |attachPoints|)
+      - JSP90.closeToBipartite_one_of_attachPoints_le_one_of_packing_one (NEW INSTANCE, CONSTANT 1, tight)
+      - JSP90.erdos73On_one_two_of_attachPoints_le_two_of_packing_one (NEW INSTANCE OF THE HEADLINE THEOREM: THE OPTIMAL CONSTANT 2, FOR EVERY k)
+      - JSP90.erdos73On_one_two_of_attachPoints_le_two, JSP90.closeToBipartite_one_of_attachPoints_le_one (the k = 1 instances)
+      - JSP90.hitsOddCycles_pair_of_attachPoints_sub, JSP90.erdos73On_one_two_of_boundary_card_eq_two_of_attachPoints_le_two (the provable case of round 135's FanTwoResidual: two NAMED vertices, the certificate lying ON the cycle)
+      - JSP90.AttachThreeResidual, JSP90.erdos73On_one_two_of_attachThreeResidual (NEW, STRICTLY TIGHTER RESIDUAL: 3 <= |attachPoints|, no hypothesis on the fan)
+      - JSP90.fanTwoResidual_of_attachThreeResidual (the new residual implies round 135's FanTwoResidual, i.e. is formally weaker)
+      - JSP90.card_isClique_le_two_add, JSP90.not_isNClique_of_card_ge_three_add, JSP90.card_isClique_le_three_of_locIndep_one (under LocIndep k every clique has at most k+2 vertices)
+      - JSP90.card_attachSet_le_two_of_locIndep_one (the missing |C| = 3 half of the fan bound, by K4-freeness)
+    measurements:
+      - discovery/JSP-000090/r136.c: 0 failures over all 986787 LocIndep-1 graphs on n = 7 for both the transversal claim and tau_odd <= 2
+      - r136.c: max over G of min over shortest odd cycles C of |attachPoints G C| = 4, so the residual threshold 3 is optimal
+      - r136.c: max |N(x) n C| = 2 for |C| = 3 as well as for |C| >= 5 (the K4-free half of the fan bound)
+      - r136.c: the smallest graph with min_C |attachPoints G C| >= 3 has n = 5, edges 0-2 0-3 0-4 1-2 1-3 1-4 2-3
+    next_step:
+      - JSP90.AttachThreeResidual is the top target; the n = 5 witness shows a single shared attachment point can work
+      - sub-case (i): a triangle with one fan vertex of attachment size 2 and three attachment points in total -- measure whether ONE vertex always suffices
+      - sub-case (ii): |C| >= 5 with three attachment points (the only case where round 35's card_inter_neigh_le_two applies to both fan vertices)
+      - combine with JSPProblem/Additive.lean additivity over anticomplete decompositions
+      - refuted this round by hand: two fan vertices in the same JSP90.fanClass need NOT be non-adjacent at LocIndep 1 (round 135 next_bet item (iii))
+      - JSP90.OddCycleErdosPosa r (unchanged: this is the missing jsp_000090_main)
+    prize_ready: false
+    missing_theorems: [jsp_000090_main]

@@ -1282,4 +1282,5 @@ import JSPProblem.MeetSet
 import JSPProblem.Nonagon
 import JSPProblem.AttachErase
 import JSPProblem.BoundaryOne
+import JSPProblem.AttachPoints
 import JSPProblem.Fan4
