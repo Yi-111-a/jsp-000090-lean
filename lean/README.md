@@ -2070,3 +2070,104 @@ New module, 21 declarations, 0 placeholders.  It adds the one finite quantity th
   revision; `Finset.disjoint_left` has another shape than expected;
 * `omit [Fintype V] in` must be written *after* a docstring is impossible: docstring first, then
   `omit ... in`, then the theorem.
+
+---
+
+## Round 138 — attack family 67: the one-point cross-over (`JSPProblem/CrossOver.lean`)
+
+Round 137 proved the segment lemma `2 ≤ (C ∩ D).card ⟹ 2 ≤ (attachPoints G C ∩ D).card` for a shortest
+odd cycle `C` and an odd cycle `D ≠ C`, and declared a **one-point cross-over** `C ∩ D = {a}` "the only
+obstruction" — without ever measuring it. Round 138 measures it (11 questions, `discovery/JSP-000090/
+r138.c`, over the `986 787` graphs with `LocIndep 1` on `n ≤ 7` vertices), proves the structural facts and
+then **finds that the cross-over is not an obstruction for the `|A| - 1` instance at all**: the right
+hypothesis is not "no cross-over" but "no cross-over *at this attachment point*".
+
+### The new object
+
+* `JSP90.OnePointCrossOver G C D` — an odd cycle `D ≠ C` meeting `C` in exactly one vertex (a segment of
+  length `0` of `C` along `D`);
+* `JSP90.CrossOverPoint G C a` — `a` is the single vertex of such a meeting;
+* `JSP90.inter_eq_singleton_of_onePointCrossOver` — a cross-over is literally `C ∩ D = {a}`;
+* **`JSP90.mem_attachPoints_of_onePointCrossOver`** — **the cross-over point is an attachment point**;
+  no packing hypothesis and no minimality of `C` is needed (round 137's exit lemma applied to the
+  degenerate segment, via `JSP90.CycleOrder.step_ne`);
+* `JSP90.not_crossOverPoint_of_mem_boundary_of_noCrossOver` — `JSP90.NoCrossOver` of round 137 is exactly
+  the *emptiness* of the set of cross-over points, so the two objects are formally comparable.
+
+### The dichotomy — the cross-over is the only obstruction, in both directions
+
+* `JSP90.card_inter_attachPoints_eq_one_iff`: at packing number one, `C` shortest, `D` odd, `D ≠ C`,
+
+  ```lean
+  (attachPoints G C ∩ D).card = 1  ⟺  (C ∩ D).card = 1
+  ```
+
+  i.e. **every odd cycle meets the attachment points, and meets them in exactly one point exactly when
+  it crosses over** (measured: `0` failures, `r138.c` `Q1`).
+
+### The main new theorem
+
+* `JSP90.hitsOddCycles_attachPoints_sdiff_of_not_crossOver`: packing number one, `C` shortest, `b` an
+  attachment point which is **not** a cross-over point, `2 ≤ |attachPoints G C|` ⟹
+
+  ```lean
+  HitsOddCycles G (attachPoints G C \ {b})
+  ```
+
+  Round 137 obtained the same conclusion from the strictly stronger `JSP90.NoCrossOver`; cross-overs
+  are now allowed at every attachment point but `b`.
+
+### New instances of the headline theorem, valid *with* cross-overs present
+
+| statement | constant | hypothesis |
+| --- | --- | --- |
+| `JSP90.closeToBipartite_of_attachPoints_sdiff` | `|A| - 1` | packing number one, `b` not a cross-over point |
+| **`JSP90.closeToBipartite_one_of_card_attachPoints_eq_two_of_not_crossOver`** | **`1`** (optimal) | `\|A\| = 2` |
+| **`JSP90.erdos73On_one_two_of_card_attachPoints_le_three_of_not_crossOver`** | **`2`** (optimal) | `\|A\| ≤ 3` |
+
+The hypothesis must be "not a cross-over point" and not "there is a cross-over": `r138.c` `Q6` gives
+`63 720` counterexamples to "a cross-over point is itself a transversal" at `|A| = 2` with two
+cross-overs.
+
+### The residual is now read off exactly
+
+`JSP90.CrossOverResidual` is **equivalent** to round 137's `JSP90.AttachThreeResidualRefined`
+(`JSP90.crossOverResidual_of_attachThreeResidualRefined`,
+`JSP90.attachThreeResidualRefined_of_crossOverResidual`) and reads:
+
+```lean
+LocIndep 1 G → C shortest odd cycle → 3 ≤ |attachPoints G C| →
+  (4 ≤ |attachPoints G C| ∨ ∀ b ∈ attachPoints G C, CrossOverPoint G C b) →
+  ∃ a b, a ≠ b ∧ a, b ∈ attachPoints G C ∧ HitsOddCycles G {a, b}
+```
+
+The second disjunct is measured **empty** (`r138.c` `Q9`, `0` occurrences), so the whole remaining
+problem is the single case `4 ≤ |attachPoints G C|`; it is non-vacuous (first instance on **seven**
+vertices, `r138.c` `Q11`: `5 040` shortest cycles with `4 ≤ |attachPoints G C|`, each with a pair inside
+`attachPoints G C` as a certificate; witness edges `0-3 0-5 0-6 1-2 1-4 1-6 2-3 2-5 3-4`).
+
+### Measured but *not* promoted to Lean
+
+* a shortest odd cycle has **at most two** cross-over points (`r138.c` `Q3`: `370 015` graphs with one,
+  `9 780` with two, none with three) — only measured for `n ≤ 7`, and the first hand-built 9-vertex
+  candidate with three cross-over points was rejected by the `LocIndep 1` check alone, so the bound is
+  *not* trusted as a theorem;
+* "one cross-over point plus any other attachment point is a transversal" (`Q5`, `0` failures) — not
+  promoted because its proof needs exactly the same unproved "some pair inside `A`" statement as the
+  `4 ≤ |A|` case.
+
+### Toolchain facts added this round
+
+* `Finset.nonempty_iff_ne_empty`: `.mp` is `Nonempty → s ≠ ∅` and `.mpr` is the other way — the name
+  reads the opposite way;
+* `rcases` on `z ∈ {a, b}` fails in a file with a local *classical* `DecidableEq` (`Dependent
+  elimination failed: … at case List.Mem.head`) — use `Finset.mem_insert.mp` / `Finset.mem_singleton.mp`;
+* `Finset.card_eq_two.mpr` takes `⟨x, y, x ≠ y, s = {x, y}⟩` — only the distinctness and the set, no
+  membership fields;
+* an inner `by omega` whose expected type is the **argument** of a hypothesis is abstracted
+  (`fun x => h4 x`), so `exact h4 (by omega)` mis-elaborates silently: derive a `have h : False` first;
+* `exact not_not.mpr (fun h => …)` unifies `not_not`'s metavariable with the wrong statement — attack
+  such a goal with `by_contra` after an `intro`;
+* `Finset.eq_of_subset_of_card_le` returns `s = t` (not `t = s`), so it usually needs `.symm`;
+* `inter_attachPoints_of_isOddCycle_ne_of_packing_one` returns `D ∩ attachPoints G C` while
+  `attachPoints G C ∩ D` is used elsewhere; convert with `rw [Finset.inter_comm]` at the statement level.

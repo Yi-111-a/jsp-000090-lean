@@ -1284,5 +1284,6 @@ import JSPProblem.AttachErase
 import JSPProblem.BoundaryOne
 import JSPProblem.AttachPoints
 import JSPProblem.Segment
+import JSPProblem.CrossOver
 import JSPProblem.SharpTwo
 import JSPProblem.Fan4
