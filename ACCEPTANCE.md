@@ -4236,3 +4236,105 @@ closed for good.** Its statement and proof strategy are in `discovery/JSP-000090
 for all `k`; what the round adds is the flip equivalence, the structure of a maximum cut, and two
 machine-checked negative results that remove the maximum-cut certificate from the list of possible
 approaches.
+
+---
+
+## Round 129 — `lean/JSPProblem/MonoWind.lean`: the windmill satisfies `LocIndep 1`, and the
+## maximum-cut axis is closed **for good**
+
+Round 128 left the maximum-cut axis with exactly **one** open input, recorded verbatim in
+`discovery/JSP-000090/policy.json`:
+
+> `JSP90.locIndep_one_wfT (t : ℕ) : LocIndep 1 (wfT t)` — with the proof strategy (a counting lemma,
+> no combinatorics).
+
+**This round proves it**, and with it the relative refutation of round 127 is complete.  `lake build`
+succeeds (1279 jobs); `score.py --strict-prize` reports `build_ok = true, sorry = 0, admit = 0,
+placeholder_total = 0, partial_ok = true, missing_theorems = ["jsp_000090_main"]`, `prize_ready =
+false`.  28 new declarations, 0 `sorry`/`admit`.
+
+### 1 — `JSP90.locIndep_one_wfT`: the counting lemma
+
+For a vertex set `X` put `selOf X i =` the leaf of triangle `i` that lies in `X` (a triangle meeting
+`X` always has a leaf in `X`; `selOf X i` is the first leaf otherwise) and
+
+```
+S := (univ.image (selOf X)) ∩ X .
+```
+
+Then
+
+* **`JSP90.selOf_mem_of_mem_leaf`** — a triangle meeting `X` has a leaf in `X`, and it is the leaf
+  `selOf` returns;
+* **`JSP90.selOf_inj`** — the chosen leaf determines the triangle;
+* **`JSP90.locIndep_one_wfT`** — `S` is an independent set (`JSP90.selOf_inj` forbids adjacency of
+  two distinct members), `|X ∩ leaves| ≤ 2 * |S|` (**`JSP90.card_inter_wfLeaves_le_two_mul_card_inter_wfChosen`**,
+  via the injection `inl (i, j) ↦ (chosen leaf of `i`, j)` of **`JSP90.wfLeafMap_inj`**) and
+  `|X| ≤ |X ∩ leaves| + 1` (**`JSP90.card_le_card_inter_wfLeaves_add_one`**: the hub is the only
+  vertex that is not a leaf), whence `2 * |S| + 1 ≥ |X|`.
+
+Supporting definitions: `JSP90.wfHub`, `JSP90.wfLeaves`, `JSP90.mem_wfLeaves`,
+`JSP90.card_wfLeaves`, `JSP90.wfLeafMap`, `JSP90.wfLabelOf`, `JSP90.WfChosen`, `JSP90.WfChosenCode`,
+`JSP90.card_WfChosenCode`, `JSP90.mem_wfLeafMap_of_mem`, `JSP90.wfLabelOf_injective`,
+`JSP90.exists_fin2_selOf`.
+
+### 2 — the deficiency of the windmill is exactly `1`
+
+* **`JSP90.isClique_wfTri0`** (+ `JSP90.WfLeaves0`, `JSP90.wfTri0`, `JSP90.card_wfTri0`,
+  `JSP90.adj_hub_of_mem_leaves0`, `JSP90.adj_leaves0`) — one triangle of the windmill is a clique of
+  size `3`, so it has deficiency `1`;
+* **`JSP90.maxDef_one_wfT : MaxDef (wfT t) = 1`** for every `t ≥ 1`: the triangles all share the hub,
+  so their deficiencies do not add.  (`MaxDef G ≤ 1` from `JSP90.maxDef_le_of_locIndep` and
+  `JSP90.locIndep_one_wfT`, `1 ≤ MaxDef G` from `JSP90.le_maxDef` and the clique.)
+
+### 3 — TWO MACHINE-CHECKED REFUTATIONS OF THE MAXIMUM-CUT CERTIFICATE
+
+* **`JSP90.not_exists_monoSet_le_of_maxDef_one`** — **no function of the deficiency bounds the mono
+  set of a cut**: there is no `phi` such that every cut `A` of every graph with `MaxDef G ≤ 1`
+  satisfies `card (MonoSet G A) ≤ phi 1`.  Witness: the windmill `t := phi 1 + 1`.
+* **`JSP90.not_exists_monoSet_le_of_locIndep`** — **no function of `k` at all bounds it**: for every
+  `phi` and every `k ≥ 1` there is a `LocIndep k` graph with a cut whose mono set has more than
+  `phi k` vertices, although the graph is `1`-close to bipartite.
+* **`JSP90.exists_monoSet_ge_of_locIndep_of_closeToBipartite_one`** — the same statement in the shape
+  of the headline statement: for every `k ≥ 1` and `m` there is a `LocIndep k` graph `G` that is
+  `1`-close to bipartite and a cut `A` with `m < card (MonoSet G A)`.
+
+`#print axioms` on the four headline declarations gives only
+`[propext, Classical.choice, Quot.sound]`.
+
+**Consequence for the search space.**  Any future proof of `jsp_000090_main` that runs through
+`CloseToBipartite m G ↔ ∃ A, card (MonoSet G A) ≤ m` is dead: the certificate is unbounded while the
+optimum is `1`.  This subsumes and extends the two negative results of rounds 127–128 (which refuted
+the absolute form `JSP90.MaxCutMonoLe c` and the maximum-cut form).
+
+### 4 — measurement (not proved): the constant of `k = 1`
+
+`discovery/JSP-000090/r129.c` enumerates **every** graph on `n ≤ 8` vertices satisfying `LocIndep 1`
+(55 179 262 of them) and computes the odd cycle transversal number `tau_odd`:
+
+| `n` | # graphs with `LocIndep 1` | max `tau_odd` |
+| --- | --- | --- |
+| 3 | 8 | 1 |
+| 4 | 63 | 1 |
+| 5 | 958 | 1 |
+| 6 | 24 814 | 2 |
+| 7 | 986 787 | 2 |
+| 8 | 55 179 262 | 2 |
+
+and the same enumeration restricted to **triangle-free** `LocIndep 1` graphs (triangle-free pruning
+as well) gives max `tau_odd = 2` already at `n = 8`, attained by `k4sub` (already formalised in
+`JSPProblem/FewOdd.lean`, `JSP90.closeToBipartite_iff_k4sub`), and again at `n = 9` by the Petersen
+graph minus one vertex.  So **the conjecture is that `k = 1` holds with the constant `2` in full
+generality** (`JSP90.erdos73_one : Erdős73On 1 2`), in the triangle-free class as well; the
+triangle-free witnesses show the constant `1` is *not* available there.
+
+### What is *not* proved
+
+`jsp_000090_main` is **not** declared, so the harness keeps reporting
+`missing_theorems = ["jsp_000090_main"]`.  Behind it stands `JSP90.OddCycleErdosPosa r`
+(Reed–Robertson–Seymour–Thomas), the unchanged primary blocker.  The *new* top target opened by this
+round's measurement is the **complete `k = 1` case with the optimal constant `2`**
+(`LocIndep 1 G → CloseToBipartite 2 G`), which is the first constant of Erdős #73 that the machine
+search shows to be *optimal*, and the `k = 1` statement is the only remaining case in which the
+deficiency bound `≤ 1` is strong enough to hope for a short proof.  `formalization.yaml` remains
+`status: wip`, `prize_ready: false`.  No award claim is made.
