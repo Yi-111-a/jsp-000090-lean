@@ -4001,3 +4001,95 @@ graph on `≤ 7` vertices has odd cycle transversal number `≥ 3`, i.e. the tar
 `build_ok = true, sorry = 0, admit = 0, placeholder_total = 0, partial_ok = true,
 prize_ready = false`.  `formalization.yaml` remains `status: wip`, `prize_ready: false`.
 No award claim is made.
+
+---
+
+## Round 126 — `lean/JSPProblem/FewOdd.lean`: the **FEW-ODD-CYCLES axis**, and the 8-vertex witness that **kills the Helly route at `k = 1`**
+
+New module (31 declarations, 522 lines, **0 `sorry`, 0 `admit`**, `lake build` OK with 1276 jobs),
+imported from the root module `JSPProblem.lean`.  Attack family 46.  `harness/score.py
+problems/JSP-000090 --strict-prize` reports `build_ok = true, sorry = 0, admit = 0,
+placeholder_total = 0, partial_ok = true, missing_theorems = ["jsp_000090_main"]`.
+
+Round 125 settled the class *all odd cycles are triangles* with the optimal constant `2`, and left
+the odd-girth-`≥ 5` case of the `k = 1` route open.  This round does **not** continue the petal-counting
+route.  It attacks the **Helly route** — the only route in the development that delivers the constant
+`1` at `k = 1` (`JSP90.closeToBipartite_one_of_helly_of_locIndep_one`, round 83) — and shows by machine
+check that **that route is dead at `k = 1`**, while delivering a new instance on a class no earlier
+round touched.
+
+### Part 1 — a NEW INSTANCE OF THE HEADLINE THEOREM, on the few-odd-cycles class
+
+Erdős's hypothesis is used exactly once, through `JSP90.inter_oddCycle_of_locIndep_one` ("two odd
+cycles of a `LocIndep 1` graph meet"), and a **pairing lemma** turns the resulting pairwise-meeting
+family into a transversal of `⌈|𝒞| / 2⌉` vertices:
+
+* **`JSP90.exists_transversal_card_le`** — *the pairing lemma*: a pairwise-meeting family `𝒞` of
+  nonempty sets has a transversal `T` with `2 * T.card ≤ 𝒞.card + 1`.  Strong induction on `|𝒞|`; the
+  step takes two distinct members, pays **one** vertex for the *pair*, and recurses on
+  `𝒞.erase C |>.erase D`.
+* **`JSP90.closeToBipartite_of_locIndep_one_of_card_oddCycles_le`** and
+  **`JSP90.erdos73On_fewOddCycles`** — **A NEW INSTANCE OF THE HEADLINE THEOREM**:
+  `LocIndep 1 G` and at most `2 * m` odd cycles give `CloseToBipartite m G`.  The hypothesis is a
+  **count of odd cycles**, which is new here: round 98 bounded the *packing* number, and that number
+  is `1` in this regime, so Part 1's hypothesis is genuinely more information than anything proved
+  before.  No bound on degrees, odd girth, cycle sizes or the number of vertices.
+* `JSP90.closeToBipartite_one_of_locIndep_one_of_two_oddCycles` (≤ 2 odd cycles, constant `1`) and
+  `JSP90.closeToBipartite_two_of_locIndep_one_of_four_oddCycles` (≤ 4 odd cycles, constant `2`).
+
+### Part 2 — `JSP90.k4sub`: `LocIndep 1`, **odd girth 5**, `τ_odd = 2`
+
+`k4sub` is `K₄` on `{0, 3, 6, 7}` with **four of its six edges subdivided** — ten edges on eight
+vertices, and **no triangle**.  All of it is proved: `JSP90.locIndep_one_k4sub` (a kernel decision over
+the `2 ^ 8` vertex sets), `JSP90.maxDef_k4sub : MaxDef k4sub = 1` (the deficiency is **exactly** `1`),
+the four 5-cycles `C₁ = {0,2,3,4,6}`, `C₂ = {0,1,3,5,7}`, `C₃ = {0,1,2,6,7}`, `C₄ = {3,4,5,6,7}`
+with **all six pairwise intersections nonempty** (`JSP90.k4sub_four_meet`, `JSP90.k4sub_pair_mem`) and
+**empty four-fold intersection** (`JSP90.k4sub_no_commonVertex`), `JSP90.closeToBipartite_two_k4sub`,
+`JSP90.deleteFinset_k4sub_not_isBipartite` (no one-vertex deletion is bipartite) and
+**`JSP90.closeToBipartite_iff_k4sub : CloseToBipartite m k4sub ↔ 2 ≤ m`** — the odd cycle transversal
+number is **exactly 2**.  `JSP90.card_oddCycles_ge_four_k4sub : 4 ≤ |OddCycles k4sub|`.
+
+### Part 3 — the Helly route is dead at `k = 1`, machine-checked
+
+* **`JSP90.not_helly_k4sub`** — `¬ HellyOddCycles k4sub`.  Together with `locIndep_one_k4sub` this is
+  the formal statement that **Erdős's hypothesis does not imply the Helly property**: the four odd
+  cycles of `k4sub` are pairwise meeting with empty total intersection.  So
+  `JSP90.closeToBipartite_one_of_helly_of_locIndep_one` can never be applied to all graphs, and
+  `JSP90.HellyOddCycles` is not a consequence of `LocIndep k` at any `k`.
+* **`JSP90.three_commonVertex_of_k4sub`** — **every three** of the four odd cycles have a common
+  vertex (the witnesses `0`, `3`, `6`, `7` for `C₁C₂C₃`, `C₁C₂C₄`, `C₁C₃C₄`, `C₂C₃C₄`).  The minimal
+  Helly obstruction therefore has size **exactly four**: no three-element (Helly-number-3) version of
+  the property detects it, and the natural upgrade of round 83's instance — "`TwoHellyOddCycles`
+  instead of `HellyOddCycles`" — is **false**, witnessed by a graph of odd girth 5 whose four odd
+  cycles are all 5-cycles.
+* `JSP90.LocIndepOneNotHelly` — the four statements packaged as one conjunction.
+* `JSP90.exists_oddCycle_avoiding_of_k4sub` — every vertex of `k4sub` is avoided by an odd cycle of
+  `k4sub`, the machine-checked form of `JSP90.exists_oddCycle_avoiding_vertex`.
+
+### Measurements made before formalising (not Lean theorems)
+
+`discovery/JSP-000090/r126.c`: **exhaustively over all `2²¹` graphs on 7 vertices**, split by odd
+girth: among `LocIndep 1` graphs, the largest odd cycle transversal number is `2` at odd girth `3`
+and **`1` at odd girth `5` and at odd girth `≥ 7`**; the `29 904` `LocIndep 1` graphs of odd girth 5 on
+7 vertices all need one vertex, and no `LocIndep 1` graph of odd girth `≥ 5` needs two.  So `f(1) = 2`
+is forced by the `2 503 867`-type witnesses of girth 3 and is *not* forced at odd girth `≥ 5` on
+`≤ 7` vertices.
+`discovery/JSP-000090/r126b.c`, `r126d.c`: random search for `LocIndep 1`, **triangle-free** graphs with
+transversal number `≥ 2` finds the **8-vertex** `k4sub` (`r126d.c` reports that all four of its minimal
+odd cycles are 5-cycles, that its odd cycles are pairwise meeting, that `TwoHellyOddCycles` holds
+while `HellyOddCycles` fails, and that `τ_odd = 2`), which is minimal: `r126.c` finds nothing on
+`≤ 7` vertices.
+
+### What is *not* proved
+
+`jsp_000090_main` is **not** declared, so the harness keeps reporting
+`missing_theorems = ["jsp_000090_main"]`; `score.py --strict-prize` reports `build_ok = true,
+partial_ok = true, prize_ready = false`.  Behind it stands `JSP90.OddCycleErdosPosa r`
+(Reed–Robertson–Seymour–Thomas), the unchanged primary blocker.  Part 1's hypothesis is a count of odd
+cycles, not a function of `MaxDef G`: round 100's `JSP90.maxDegLe_two_unbounded_oddCycles` records that
+graphs of deficiency `2` have an unbounded number of odd cycles, so a bound on `|OddCycles G|` in terms
+of `MaxDef G` is false in that shape and the residual of this axis is exactly that gap.
+
+`#print axioms` on all twenty-one headline declarations shows only
+`[propext, Classical.choice, Quot.sound]` — no `sorryAx`.  `formalization.yaml` remains
+`status: wip`, `prize_ready: false`.  No award claim is made.

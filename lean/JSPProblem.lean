@@ -1178,6 +1178,25 @@ unchanged.
 What remains: `JSP90.OddCycleErdosPosa r` (Reed–Robertson–Seymour–Thomas) and
 `jsp_000090_main` are unchanged; what round 118 removes is one *route* to them, not the theorem.
 
+## `JSPProblem/FewOdd.lean` (round 126) — the FEW-ODD-CYCLES axis
+
+* **`JSP90.exists_transversal_card_le`** — the **pairing lemma**: a pairwise-meeting family of nonempty
+  sets has a transversal of `⌈|𝒞| / 2⌉` vertices (strong induction on `|𝒞|`; the step pays one vertex
+  for a *pair* of members);
+* **`JSP90.closeToBipartite_of_locIndep_one_of_card_oddCycles_le`**, **`JSP90.erdos73On_fewOddCycles`**
+  — **a new instance of the headline theorem**: `LocIndep 1 G` together with `|OddCycles G| ≤ 2 m`
+  gives `CloseToBipartite m G`.  Erdős's hypothesis enters only through the fact that two odd cycles
+  of a `LocIndep 1` graph meet;
+* **`JSP90.k4sub`** — `K₄` with four of its six edges subdivided: eight vertices, ten edges, **no
+  triangle**, `MaxDef = 1` exactly, **four** 5-cycles which pairwise meet and have empty total
+  intersection, and `JSP90.closeToBipartite_iff_k4sub : CloseToBipartite m k4sub ↔ 2 ≤ m`;
+* **`JSP90.not_helly_k4sub`** and **`JSP90.three_commonVertex_of_k4sub`** — `LocIndep 1` does **not**
+  imply `HellyOddCycles`, and the failure is invisible to every three-element version of the property.
+  **The Helly route is therefore closed at `k = 1`** (rounds 83, 84, 87 and 124 used it).
+
+What remains: `JSP90.OddCycleErdosPosa r` (Reed–Robertson–Seymour–Thomas) and `jsp_000090_main`, both
+unchanged; what round 126 adds is one more instance and the removal of one route.
+
 -/
 import JSPProblem.Definitions
 import JSPProblem.Reed
@@ -1253,3 +1272,4 @@ import JSPProblem.HubSharp
 import JSPProblem.Two
 import JSPProblem.Wheel
 import JSPProblem.Petal3
+import JSPProblem.FewOdd
