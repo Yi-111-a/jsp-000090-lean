@@ -3706,3 +3706,110 @@ that is not fatal and what replaces it:
   is purely the explicit cyclic ordering of `{0, …, n - 3}` inside `Fin n`, where the literal `1` is
   not available (`OfNat (Fin n) 1` does not exist for a variable `n`) and `decide`/`simp` on `Fin`
   literals are unusable once a classical `DecidableEq (Fin n)` is in scope.
+
+---
+
+## Round 123 (`lean/JSPProblem/Two.lean`) — **the constant `2` at `k = 1`**
+
+New module (19 declarations, 0 `sorry`, 0 `admit`, `lake build` OK with 1273 jobs), imported from the
+root module `JSPProblem.lean` (which gained `import JSPProblem.Two`).  Attack family 60: the
+**constant `2`** — the value that round 96 measured for `k = 1` and that every previous instance of
+the headline theorem failed to reach with Erdős's own hypothesis alone.
+
+`harness/score.py problems/JSP-000090 --strict-prize`: `build_ok = true, sorry = 0, admit = 0,
+placeholder_total = 0, partial_ok = true, missing_theorems = ["jsp_000090_main"]`.
+
+### What is proved
+
+* `JSP90.hitsOddCycles_of_isOddCycle_of_locIndep_one` — **under `LocIndep 1`, every odd cycle of `G`
+  is an odd cycle transversal**.  (Rounds 83 and 98 needed a class hypothesis — Helly, disjointness
+  — to obtain a transversal at all.)
+* `JSP90.exists_commonVertex_of_oneAttach_pair_of_locIndep_one` — **the petals of a cycle pairwise
+  meet** at `k = 1`: the structural content of Erdős's hypothesis for the attachment sets of rounds
+  119–122.  (`locIndep_mono` records that `LocIndep k G → LocIndep k' G` only for `k ≤ k'`.)
+* **`JSP90.hitsOddCycles_erase_of_triangle_petalSet_le_two`** — for a triangle `C` meeting every odd
+  cycle with at most two attachment points, `C` meets every odd cycle **in all but at most one of its
+  vertices**: `C.erase c` is a transversal for a vertex `c ∈ C` outside the attachment set.  Hence
+* **`JSP90.closeToBipartite_two_of_triangle_petalSet_le_two` and
+  `JSP90.erdos73On_of_triangle_petalSet_le_two` — AN INSTANCE OF THE HEADLINE THEOREM WITH THE
+  CONSTANT `2`** and Erdős's own hypothesis: `LocIndep k G` (`k ≤ 1`) plus a triangle, with
+  `CloseToBipartite 2 G`.  This is the first instance in the development whose constant is `2` and
+  whose only class hypothesis is a triangle.
+* **`JSP90.closeToBipartite_two_of_triangle_attachCover`** — the most general form at a triangle:
+  *some* two-element subset `T ⊆ C` meeting every odd cycle that meets `C` in one point meets **every**
+  odd cycle of `G` (`JSP90.attachCover_of_triangle_petalSet_le_two` shows the previous item is a
+  special case).  The proof splits `|D ∩ C|` into `= 1` and `≥ 2`; the second case uses the
+  pigeonhole step `JSP90.exists_mem_inter_erase_of_card_ge_two`.
+* **`JSP90.closeToBipartite_two_of_oddCycle_high_intersection`** and
+  `JSP90.erdos73On_of_oddCycle_high_intersection` — **the same constant for a cycle of arbitrary
+  length**: if every odd cycle of `G` uses all but one vertex of `C` (`C.card - 1 ≤ |D ∩ C|`), two
+  vertices of `C` meet every odd cycle.  This is the part of the constant `2` that survives where no
+  triangle exists (odd girth `≥ 5`).
+* **`JSP90.constant_two_attained_g6`** — **the constant `2` is attained**: `g6` satisfies
+  `LocIndep 1 g6`, `CloseToBipartite 2 g6` and `¬ CloseToBipartite 1 g6`, so no instance of Erdős #73
+  at `k = 1` can have a smaller constant.
+
+### Verified exhaustively before formalising (outside Lean, `discovery/JSP-000090/r123*.c`)
+
+* **`MaxDef ≤ 1 ⟹ τ_odd ≤ 2` up to eight vertices**: all `268 435 456` graphs on `8` vertices
+  (`55 179 262` of them with `MaxDef ≤ 1`) have transversal number at most `2`
+  (`discovery/JSP-000090/r123_n8.log`); this **extends round 96's `n ≤ 7` measurement to `n = 8`**.
+* **`f(2) = 3`, `f(3) = 4` on `n ≤ 11`** by hill-climbing search, so the shape `f(k) = k + 1` is
+  consistent up to `k = 3` (`r123b.c`).
+* **`JSP90.PetalSetLeTwoOfOne` holds on every `LocIndep 1` graph with `n ≤ 7`**: over all graphs
+  with `MaxDef ≤ 1`, the maximum number of attachment points of a triangle is `0, 0, 1, 2, 2` for
+  `n = 3 … 7`, while the maximum transversal number is `1, 1, 1, 2, 2` (`discovery/JSP-000090/
+  r123_n7.log`).  The two maxima agree, i.e. `g6`-type graphs are the only obstruction at `k = 1`.
+
+### Discarded before formalisation (so that no round repeats them)
+
+* **A "hub plus one vertex of `C`" transversal is FALSE as a theorem.**  The draft claimed
+  `closeToBipartite_two_of_triangle_hub`: with `z` outside `C` meeting every odd cycle that meets `C`
+  in one point, `{z, c}` does **not** meet an odd cycle meeting `C` in the other two vertices — the
+  second range of `|D ∩ C|` is not covered, because `C \ {c}` has two elements.  (Lean rejected the
+  proof at exactly this step; the correction is that a two-element transversal inside a triangle must
+  lie **inside** `C`, which is why the correct general form is `closeToBipartite_two_of_triangle_attachCover`.)
+* **"Every odd cycle is a transversal" is false at `LocIndep 1`**: it is true, but only because
+  `LocIndep 1` bounds the *packing* number by `1`; the useful consequence is
+  `PetalSet G C ⊆ T` for a two-element `T ⊆ C`, i.e. the attachment set must fit inside `T`, which
+  fails as soon as all three vertices of a triangle are attachment points.
+* **`LocIndep k G → LocIndep 1 G` is false for `k ≥ 2`** (`k = 2, |S| = 0, |X| = 2` is the smallest
+  counterexample): a *larger* `k` is a *weaker* hypothesis.  The headline forms therefore take
+  `k ≤ 1`, and `JSP90.locIndep_mono` records the correct direction.
+
+### What is *not* proved — the residual, in two statements
+
+* **`JSP90.PetalSetLeTwoOfOne`**: *"under `LocIndep 1`, a triangle of `G` has at most **two**
+  attachment points"*.  Stated as a `def`, **not assumed anywhere**;
+  `JSP90.erdos73On_one_of_triangle_of_petalSetLeTwoOfOne` and
+  `JSP90.erdos73On_of_triangle_of_petalSetLeTwoOfOne` take it as a hypothesis.  With it, the whole
+  `k = 1` case with the **optimal** constant `2` follows for graphs of odd girth `3`.
+* the **odd girth `≥ 5`** case, where `JSPProblem/Petal.lean` pays
+  `(|C| - 1) + (PetalSet G C).card` and no triangle is available; item 5 above covers it only under
+  the high-intersection hypothesis.
+
+`jsp_000090_main` is **not** declared, so the harness keeps reporting
+`missing_theorems = ["jsp_000090_main"]`; behind it stands `JSP90.OddCycleErdosPosa r`
+(Reed–Robertson–Seymour–Thomas), untouched.  `formalization.yaml` remains `status: wip`,
+`prize_ready: false`.  No award claim is made.
+
+### Toolchain facts verified this round (they cost most of the round)
+
+* `Finset.card_pos.mp (by omega)` leaves `?s` a metavariable, so the goal of `omega` becomes
+  `0 < ?s.card` and fails; write `have hpos : 0 < C.card := by omega` first.
+* `Finset.nonempty_iff_ne_empty` is `s.Nonempty ↔ s ≠ ∅`: use `.mpr` with a proof of `≠ ∅` and `.mp`
+  with a witness.  (`JSPProblem/Petal.lean` mixes both directions; both are needed.)
+* `rw` **closes** a goal when the rewritten statement becomes true by `rfl` (`3 - 1 ≤ 2`,
+  `3 - 2 = 1`), so a following `omega` is a "no goals to be solved" error.
+* `{a, b}` is `insert a {b}`, so `Finset.card_insert_le` must be applied to `a` (not `b`) to match
+  syntactically, and `Finset.mem_insert.mp` returns `a = v ∨ v ∈ {b}`.
+* `Finset.mem_erase : a ∈ s.erase b ↔ a ≠ b ∧ a ∈ s`; `Finset.subset_erase` is an `iff`
+  (`s ⊆ s.erase a ↔ s ⊆ s ∧ a ∉ s`), so use `(Finset.subset_erase a).2`; `Finset.card_insert_of_not_mem`
+  does not exist at this revision — use `Finset.card_insert_eq_ite` + `simp [Ne.symm hne]`.
+* `Finset.card_sdiff_of_subset (h : s ⊆ t) : #(t \ s) = #t - #s` and
+  `Finset.sdiff_nonempty_of_card_lt_card (h : #s < #t) : (t \ s).Nonempty` are both available and
+  are what the counting steps need.
+* `omega` is blind to `C.card - 1` versus `C.card - 2` when both appear as distinct atoms (as in
+  round 101), so the contradictory pair must be introduced with a single `have` in terms of
+  `C.card` (`omega` handles `b ≤ C.card - 2` and `C.card - 1 ≤ b` together, but not after the
+  subtraction has been pushed into the other hypothesis).
