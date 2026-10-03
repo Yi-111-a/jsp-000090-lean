@@ -1248,3 +1248,5 @@ import JSPProblem.CriticalSharp
 import JSPProblem.Petal
 import JSPProblem.PetalFinite
 import JSPProblem.PetalBound
+import JSPProblem.Hub
+import JSPProblem.HubSharp

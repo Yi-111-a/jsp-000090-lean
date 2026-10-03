@@ -2,47 +2,37 @@ jsp_id: JSP-000090
 catalog_url: https://github.com/TheJustinSunPrize/awards
 status: wip
 prize_ready: false
-last_round: 120
+last_round: 122
 last_round_summary: |
-  Round 120 -- THE CHARGING OF THE ATTACHMENT SET AGAINST THE DEFICIENCY, A NEW INSTANCE WITH CONSTANT
-  k + |C| - 1, AND THE TWO MACHINE-CHECKED WITNESSES ROUND 119 PROMISED (attack family 58).  TWO new
-  modules, 132 declarations, 0 sorry/admit, lake build OK with 1270 jobs:
-  lean/JSPProblem/PetalFinite.lean (32 declarations; the two concrete witnesses with the COMPUTABLE
-  DecidableEq instance: g7 on Fin 7, K_4 on {0,1,2,3} with an independent set {4,5,6} where
-  4 ~ {0,3}, 5 ~ {1,3}, 6 ~ {2,3}; and prop on Fin 9, the propeller, the triangle 0-1-2-0 with a
-  pendant triangle at each vertex; plus the exhaustive LocIndep decisions locIndep_two_g7,
-  not_locIndep_one_g7, locIndep_three_prop, not_locIndep_two_prop) and
-  lean/JSPProblem/PetalBound.lean (100 declarations; the general theory with the CLASSICAL instance,
-  which is the one baked into JSP90.IsOddCycle and JSP90.mem_petalSet).  HEADLINE 1 (negative):
-  JSP90.not_petalSet_le_maxDef_g7 -- in g7 the attachment set PetalSet g7 {0,1,2} has THREE vertices
-  while MaxDef g7 = 2, so |PetalSet G C| <= MaxDef G is FALSE; any function phi with
-  |PetalSet G C| <= phi (MaxDef G) must satisfy phi 2 >= 3.  The round-119 numerical blocker cannot be
-  closed by comparing the attachment set with the deficiency.  HEADLINE 2 (positive): the attachment
-  points lying on a PACKING of petals number at most MaxDef G
-  (JSP90.card_petalSet_inter_biUnion_le_card, card_petalSet_inter_biUnion_le_maxDef), hence
-  JSP90.card_petalSet_le_maxDef_of_cover proves |PetalSet G C| <= MaxDef G under a packing cover, and
-  JSP90.closeToBipartite_of_petalPackingCover / erdos73On_of_petalPackingCover is A NEW INSTANCE OF THE
-  HEADLINE THEOREM with the constant k + |C| - 1 (triangle level k + 2, odd-girth form k + l - 1), with
-  the class-level def JSP90.OneCyclePetal G l and the reduction erdos73On_of_oneCyclePetal.  HEADLINE 3
-  (the nine-vertex witness promised by round 119): the propeller satisfies the residue hypothesis
-  (every odd cycle meets C), PetalSet prop C = C, and its odd cycle transversal number is exactly
-  3 = |C|, so JSP90.not_closeToBipartite_two_prop_of_cardC refutes CloseToBipartite (|C| - 1) prop: the
-  |C| - 1 term of JSP90.closeToBipartite_of_petalSet_empty, and hence round 111's two-attachment
-  transversal, cannot be dropped once petals exist; the propeller's three pendant triangles ARE a
-  packing of petals covering the attachment set, so the new instance applies to it
-  (JSP90.erdos73On_propeller, JSP90.oneCyclePetal_prop).  ALSO: JSP90.isOddCycle_triple (a pairwise
-  adjacent triple of distinct vertices is an odd cycle, generic), JSP90.card_petalSet_le_maxDef_add
-  and JSP90.exists_petal_hits_biUnion_offC (what a maximal petal packing does NOT pay for: the
-  attachment points whose petals all pass through a common point of the packing OFF C), and the
-  decide-free helper set for concrete Fin witnesses (fin_ne_val, fin_mem_triple, mem_first_triple /
-  mem_mid_triple / mem_last_triple, fin_inter_tri_tri, card_triple, inter_eq_singleton).
-  NOT proved: the packing cover of the attachment set, i.e. a function phi(k) such that PetalSet G C is
-  covered by at most phi(k) pairwise disjoint petals -- the single remaining step to JSP90.OneCyclePetal
-  and hence to the reduction of round 115.  JSP90.OddCycleErdosPosa r (Reed-Robertson-Seymour-Thomas) is
-  unchanged and jsp_000090_main is NOT declared: the harness keeps reporting
-  missing_theorems = ["jsp_000090_main"], score.py --strict-prize reports build_ok = true, sorry = 0,
-  admit = 0, partial_ok = true, prize_ready = false.  #print axioms on the headline declarations gives
-  only [propext, Classical.choice, Quot.sound].  status remains wip; no award claim is made.
+  Round 122 -- THE HUB COVER IS NEVER CHEAPER THAN THE TRUTH, THE RESIDUAL HubByPacking FORCES
+  l + q >= 3r - 1, IT IS FALSE AT r = 0, AND THE REDUCTION IS REPAIRED (attack family 59).  NEW
+  lean/JSPProblem/HubSharp.lean: 21 declarations, 0 sorry/admit, lake build OK with 1272 jobs, imported
+  from the root module -- which also gained the MISSING `import JSPProblem.Hub` (round 121's Hub.lean
+  was dead code, never compiled).  NOTE: round 121's lean/JSPProblem/Wheel.lean DOES NOT COMPILE and was
+  never in the build, so round 121's negative result JSP90.no_petalSet_bound_of_maxDef is NOT proved;
+  its four errors are recorded in ACCEPTANCE.md and in discovery/JSP-000090/policy.json.  TARGET: the
+  round-121 residual JSP90.HubByPacking r l q (a SHORT odd cycle meeting every odd cycle, plus a hub
+  set meeting every petal; cost l + (q - 1)).  RESULTS: (1) JSP90.hubCost (def) + JSP90.hubCost_ge_
+  completeGraph -- the certificate (C.erase c) u Z is a transversal of K_n and no transversal of K_n
+  is smaller than n - 2, so EVERY hub cover of K_n costs at least n - 2 and the round-121 instance can
+  never beat the truth (with JSP90.card_compl_le_two_completeGraph: a set meeting every odd cycle of K_n
+  leaves at most two vertices out).  (2) JSP90.hubByPacking_cost_ge -- HubByPacking r l q with r >= 1
+  forces 3r - 2 <= l + (q - 1), i.e. l + q >= 3r - 1 (witness K_{3r}), so the constants of the residual
+  must grow at least linearly with slope 3; plus JSP90.hubByPacking_q_ge_three.  (3)
+  JSP90.not_hubByPacking_zero -- HubByPacking 0 l q is FALSE for all l, q, so round 121's
+  erdos73_of_hubByPacking_of_forall (which assumes all r) demands an impossible hypothesis, and
+  JSP90.erdos73_of_hubByPacking_of_succ is the REPAIRED reduction: (all r >= 1, HubByPacking r l q) ->
+  all k, Erdos73 k, constant l + (q - 1) independent of k.  (4) THE REPAIRED NUMERICAL ROUTE:
+  JSP90.card_petalSet_le_of_hubCover_trianglePetals -- at a SHORTEST odd cycle of length >= 5, if every
+  petal is a triangle then |PetalSet G C| <= |Z n C| + 2|Z \ C| for every hub cover Z (a triangle petal's
+  hub vertex is ADJACENT to its attachment point), with the contrapositive
+  JSP90.card_petalSet_gt_of_hubCover_of_longPetal (a cheap hub set forces a petal of at least five
+  vertices) and JSP90.card_petalSet_inter_attachSet_le_two (a hub is adjacent to at most two attachment
+  points).  Helpers: card_mod_two_of_isOddCycle, adj_of_oddCycle_card_three, card_biUnion_le_sum_gen,
+  card_inter_compl_add, card_univ_sub_add, mem_triple_iff, isOddCycle_triple_completeGraph.
+  NOT proved: HubByPacking for ANY r >= 1 (the first non-vacuous case r = 1 is open), the exact minimum
+  of hubCost over the hub covers of K_n (only the lower bound), and JSP90.OddCycleErdosPosa r;
+  jsp_000090_main is still NOT declared.
 github_owner: Yi-111-a
 lean_repository: https://github.com/Yi-111-a/jsp-000090-lean
 branch: main
@@ -156,3 +146,20 @@ build:
     prize_ready: false
     missing_theorems: [jsp_000090_main]
 
+  round_122:
+    module: lean/JSPProblem/HubSharp.lean
+    attack_family: 59
+    status: wip
+    new_declarations: 21
+    sorry: 0
+    admit: 0
+    headline_results:
+      - JSP90.card_petalSet_le_of_hubCover_trianglePetals (attachment set counted by the hubs at a shortest odd cycle)
+      - JSP90.card_petalSet_gt_of_hubCover_of_longPetal (contrapositive: a cheap hub set forces a long petal)
+      - JSP90.card_petalSet_inter_attachSet_le_two (a hub is adjacent to at most two attachment points)
+      - JSP90.hubCost / JSP90.hubCost_ge_completeGraph (a hub cover of K_n costs at least n - 2)
+      - JSP90.card_compl_le_two_completeGraph (a transversal of K_n leaves at most two vertices out)
+      - JSP90.hubByPacking_cost_ge (the residual forces l + q >= 3r - 1)
+      - JSP90.hubByPacking_q_ge_three
+      - JSP90.not_hubByPacking_zero (the residual is false at r = 0)
+      - JSP90.erdos73_of_hubByPacking_of_succ (the repaired reduction to jsp_000090_main)

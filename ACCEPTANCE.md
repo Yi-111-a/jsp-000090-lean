@@ -3613,3 +3613,96 @@ missing — the attachment points whose petals all pass through a point of the p
 `build_ok = true, sorry = 0, admit = 0, partial_ok = true, prize_ready = false`.  `#print axioms` on
 the headline declarations of the round gives only `[propext, Classical.choice, Quot.sound]`.
 `formalization.yaml` remains `status: wip`, `prize_ready: false`.  No award claim is made.
+
+---
+
+## Round 122 — `JSPProblem/HubSharp.lean`: the HUB COVER is never cheaper than the truth, the residual
+## `HubByPacking` FORCES `ℓ + q ≥ 3r - 1`, and the residual is FALSE at `r = 0`
+
+New file `lean/JSPProblem/HubSharp.lean` (21 declarations, **0 `sorry`, 0 `admit`**, `lake build` OK with
+1272 jobs), imported from the root module `JSPProblem.lean` — **which this round also fixed**: round
+121's `JSPProblem/Hub.lean` had never been added to the root module, so it was dead code, and round
+121's `JSPProblem/Wheel.lean` **does not compile** (see below).  `harness/score.py problems/JSP-000090`
+reports `build_ok: true, sorry: 0, admit: 0, partial_ok: true, prize_ready: false`,
+`missing_theorems: ["jsp_000090_main"]`.
+
+### The live residual
+
+```lean
+JSP90.HubByPacking (r ℓ q : ℕ) : Prop :=
+  ∀ (W : Type u) [Fintype W] (G : SimpleGraph W), OddCyclePackingLe r G →
+    ∃ C Z : Finset W, IsOddCycle G C ∧ C.card ≤ q ∧ HubCover G C Z ∧ Z.card ≤ ℓ
+```
+
+`JSPProblem/Hub.lean` (round 121) reduces `jsp_000090_main` to it; this round attacks it.
+
+### 1. The repaired numerical route: hubs count the attachment points at a *shortest* odd cycle
+
+Round 121 refuted **every** bound `|PetalSet G C| ≤ φ(MaxDef G)` (wheel family).  This round shows why
+that is not fatal and what replaces it:
+
+* **`JSP90.card_petalSet_inter_attachSet_le_two`** — at a **shortest** odd cycle `C` with `|C| ≥ 5`, the
+  attachment points of `C` which are adjacent to a vertex outside `C` number at most **two**
+  (`JSP90.card_attachSet_le_two` of `JSPProblem/Book.lean`).
+* **`JSP90.card_petalSet_le_of_hubCover_trianglePetals`** — **if every petal of `C` is a triangle**,
+  then a hub cover `Z` of `C` satisfies **`|PetalSet G C| ≤ |Z ∩ C| + 2 * |Z \ C|`**: an attachment
+  point outside `Z` carries a triangle petal, whose hub vertex is **adjacent to it**, so the
+  attachment points are counted twice over by the hubs.  The wheel escapes exactly because its rim is
+  *not* a shortest odd cycle (its triangles are shorter).
+* **`JSP90.card_petalSet_gt_of_hubCover_of_longPetal`** — the contrapositive: if
+  `|Z ∩ C| + 2 * |Z \ C| < |PetalSet G C|` then **some petal of `C` has at least five vertices**.
+* `JSP90.adj_of_oddCycle_card_three`, `JSP90.card_mod_two_of_isOddCycle` — the two small helpers
+  (two vertices of an odd cycle of cardinality three are adjacent; the cardinality of an odd cycle is
+  odd).
+
+### 2. The instance is never better than the truth
+
+* **`JSP90.hubCost_ge_completeGraph`** — **`hubCost C Z = |C| - 1 + |Z| ≥ n - 2` for every hub cover
+  `(C, Z)` of `K_n`**, and `n - 2` is the odd cycle transversal number of `K_n`.  So the certificate
+  `(C.erase c) ∪ Z` of round 121 is **never cheaper than the optimal transversal**, and the constant
+  `ℓ + (q - 1)` of the reduction cannot be improved on complete graphs.
+* Supporting: `JSP90.card_univ_sub_add`, **`JSP90.card_compl_le_two_completeGraph`** (a set meeting
+  every odd cycle of `K_n` leaves at most two vertices out), `JSP90.mem_triple_iff`,
+  `JSP90.isOddCycle_triple_completeGraph`, `JSP90.card_biUnion_le_sum_gen`,
+  `JSP90.card_inter_compl_add`.
+
+### 3. What the residual forces — and why it cannot hold at `r = 0`
+
+* **`JSP90.hubByPacking_cost_ge`** — `HubByPacking r ℓ q` with `r ≥ 1` forces
+  `3 * r - 2 ≤ ℓ + (q - 1)`, i.e. **`ℓ + q ≥ 3 * r - 1`**: the constants of the residual must grow at
+  least linearly, with slope `3`, in the packing number, and no `r`-independent pair can ever work.
+  Witness `K_{3r}` (`JSP90.oddCyclePackingLe_completeGraph` + Part 2).
+* `JSP90.hubByPacking_q_ge_three` — the witness cycle has `q ≥ 3`.
+* **`JSP90.not_hubByPacking_zero`** — **`HubByPacking 0 ℓ q` is FALSE for every `ℓ, q`**: the graph on
+  the empty vertex type has odd cycle packing number `0` and no odd cycle at all, so the existential
+  cannot be witnessed.  Round 121's `JSP90.erdos73_of_hubByPacking_of_forall` assumes `∀ r`, and is
+  therefore a reduction demanding an **impossible** hypothesis.
+* **`JSP90.erdos73_of_hubByPacking_of_succ`** (with `JSP90.erdos73_on_of_hubByPacking_of_succ`) —
+  **the repaired reduction to `jsp_000090_main`**: `(∀ r ≥ 1, HubByPacking r ℓ q) → ∀ k, Erdős73 k`,
+  with the constant `ℓ + (q - 1)` independent of `k`; for `k = 0` the graph is bipartite already
+  (`JSP90.locIndep_zero_isBipartite`).
+
+`#print axioms` on the seven headline declarations of the round gives only
+`[propext, Classical.choice, Quot.sound]`.
+
+### What is *not* proved, and one repair of the previous round
+
+`jsp_000090_main` is **not** declared and `JSP90.OddCycleErdosPosa r`
+(Reed–Robertson–Seymour–Thomas) is untouched.  Additionally:
+
+* **`lean/JSPProblem/Wheel.lean` (round 121) does not compile** and is *not* in the build (it was never
+  imported by `JSPProblem.lean`): `IsOddCycle.cycleOrder` is `∃ o : CycleOrder G C, o.m % 2 = 1`, so
+  round 121's `obtain ⟨o, ho⟩ := hD'.cycleOrder` binds the names the wrong way round;
+  `JSP90.CycleOrder.step_prev_ne` does not exist in the development (only
+  `CycleOrder.adj_iff_cycle_neigh`); `Finset.inter_eq_self.mpr` does not exist at this Mathlib
+  revision; and the `end JSP90` at line 625 closes an unnamed section.  Consequently round 121's
+  `JSP90.no_petalSet_bound_of_maxDef` (**no function of the deficiency bounds the attachment set**) is
+  **not** proved, and `JSP90.closeToBipartite_wheel_hub` is not either.  `JSPProblem/Hub.lean` itself
+  does compile and is now in the build.
+* The **upper** half of Part 2 was dropped: the exact minimum of `hubCost` over the hub covers of `K_n`
+  (the explicit `n - 2`-cycle and `n - 1`-cycle constructions of `completeCycleOdd` /
+  `completeCycleEven`) ran out of budget, so `JSP90.hubCost_min_completeGraph` and
+  `JSP90.erdos73On_completeGraph_hubCover` are **not** proved; only the lower bound is.  The obstruction
+  is purely the explicit cyclic ordering of `{0, …, n - 3}` inside `Fin n`, where the literal `1` is
+  not available (`OfNat (Fin n) 1` does not exist for a variable `n`) and `decide`/`simp` on `Fin`
+  literals are unusable once a classical `DecidableEq (Fin n)` is in scope.
