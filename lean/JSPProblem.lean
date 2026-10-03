@@ -1197,6 +1197,40 @@ What remains: `JSP90.OddCycleErdosPosa r` (Reed–Robertson–Seymour–Thomas) 
 What remains: `JSP90.OddCycleErdosPosa r` (Reed–Robertson–Seymour–Thomas) and `jsp_000090_main`, both
 unchanged; what round 126 adds is one more instance and the removal of one route.
 
+## `JSPProblem/FanCount.lean` (round 142) — the FAN ACCOUNTING and the SIX-TRACES classification
+
+Attack family 71, following `policy.json`'s `next_bet` route (A) — *"count on the fan"*.  With
+`A = attachPoints G C` and `B = boundary G C`:
+
+* **`JSP90.card_attachPoints_le_sum_attachSet`**, **`JSP90.card_attachPoints_le_two_mul_card_boundary`** —
+  **THE FAN ACCOUNTING: `|A| ≤ 2 |B|` at `LocIndep 1` for a shortest odd cycle**, the statement
+  measured (but never formalised) as `Q8` in round 139 and re-measured here as `F1` with **0 failures
+  in 2 163 652** shortest odd cycles.  Corollaries `two_le_card_boundary_of_card_attachPoints_ge_three`,
+  `…_ge_four`, `three_le_card_boundary_of_card_attachPoints_ge_five`,
+  `card_attachPoints_le_four_of_card_boundary_le_two`, `card_attachPoints_le_two_of_card_boundary_le_one`
+  are the first *lower* bounds on the fan in the development;
+* **`JSP90.exists_attachSet_pair_of_card_attachPoints_eq_four_of_card_boundary_eq_two`** — **THE PAIRING**:
+  four attachment points with a fan of two force two *disjoint* two-element attachment sets whose union
+  is `A` (measured as `F6`: 0 failures in 5 040 cases);
+* **`JSP90.not_pair_transversal_iff_sixTraces_of_card_attachPoints_eq_four_of_noCrossOver`** — **THE
+  SIX-TRACES THEOREM**: at packing number one, for a shortest odd cycle with four attachment points and
+  no cross-over, *no* pair of attachment points is a transversal **iff** every pair is realised as the
+  trace `D ∩ attachPoints G C = attachPoints G C \ {p, q}` of an odd cycle — i.e. the failure of the
+  sharp case at `|A| = 4` is one named configuration (measured as `F3`: 0 failures in 5 040 cases);
+* **`JSP90.exists_trace_or_crossOverPoint_of_pair_not_transversal_of_card_attachPoints_eq_four`** — the
+  same content without the no-cross-over hypothesis: a failing pair is witnessed by a complementary
+  trace or by a cross-over point **outside** the pair;
+* **`JSP90.AttachFourResidual`**, **`JSP90.NoSixTraces`** and
+  **`JSP90.erdos73On_one_two_of_allCrossResidual_and_attachFourResidual`** — with round 141's
+  `AllCrossResidual` the sharp case `k = 1` (`Erdős73On 1 2`, the optimal constant `2`) follows from
+  three named configurations, one of them in *negative* form;
+* **`JSP90.exists_pair_of_not_sixTraces_of_card_attachPoints_eq_four_of_noCrossOver`** — the per-instance
+  reading of the six-traces theorem.
+
+What remains: `JSP90.AllCrossResidual`, `JSP90.NoSixTraces`, `JSP90.AttachFourResidual` and behind them
+`JSP90.OddCycleErdosPosa r` (Reed–Robertson–Seymour–Thomas); `jsp_000090_main` is deliberately **not**
+declared, so the harness keeps reporting `missing_theorems = ["jsp_000090_main"]`.
+
 -/
 import JSPProblem.Definitions
 import JSPProblem.Reed
@@ -1290,3 +1324,4 @@ import JSPProblem.Fan4
 import JSPProblem.CrossPair
 import JSPProblem.Tau
 import JSPProblem.CrossThree
+import JSPProblem.FanCount

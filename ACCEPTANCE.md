@@ -5332,3 +5332,106 @@ no contradiction follows from `LocIndep 1` alone.  `jsp_000090_main` is delibera
 so the harness keeps reporting `missing_theorems = ["jsp_000090_main"]`; `score.py --strict-prize`
 reports `build_ok = true, sorry = 0, admit = 0, partial_ok = true`.  `formalization.yaml` remains
 `status: wip`, `prize_ready: false`.  No award claim is made.
+
+---
+
+## Round 142 (`lean/JSPProblem/FanCount.lean`, attack family 71) — **the FAN ACCOUNTING, the PAIRING of
+four attachment points, and the SIX-TRACES classification of the failure at `|A| = 4`**
+
+Attack family 71, following `policy.json`'s `next_bet` route (A) — *"count on the fan"*.  Rounds 136–141
+built the attachment-point axis of a shortest odd cycle `C`; round 141 left the
+`|attachPoints G C| ≥ 4` half of `JSP90.AttachThreeResidualRefined` (`JSPProblem/Segment.lean`)
+**completely untouched** — the largest untouched part of the sharp case `k = 1`.  With
+`A = attachPoints G C` and `B = boundary G C` (the fan), one new file (**20 declarations, 0
+sorry/admit**, `lake build` OK with **1294 jobs**, axiom report clean: `propext, Classical.choice,
+Quot.sound` only), imported from the root module `JSPProblem.lean`.
+
+### Part 1 — the fan accounting (`policy.json` `next_bet` route (A))
+
+* **`JSP90.card_attachPoints_le_sum_attachSet`** — the attachment points are priced by the attachment
+  sets of the fan (`attachPoints G C = ⋃ y ∈ B, attachSet G C y`);
+* **`JSP90.card_attachPoints_le_two_mul_card_boundary` — THE FAN ACCOUNTING: `|A| ≤ 2 |B|`** at
+  `LocIndep 1` for a shortest odd cycle.  This is the statement `discovery/JSP-000090/r139.c` measured
+  as `Q8` and round 139 could not formalise; `discovery/JSP-000090/r142.c` (`F1`) re-measures it with
+  **0 failures in 2 163 652** shortest odd cycles, of which `29 052` attain `|A| = 2|B|`;
+* five corollaries — `two_le_card_boundary_of_card_attachPoints_ge_three`,
+  `…_ge_four`, `three_le_card_boundary_of_card_attachPoints_ge_five`,
+  `card_attachPoints_le_four_of_card_boundary_le_two`, `card_attachPoints_le_two_of_card_boundary_le_one`
+  — the first **lower** bounds on the fan in the development: three (four, five) attachment points force
+  a fan of two (two, three) vertices.
+
+### Part 2 — the pairing of four attachment points
+
+* **`JSP90.exists_attachSet_pair_of_card_attachPoints_eq_four_of_card_boundary_eq_two` — THE PAIRING**:
+  `LocIndep 1`, `|A| = 4` and `|B| = 2` force `∃ y₁ ≠ y₂ ∈ B` with
+
+  ```lean
+  |attachSet G C y₁| = |attachSet G C y₂| = 2 ∧ Disjoint (attachSet G C y₁) (attachSet G C y₂)
+    ∧ attachSet G C y₁ ∪ attachSet G C y₂ = attachPoints G C
+  ```
+
+  Every inequality of the count `4 = |A| ≤ |A₁ ∪ A₂| ≤ |A₁| + |A₂| ≤ 2 + 2` is an equality, and
+  `Finset.card_union_add_card_inter` makes the two attachment sets disjoint.  Measured as `F6`:
+  **0 failures in the 5 040** measured cases, which all have `|B| = 2`.
+
+### Part 3 — the six-traces classification of the failure at `|A| = 4`
+
+* **`JSP90.not_pair_transversal_iff_sixTraces_of_card_attachPoints_eq_four_of_noCrossOver` — THE
+  SIX-TRACES THEOREM.**  At packing number one, for a shortest odd cycle `C` with
+  `|attachPoints G C| = 4` and no cross-over, as an `iff`:
+
+  ```lean
+  (no two-element subset of A meets every odd cycle of G)
+    ↔ (for every two distinct p q ∈ A there is an odd cycle D with D ∩ A = A \ {p, q})
+  ```
+
+  On a four-element ground set this is the *complete* classification of the failure: a pair fails iff
+  the complementary pair occurs as the trace of an odd cycle, so "no pair works" iff **all six**
+  complementary pairs occur.  ⟸ is one line (`{p, q} ⊆ A`); ⟹ uses round 137's
+  `two_le_card_attachPoints_inter_of_noCrossOver_of_packing_one` to price `D ∩ A` at `2` and
+  `|A \ {p, q}| = 4 − 2 = 2`.  Measured as `F3`: **0 failures in the 5 040** measured cases.
+* **`JSP90.exists_trace_or_crossOverPoint_of_pair_not_transversal_of_card_attachPoints_eq_four`** — the
+  same content **without** the no-cross-over hypothesis: a failing pair is witnessed either by a cycle
+  whose trace on `A` is exactly the complementary pair, or by a cross-over point of `C` **outside**
+  `{p, q}`.  This is the forced shape of the whole `|A| ≥ 4` residual — the only obstruction is the
+  cross-over, as in round 139.
+* Helpers `mem_pair_iff`, `card_pair_of_mem_attachPoints`,
+  `exists_oddCycle_avoid_pair_of_not_hitsOddCycles_pair`,
+  `ne_of_oddCycle_avoid_pair_sub_attachPoints`.
+
+### Part 4 — the sharp case `k = 1` is three named statements
+
+* **`JSP90.AttachFourResidual`** — the `4 ≤ |A|` half of round 137's refined residual;
+* **`JSP90.NoSixTraces`** — the **negative form** of the `|A| = 4` half: at `LocIndep 1` the six-traces
+  configuration never occurs (a statement about a configuration that does not occur, of the same shape
+  as round 139's `JSP90.TriangleCrossResidual`);
+* **`JSP90.erdos73On_one_two_of_allCrossResidual_and_attachFourResidual`** — with round 141's
+  `AllCrossResidual` (the `|A| = 3` half) this gives the **sharp** `Erdős73On 1 2`, the optimal
+  constant `2`, so the whole sharp case `k = 1` is reduced to three named configurations, one of them
+  in negative form;
+* **`JSP90.allCrossResidual_of_erdos73On_one_two`**, **`JSP90.attachFourResidual_of_attachThreeResidualRefined`**,
+  **`JSP90.exists_pair_of_not_sixTraces_of_card_attachPoints_eq_four_of_noCrossOver`**.
+
+### Measurements (`discovery/JSP-000090/r142.c`, all `986 787` graphs with `LocIndep 1` on `n ≤ 7`)
+
+`2 163 652` shortest odd cycles examined; `5 040` of them have `|A| = 4` (all with `|B| = 2`):
+
+| question | statement | result |
+| --- | --- | --- |
+| `F1` | `|A| > 2|B|` (the fan accounting) | **0** failures; `29 052` cases with `|A| = 2|B|` |
+| `F3` | the six-traces `iff` at `|A| = 4`, `X = ∅` | **0** failures (5 040 cases) |
+| `F4` | `|A| = 4`: some pair of `A` is a transversal | **0** failures |
+| `F6` | `|A| = 4`, `|B| = 2`: the two attachment sets are disjoint pairs | **0** failures (5 040 / 5 040) |
+| `F7` | `|A| = 4`, `|B| = 2`: some transversal pair of `A` meets **both** attachment sets | **0** failures; histogram of such pairs `3: 2520`, `4: 2520` — the `next_bet` prediction, confirmed |
+| histogram | `|A| × |B|` | `|A| ≤ 2` with `|B| ≤ 4`; `|A| = 3` with `|B| = 2, 3, 4`; `|A| = 4` only with `|B| = 2` |
+
+### What is *not* proved
+
+`JSP90.AllCrossResidual`, `JSP90.NoSixTraces`, `JSP90.AttachFourResidual` — and behind them
+`JSP90.OddCycleErdosPosa r` (Reed–Robertson–Seymour–Thomas), the unchanged primary blocker.  The
+`F7` measurement says the `|A| = 4` certificate is always a *balanced* pair (one point from each
+attachment set), which is stronger than `AttachFourResidual` and is the next formal target;
+nothing yet proves that the six-traces configuration cannot occur.  `jsp_000090_main` is deliberately
+**not** declared, so the harness keeps reporting `missing_theorems = ["jsp_000090_main"]`;
+`score.py --strict-prize` reports `build_ok = true, sorry = 0, admit = 0, partial_ok = true`.
+`formalization.yaml` remains `status: wip`, `prize_ready: false`.  No award claim is made.
