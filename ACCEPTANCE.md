@@ -5227,3 +5227,108 @@ No award claim is made.
   out of reach this way, and lowering the priority of the classical instance (`attribute [instance
   2000]`) breaks the generic parts of the file with kernel errors.  Work-around used here: the
   transversal route instead of the clique route.
+
+## Round 141 (`lean/JSPProblem/CrossThree.lean`, attack family 70) — **the sharp case `k = 1` is
+classified: the residual is ONE configuration**, and the first accounting at three cross-over points
+
+Attack family 70.  Rounds 136–139 built the attachment-point axis of a shortest odd cycle `C`: the
+attachment points `A = attachPoints G C` are an odd-cycle transversal (136); an odd cycle meets them in
+one point exactly when it crosses `C` over in one point, and **erasing one attachment point which is
+not a cross-over point leaves a transversal** (137/138); a two-element certificate lying on `C$ is
+*forced* to contain the cross-over set `X = crossOverSet G C` (139).  What round 139 could not do is
+decide the sharp case at `|A| = 3`, where the certificate must be `{x, a}$ with `x$ a cross-over
+point, and where — if *every* attachment point is a cross-over point — no pair on `C$ works at all.
+
+This round changes method: instead of hunting for certificates it **turns the residual into an
+equivalence**, so that what is left is a single named object.
+
+### Part 1 — the counting lemma
+
+* **`JSP90.two_mul_card_add_one_le_card_of_isIndepSet_sub_isOddCycle`** — an independent set
+  *contained in* an odd cycle satisfies `2 |S| + 1 ≤ |C|` (`α(C_m) ≤ ⌊m/2⌋`), the side condition of
+  `JSP90.indep_card_le_of_odd_cycle` (`JSPProblem/OddCycle.lean`) discharged by `S ⊆ C`; the
+  development only had the form with `S` given as an intersection;
+  **`JSP90.card_le_one_of_isIndepSet_sub_of_card_C_eq_three`** is its `|C| = 3` case.
+
+### Part 2 — **the classification at `|A| = 3`** (the round's central result)
+
+* **`JSP90.attachThreeResidualRefined_iff_of_card_attachPoints_eq_three`**:
+
+  ```lean
+  PackingNumberOne G → C a shortest odd cycle → |attachPoints G C| = 3 →
+    ((∃ a b, a ≠ b ∧ a, b ∈ attachPoints G C ∧ HitsOddCycles G {a, b})
+       ↔ attachPoints G C ≠ crossOverSet G C)
+  ```
+
+  `⇐`: pick `b ∈ attachPoints G C \ crossOverSet G C` — nonempty because `crossOverSet ⊆ attachPoints`
+  and the two finsets differ — erase it (round 138), and the residue has exactly `3 − 1 = 2`
+  elements, so it *is* the sharp certificate of round 137's residual;
+  `⇒`: a two-element certificate of `C$ contains `X$ (round 139), so `|X| ≤ 2 < 3 = |A|`.
+
+* **`JSP90.hitsOddCycles_pair_of_card_attachPoints_eq_three_of_ne_crossOverSet`** — the certificate
+  **exhibited as a named pair** (`attachPoints G C \ {b} = {a, a'}$);
+* **`JSP90.hitsOddCycles_crossOverSet_of_card_crossOverSet_eq_two_of_card_attachPoints_eq_three`** —
+  round 139's `JSP90.TwoCrossTransversal` under the necessary hypothesis `|A| = 3`: with two cross-over
+  points the **cross-over set itself** is the transversal;
+* **`JSP90.not_hitsOddCycles_pair_of_mem_of_card_attachPoints_eq_three_of_eq_crossOverSet`** — the
+  negative half: in the remaining configuration no two-element subset of `A$ (hence none of `C$) is a
+  transversal, so the certificate must come from *outside* `C$.
+
+### Part 3 — new instances of the headline theorem
+
+* **`JSP90.erdos73On_one_two_of_card_attachPoints_le_three_of_ne_crossOverSet`** — Erdős #73 at `k = 1`
+  with the **optimal constant `2`**, for every shortest odd cycle with at most three attachment points
+  and not all of them cross-over points: no bound on `|C|`, no odd-girth hypothesis, no packing
+  weight, no branch vertices.  This *strictly generalises* round 139's
+  `erdos73On_one_two_of_triangleCrossResidual` (which needed `|C| = 3`);
+* **`JSP90.erdos73On_one_two_of_triangleCrossResidual'`** — the same conclusion from round 139's
+  triangle residual, with the certificate exhibited as `attachPoints G C \ {x}`;
+* **`JSP90.AllCrossResidual`** (the last residual: every attachment point of a shortest odd cycle with
+  three attachment points is a cross-over point), **`JSP90.SmallAttachResidual`** and
+  **`JSP90.erdos73On_one_two_of_maxCardAttach_three`** — a *class* instance: every graph all of whose
+  shortest odd cycles have at most three attachment points is `2`-close to bipartite at `LocIndep 1`.
+
+### Part 4 — **the accounting at three cross-over points**
+
+* **`JSP90.le_card_add_two_mul_card_inter_of_three_crossOverPoints`** — if `c₁, c₂, c₃` are cross-over
+  points of `C` with witnesses `D₁, D₂, D₃` (so `C ∩ Dᵢ = {cᵢ}`) and `S` is an independent set
+  contained in `C ∪ ⋃ᵢ (Dᵢ \ C)`, then
+
+  ```lean
+  2 * |S| + 2 * |S ∩ {c₁, c₂, c₃}|  ≤  |C| - 1 + (|D₁| - 1) + (|D₂| - 1) + (|D₃| - 1)
+  ```
+
+  the three-line count being that `Dᵢ = (Dᵢ \ C) ⊔ {cᵢ}`, so `S ∩ Dᵢ` splits as
+  `(S ∩ (Dᵢ \ C)) ⊔ (S ∩ {cᵢ})` and Part 1 prices it at `(|Dᵢ| - 1)/2`, **minus one** whenever
+  `cᵢ ∈ S`.  No hypothesis on `LocIndep`, on the minimality of `C$ or on `|C|`;
+* **`JSP90.le_card_union_tails_add_two_mul_card_inter_of_three_crossOverPoints`** — with `LocIndep 1`
+  applied to `W = C ∪ ⋃ᵢ (Dᵢ \ C)`: **`|⋃ᵢ (Dᵢ \ C)| + 2 |S ∩ {c₁, c₂, c₃}| ≤ Σᵢ (|Dᵢ| - 1)`**, i.e. the
+  three tails must overlap by at least twice the number of cross-over points met.
+
+### Measurements (`discovery/JSP-000090/r141.c`, all `986 787` graphs with `LocIndep 1` on `n ≤ 7`)
+
+`1 268 520` shortest odd cycles with `≥ 3` attachment points, of which `1 263 480` have `|A| = 3` and
+`5 040` have `|A| ≥ 4`:
+
+| question | statement | result |
+| --- | --- | --- |
+| `T1` | `|A| = 3` and `X = A` (the last residual) | **0** occurrences; histogram of `|X|`: `0: 607 470`, `1: 650 970`, `2: 5 040`, `3: 0` |
+| `T2` | `|A| = 3`, `|X| = 2` ⇒ `X` is a transversal | **0** failures (5 040 cases) |
+| `T3` | `|A| ≥ 4` and `X = A` | **0** |
+| `T4` | `|A| ≥ 4` ⇒ some pair of `A$ is a transversal | **0** failures (5 040 cases) |
+| `T5` | `|A| = 3`, `X ≠ A` ⇒ the exhibited `A \ {b}$ is a transversal | **0** failures |
+| `T6` | the new **iff** (`pair exists` vs `X ≠ A$) | **0** failures |
+| `T7` | `|A| ≥ 4`, `X ≠ A$ ⇒ `A \ {b}$ is a transversal | **0** failures |
+| `T8` | the accounting lemma | **not exercised** — `|X| ≥ 3` never occurs at `LocIndep 1` for `n ≤ 7`, so the lemma is vacuous in the measured range |
+
+### What is *not* proved
+
+`JSP90.AllCrossResidual`, the cases `|attachPoints G C| ≥ 4` of `JSP90.AttachThreeResidualRefined`, and
+behind them `JSP90.OddCycleErdosPosa r` (Reed–Robertson–Seymour–Thomas), the unchanged primary
+blocker.  Note that the counting route to `AllCrossResidual` is **tight**: at `LocIndep 1` the three
+cross-over cycles pairwise meet (`JSP90.inter_ne_of_crossOverPoint_pair`), the overlap of the three
+tails is at least `2`, and the independent-set count reaches exactly the size `LocIndep 1` demands, so
+no contradiction follows from `LocIndep 1` alone.  `jsp_000090_main` is deliberately **not** declared,
+so the harness keeps reporting `missing_theorems = ["jsp_000090_main"]`; `score.py --strict-prize`
+reports `build_ok = true, sorry = 0, admit = 0, partial_ok = true`.  `formalization.yaml` remains
+`status: wip`, `prize_ready: false`.  No award claim is made.

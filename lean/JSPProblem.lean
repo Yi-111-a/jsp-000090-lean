@@ -1289,3 +1289,4 @@ import JSPProblem.SharpTwo
 import JSPProblem.Fan4
 import JSPProblem.CrossPair
 import JSPProblem.Tau
+import JSPProblem.CrossThree
