@@ -2,39 +2,48 @@ jsp_id: JSP-000090
 catalog_url: https://github.com/TheJustinSunPrize/awards
 status: wip
 prize_ready: false
-last_round: 130
+last_round: 134
 last_round_summary: |
-  Round 123 -- THE CONSTANT 2 AT k = 1 (attack family 60).  NEW lean/JSPProblem/Two.lean: 19 declarations,
-  0 sorry/admit, lake build OK with 1273 jobs, imported from the root module JSPProblem.lean.  MOTIVATION:
-  round 96 measured f(1) = 2 exhaustively for n <= 7 (g6 is LocIndep 1, CloseToBipartite 2, not
-  CloseToBipartite 1) and NO proved instance of the headline theorem with Erdős's own hypothesis reached
-  that constant; this round re-ran the exhaustive search to n = 8 (all 268435456 graphs, 55179262 with
-  MaxDef <= 1, max transversal number 2) and attacked the constant structurally.  RESULTS:
-  (1) JSP90.hitsOddCycles_of_isOddCycle_of_locIndep_one -- under LocIndep 1 EVERY odd cycle of G is an odd
-  cycle transversal (previously only on the Helly class of round 83 and the disjoint-odd-cycle class of
-  round 98), and JSP90.exists_commonVertex_of_oneAttach_pair_of_locIndep_one -- the petals of a cycle
-  pairwise meet at k = 1.  (2) JSP90.hitsOddCycles_erase_of_triangle_petalSet_le_two +
-  JSP90.closeToBipartite_two_of_triangle_petalSet_le_two + JSP90.erdos73On_of_triangle_petalSet_le_two --
-  THE FIRST INSTANCE OF THE HEADLINE THEOREM WITH THE CONSTANT 2 AND ERDOS'S OWN HYPOTHESIS: if a triangle C
-  meets every odd cycle and at most two of its vertices are attachment points, then C.erase c (for c in C
-  outside the attachment set) meets every odd cycle.  (3) JSP90.closeToBipartite_two_of_triangle_attachCover
-  -- the most general form at a triangle: ANY two-element subset T of C meeting every odd cycle that meets C
-  in one point meets every odd cycle (the second range |D n C| >= 2 is forced because C \ T has one element),
-  with JSP90.attachCover_of_triangle_petalSet_le_two showing (2) is a special case.  (4)
-  JSP90.closeToBipartite_two_of_oddCycle_high_intersection + JSP90.erdos73On_of_oddCycle_high_intersection --
-  THE CONSTANT 2 FOR A CYCLE OF ARBITRARY LENGTH (every odd cycle uses all but one vertex of C), i.e. the
-  part of the constant-2 axis that survives at odd girth >= 5.  (5) JSP90.constant_two_attained_g6 -- the
-  constant 2 is attained, so no instance at k = 1 can do better.  (6) JSP90.locIndep_mono (LocIndep k G ->
-  LocIndep k' G for k <= k'; the reverse is false, as in k = 2, |S| = 0, |X| = 2).  REFUTED AND RECORDED:
-  the draft 'closeToBipartite_two_of_triangle_hub' (a hub z for the petals plus one vertex c of C gives a
-  two-element transversal) is FALSE -- an odd cycle meeting C in the other two vertices is missed -- so the
-  hub-cover framework of rounds 121-122 was abandoned.  MEASURED (discovery/JSP-000090/r123*.c): MaxDef <= 1
-  -> tau_odd <= 2 up to n = 8; f(2) = 3 and f(3) = 4 up to n = 11; and on EVERY LocIndep-1 graph with n <= 7 a
-  triangle has at most TWO attachment points (maxima 0,0,1,2,2 for n = 3..7 against maximal transversal number
-  1,1,1,2,2).  NOT proved: JSP90.PetalSetLeTwoOfOne (stated as a def, assumed nowhere) and the odd girth >= 5
-  case; JSP90.OddCycleErdosPosa r; jsp_000090_main is still NOT declared.  STANDING REGRESSION:
-  lean/JSPProblem/Wheel.lean (round 121) still does not compile and is still not imported, so
-  JSP90.no_petalSet_bound_of_maxDef is still unproved (rounds 122 and 123 both failed to repair it).
+  Round 134 -- REFUTATION OF THE TOP TARGET OF ROUNDS 119-133.  Attack family 63.  Two new files,
+  0 sorry/admit, lake build OK with 1284 jobs, axiom report clean (propext, Classical.choice,
+  Quot.sound), imported from the root module JSPProblem.lean.
+
+  (i)  THE RESIDUAL JSP90.PetalSetLeTwoOfOne IS FALSE.  The exhaustive search of this round
+       (discovery/JSP-000090/r134.c) over all graphs with MaxDef <= 1 on n <= 8 (55 179 262 of them,
+       140 216 552 triangles) found no failure, and at n = 9 found the first counterexample: the
+       graph g9 with edges 0-5 0-6 0-7 0-8 1-5 1-6 2-5 2-8 3-6 3-7 4-7 4-8 5-7 6-8 satisfies
+       LocIndep 1 and BOTH of its triangles, T1 = {0,5,7} and T2 = {0,6,8}, have three attachment
+       points.  lean/JSPProblem/Nonagon.lean formalises the witness (JSP90.locIndep_one_g9 is an
+       exhaustive kernel decision over the 2^9 vertex sets; the two triangles and the six petals are
+       explicit cyclic orderings) and lean/JSPProblem/AttachErase.lean draws the consequences:
+       JSP90.not_forall_oddCycle_exists_erase_g9 (no triangle of g9 has a 2-subset meeting every odd
+       cycle), JSP90.not_exists_twoTransversal_sub_g9_T1 / _T2 (no two vertices of a shortest odd
+       cycle suffice either), JSP90.triangleCertificates_are_impossible.  The measured certificate of
+       CloseToBipartite 2 g9 is {5,6}, which lies in NEITHER triangle, so f(1) = 2 survives while every
+       triangle-based certificate shape is dead.
+
+  (ii) THE ERASABLE VERTICES OF AN ODD CYCLE, EXACTLY.  JSP90.hitsOddCycles_erase_iff_notMem_petalSet
+       proves, for every odd cycle C meeting every odd cycle and every p in C,
+       HitsOddCycles G (C.erase p) <-> p not in PetalSet G C: the vertices that cannot be erased are
+       exactly the attachment points.  Hence JSP90.erdos73On_of_isOddCycle_of_petalSet_lt_card, a new
+       instance of the headline theorem with the constant |C| - 1 for an ARBITRARY odd cycle (Two.lean
+       had it only for triangles), and an odd-girth bound of l - 1 at k = 1.
+
+  (iii) THE HONEST RESIDUAL OF THE SHARP CASE k = 1 IS A SINGLE STATEMENT:
+       JSP90.erdos73On_one_iff_twoTransversal : Erdős73On 1 m <-> TwoTransversal m, i.e. "some m
+       vertices meet every odd cycle".  The two conjectures drafted in this round from measurements
+       (PetalSetLeTwoOfOneAny and ShortestOddCycleTransversal m) were REFUTED by the same witness and
+       are now marked as defs that must not be assumed in the source.  The triangle-free half is
+       JSP90.TriangleFreeTwoTransversal 2, proved equivalent to the triangle-free case of the sharp
+       conclusion by JSP90.triangleFree_iff_triangleFreeTwoTransversal.
+
+  (iv) The "high intersection" hypothesis of Two.lean item 5 is not automatic at LocIndep 1, even at a
+       shortest odd cycle: JSP90.not_forall_card_sdiff_le_one_wf (the windmill wf of
+       JSPProblem/Windmill.lean).
+
+  NOT proved: jsp_000090_main.  JSP90.OddCycleErdosPosa r (Reed-Robertson-Seymour-Thomas) is untouched.
+  score.py --strict-prize reports build_ok = true, sorry = 0, admit = 0, partial_ok = true,
+  missing_theorems = ["jsp_000090_main"].  No award claim is made.
 github_owner: Yi-111-a
 lean_repository: https://github.com/Yi-111-a/jsp-000090-lean
 branch: main

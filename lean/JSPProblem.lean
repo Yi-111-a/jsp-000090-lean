@@ -1279,3 +1279,5 @@ import JSPProblem.MonoWind
 import JSPProblem.OneK
 import JSPProblem.PetalOverlap
 import JSPProblem.MeetSet
+import JSPProblem.Nonagon
+import JSPProblem.AttachErase

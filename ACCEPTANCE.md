@@ -4635,3 +4635,96 @@ theorem on a *structural* class, not a step towards `Erdős73 k m` for all graph
 `JSP90.LocIndepOneTriangleTwo` and `JSP90.LocIndepOneTriangleFree 2` are still unproved, and
 `JSP90.PetalSetLeTwoOfOne` is untouched.  `formalization.yaml` remains `status: wip`,
 `prize_ready: false`.  No award claim is made.
+
+---
+
+## Round 134 — `JSPProblem/AttachErase.lean` + `JSPProblem/Nonagon.lean`: **`JSP90.PetalSetLeTwoOfOne`
+IS REFUTED** (the top target of rounds 119–131), and the erasable vertices of an odd cycle are
+characterised
+
+Two new files (52 + 31 declarations, **0 sorry/admit**, `lake build` OK with 1284 jobs, axiom report
+clean: `propext, Classical.choice, Quot.sound` only), imported from the root module `JSPProblem.lean`.
+
+### Part 1 — **the erasable vertices of an odd cycle** (`AttachErase.lean`)
+
+`JSP90.PetalSet G C` (`JSPProblem/Petal.lean`) is the attachment set of the odd cycle `C`.  Rounds
+119–131 used it only in the direction "if `p` is not an attachment point then `C.erase p` meets every
+odd cycle", and only at a triangle.  Round 134 proves the **exact** statement, for **every** odd
+cycle, with no hypothesis beyond "every odd cycle meets `C`":
+
+* **`JSP90.hitsOddCycles_erase_iff_notMem_petalSet`** —
+
+  ```lean
+  HitsOddCycles G (C.erase p) ↔ p ∉ PetalSet G C            -- C an odd cycle, p ∈ C
+  ```
+
+  i.e. **the vertices of an odd cycle which cannot be erased are exactly its attachment points**, and
+  nothing else blocks the erasure;
+* **`JSP90.closeToBipartite_erase_of_notMem_petalSet`**, **`…_card_sub_one_of_petalSet_lt_card`** —
+  hence `CloseToBipartite (|C| - 1) G` as soon as the attachment set is a proper subset of `C`, with
+  the certificate `C.erase p` (**contained in the cycle**);
+* **`JSP90.erdos73On_of_isOddCycle_of_petalSet_lt_card`** — **a new instance of the headline theorem,
+  for an arbitrary odd cycle and the constant `|C| - 1`** (Two.lean had it only for triangles with the
+  constant `2`, Petal.lean with `|C| - 1 + |PetalSet|`), and
+  **`JSP90.closeToBipartite_of_locIndep_one_of_odd_girth_of_petalSet_lt_card`**, which improves the
+  odd-girth bound `ℓ · k` of `JSPProblem/Transversal.lean` to `ℓ - 1` at `k = 1`;
+* **`JSP90.isOddCycle_of_isNClique_three`** — the conversion `IsNClique 3 T → IsOddCycle G T`, which
+  the development lacked (only the converse, `JSPProblem/Free.lean`, existed);
+* **`JSP90.erdos73On_one_iff_twoTransversal`** — **`Erdős73On 1 m ↔ TwoTransversal m`**: the sharp
+  case `k = 1` *is* the statement "some `m` vertices meet every odd cycle", with no shape assumed.
+
+### Part 4 — the "high intersection" route is refuted, machine-checked
+
+* **`JSP90.not_forall_card_sdiff_le_one_wf`** — at `LocIndep 1` an odd cycle need **not** use all but
+  one vertex of a **shortest** odd cycle: on the windmill `wf` (`JSPProblem/Windmill.lean`) the two
+  triangles `{0,1,2}` and `{0,3,4}` are both shortest odd cycles and meet in the single vertex `0`.
+  The hypothesis of `JSP90.closeToBipartite_of_oddCycle_high_intersection` (Two.lean, item 5) is
+  therefore not a consequence of `LocIndep 1`, and that route must not be retried;
+  **`JSP90.two_shortest_oddCycles_can_meet_in_one_wf`** records the same fact as a statement about odd
+  cycles (it holds for the *petals* of a triangle, Two.lean item 2, but not for arbitrary odd cycles).
+
+### Part 5 — **`JSP90.PetalSetLeTwoOfOne` IS FALSE** (`Nonagon.lean` + `AttachErase.lean`)
+
+The exhaustive search run this round (`discovery/JSP-000090/r134.c`) over **all** graphs with
+`MaxDef ≤ 1` on `n ≤ 8` vertices (55 179 262 of them, 140 216 552 triangles) found **no** failure,
+and then found the **first counterexample at `n = 9`**:
+
+```
+g9 (Fin 9):  0-5 0-6 0-7 0-8 1-5 1-6 2-5 2-8 3-6 3-7 4-7 4-8 5-7 6-8
+```
+
+`JSPProblem/Nonagon.lean` formalises the witness (`JSP90.locIndep_one_g9` is an exhaustive kernel
+decision over the `2 ^ 9` vertex sets; the two triangles `T₁ = {0,5,7}`, `T₂ = {0,6,8}` and the six
+petals are exhibited as explicit cyclic orderings), and `JSPProblem/AttachErase.lean` draws the
+consequences:
+
+* **`JSP90.not_forall_oddCycle_exists_erase_g9`** — **THE "ERASE ONE VERTEX OF A TRIANGLE" STEP IS
+  IMPOSSIBLE IN `g9`**: no triangle of `g9` has a `2`-subset meeting every odd cycle.  By Part 1 this
+  is exactly the statement "every triangle has a vertex lying in no odd cycle", i.e. **the residual
+  `JSP90.PetalSetLeTwoOfOne` of rounds 119–131 — the top target of `policy.json` since round 123 —
+  is false**;
+* **`JSP90.not_exists_twoTransversal_sub_g9_T1` / `…_g9_T2`** — **not even a free choice of two
+  vertices inside a shortest odd cycle works**: no set of at most two vertices of `T₁` or of `T₂`
+  meets every odd cycle of `g9`.  So the shape "two vertices of a shortest odd cycle"
+  (`JSP90.ShortestOddCycleTransversal 2`) is refuted as well;
+* **`JSP90.triangleCertificates_are_impossible`** — the two refutations in one statement.
+
+The **conclusion** is *not* refuted: the search measures the least odd cycle transversal number of
+`g9` to be `2`, with certificate `{5, 6}` — a pair lying in **neither** triangle (`5 ∈ T₁ \ T₂`,
+`6 ∈ T₂ \ T₁`).  So `f(1) = 2` remains the sharp candidate, and the two statements of this round that
+had been proposed as *conjectures* are now marked refuted in the source:
+`JSP90.PetalSetLeTwoOfOneAny` and `JSP90.ShortestOddCycleTransversal m` are `def`s that **must not be
+assumed**.  The honest residual of the sharp case `k = 1` is `JSP90.TwoTransversal 2`, which
+`JSP90.erdos73On_one_iff_twoTransversal` proves **equivalent** to `Erdős73On 1 2`, and
+`JSP90.TriangleFreeTwoTransversal 2` + `JSP90.triangleFree_iff_triangleFreeTwoTransversal` give the
+triangle-free half of it in its strongest available form (no containment requirement).
+
+### What is *not* proved
+
+`jsp_000090_main` is **not** declared, so the harness keeps reporting
+`missing_theorems = ["jsp_000090_main"]`; `score.py --strict-prize` reports
+`build_ok = true, sorry = 0, admit = 0, partial_ok = true`.  `JSP90.OddCycleErdosPosa r`
+(Reed–Robertson–Seymour–Thomas) is untouched, and the machine-checked refutations above mean that the
+whole family of *triangle-based* certificates for `k = 1` (attachment sets, petals, two vertices of an
+odd cycle) is closed.  `formalization.yaml` remains `status: wip`, `prize_ready: false`.  No award
+claim is made.
