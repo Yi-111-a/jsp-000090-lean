@@ -1274,3 +1274,5 @@ import JSPProblem.Wheel
 import JSPProblem.Petal3
 import JSPProblem.FewOdd
 import JSPProblem.Mono
+import JSPProblem.CutFlip
+import JSPProblem.MonoWind

@@ -4164,3 +4164,75 @@ at most **4** mono vertices (histogram 1: 14 652, 2: 2 104 340, 3: 26 563 064, 4
 vertices the worst case is the friendship graph `F₃` (three triangles sharing a vertex, `tau_odd = 1`)
 (`discovery/JSP-000090/r127d_n8_md1.log`, `r127_n7.log`, programs `r127.c`–`r127d.c`).
 `formalization.yaml` remains `status: wip`, `prize_ready: false`.  No award claim is made.
+
+---
+
+## Round 128 — the maximum-cut axis is CLOSED: the flip equivalence, and the death of the certificate
+
+`lean/JSPProblem/CutFlip.lean` (31 declarations, 0 sorry, 0 admit) and `lean/JSPProblem/MonoWind.lean`
+(17 declarations, 0 sorry, 0 admit); `lake build` OK with 1279 jobs; `#print axioms` on nine headline
+declarations of the two files gives only `[propext, Classical.choice, Quot.sound]`.
+
+### 1 — the FLIP EQUIVALENCE (the blocker round 127 named)
+
+* **`JSP90.CutSize G A`** — the number of edges crossing the cut with side `A`, counted once from
+  that side; **`JSP90.cutSize_flip`** — **the per-vertex delta**: flipping `v ∈ A` changes the size
+  of the cut by `+ SameDeg G A v − CrossDeg G A v`.
+* **`JSP90.IsMaxCut G A`** and **`JSP90.stableCut_of_isMaxCut`: EVERY MAXIMUM CUT IS STABLE**, i.e.
+  `IsMaxCut G A → StableCut G A` — precisely the lemma round 127 recorded as missing.
+* **`JSP90.exists_maxCut`** — every finite graph *has* a maximum cut (the first cut in the
+  development produced from `G` and proved optimal for it);
+  **`JSP90.exists_maxCut_stable`**, **`JSP90.exists_maxCut_closeToBipartite`** (an instance of the
+  conclusion produced by an optimal cut).
+* **`JSP90.cutSize_compl`**, **`JSP90.crossDeg_compl_eq_sameDeg`**, **`JSP90.sameDeg_compl_eq_crossDeg`**
+  — the size of a cut does not depend on which side is called `A`.
+
+### 2 — what optimality buys: the counts at a maximum cut
+
+* **`JSP90.sum_sameDeg_le_cutSize_of_isMaxCut`**, **`JSP90.sameDeg_pos_of_mem_monoSet`**,
+  **`JSP90.card_monoSide_le_sum_sameDeg`**, **`JSP90.card_monoSide_le_cutSize_of_isMaxCut`** — each
+  side of a maximum cut has at most `CutSize` monochromatic vertices.
+* **`JSP90.monoSet_eq_inter_union_inter`** — the mono set splits over the two sides.
+* **`JSP90.card_monoSet_le_two_mul_cutSize_of_isMaxCut`** — **the mono set of a maximum cut has at
+  most twice the size of the cut**.
+* **`JSP90.edgeCount_le_two_mul_cutSize_of_isMaxCut`** — **the classical maximum-cut bound**:
+  `edgeCount G ≤ 2 * CutSize G A`, i.e. every graph has a cut carrying at least half its edges.
+
+### 3 — the reduction, and its DEATH
+
+* **`JSP90.MaxCutOfMonoCardLe`** (a `def`, not assumed) + `JSP90.erdos73On_of_maxCutOfMonoCardLe` +
+  `JSP90.erdos73_of_maxCutOfMonoCardLe` + **`JSP90.maxCutMonoLe_of_maxCutOfMonoCardLe`** — the round-127
+  reduction restated with *maximum* cuts; the two are equivalent in strength.
+* **`JSP90.not_exists_monoCard_le_completeGraph`**, **`JSP90.not_maxCutMonoLe`**,
+  **`JSP90.not_maxCutOfMonoCardLe`** — **the maximum-cut certificate route is refuted, for every
+  constant**: `JSP90.MaxCutMonoLe c` and `JSP90.MaxCutOfMonoCardLe c` are inhabited never, witnessed
+  by `K_{c + 2}` (for `c ≥ 1`) and `K_3` (for `c = 0`), which satisfy `LocIndep c` and are `c`-close
+  to bipartite while **every** cut certifies at least `c + 1` vertices.
+
+### 4 — `lean/JSPProblem/MonoWind.lean`: the windmill kills the *relative* hypothesis too
+
+* **`JSP90.wfT t`** — the windmill with `t` triangles (one hub, `t` pairs of leaves).
+* **`JSP90.exists_mono_leaf_of_wfT`** — in **every** cut, **every** triangle contributes a
+  monochromatic leaf (a leaf is mono either through the hub or through its partner; the two cases are
+  exhaustive).
+* **`JSP90.card_monoSet_ge_t`**, **`JSP90.card_monoSet_ge_t_add_one`** (when the hub is mono) and
+  **`JSP90.card_monoSet_ge_t_add_one'`** — **the mono set of any cut of the windmill `t` has at least
+  `t + 1` vertices**.
+* **`JSP90.leaf_mem_monoSet_of_not_mem_hub`** — if the hub is not mono, *both* leaves of every
+  triangle are mono, so the mono set has `2 t` vertices.
+* **`JSP90.closeToBipartite_one_wfT`** — deleting the hub leaves a matching: **the windmill `t` is
+  `1`-close to bipartite for every `t`**.
+
+So the optimal odd cycle transversal number of the windmill is `1` while its cut certificates grow
+without bound — the round-127 data (`phi(1) = 4`, `phi(2) ≥ 7`, measured over `≤ 8` vertices) were an
+artefact of the vertex bound. **The single remaining input is `JSP90.locIndep_one_wfT`
+(`LocIndep 1 (wfT t)`), a pure counting lemma; with it, no `phi (MaxDef G)` exists and the axis is
+closed for good.** Its statement and proof strategy are in `discovery/JSP-000090/policy.json`.
+
+### What is *still* not proved
+
+`jsp_000090_main` is **not** declared; `JSP90.OddCycleErdosPosa r`
+(Reed–Robertson–Seymour–Thomas) is untouched. Nothing above is an instance of the headline theorem
+for all `k`; what the round adds is the flip equivalence, the structure of a maximum cut, and two
+machine-checked negative results that remove the maximum-cut certificate from the list of possible
+approaches.
