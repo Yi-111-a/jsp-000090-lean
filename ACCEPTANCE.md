@@ -4093,3 +4093,74 @@ of `MaxDef G` is false in that shape and the residual of this axis is exactly th
 `#print axioms` on all twenty-one headline declarations shows only
 `[propext, Classical.choice, Quot.sound]` — no `sorryAx`.  `formalization.yaml` remains
 `status: wip`, `prize_ready: false`.  No award claim is made.
+
+---
+
+## Round 127 — `lean/JSPProblem/Mono.lean`: the **MAXIMUM-CUT axis** — the canonical `MonoSet` of a
+## cut, one-vertex-flip **stability**, and a machine-checked refutation of the absolute bound
+
+New file (31 declarations, **0 `sorry`, 0 `admit`**, `lake build` OK with 1277 jobs), imported from
+the root module `JSPProblem.lean`.  Attack family 47.  An audit of all 83 modules showed that the
+development contained **no** use of the *optimality* of a cut and no way to produce a monochromatic
+cover *from* a cut; this round supplies both.
+
+### 1 — the canonical certificate of an arbitrary cut
+
+`JSP90.MonoVertex G A v` = "`v` is incident to a non-crossing edge of the cut with side `A`", and
+`JSP90.MonoSet G A` is the finset of all such vertices.
+
+* **`JSP90.hitsOddCycles_monoSet` — THE MONO SET OF *ANY* CUT IS AN ODD CYCLE TRANSVERSAL.**
+  `JSPProblem/MaxCut.lean` proves this only for a *supplied* cover `Z`; here `Z` comes from the cut.
+* **`JSP90.closeToBipartite_monoSet` — AN INSTANCE OF THE CONCLUSION FOR EVERY CUT**:
+  `CloseToBipartite (MonoSet G A).card G`.
+* **`JSP90.inter_monoSet_ne_empty_of_hitsMono`** — the mono set meets every monochromatic edge, so it
+  also meets every monochromatic cover.
+* **`JSP90.isBipartite_iff_exists_monoSet_empty` — THE CUT AXIS IS EQUIVALENT TO BIPARTITENESS**
+  (`G.IsBipartite ↔ ∃ A, MonoSet G A = ∅`), the converse direction `MaxCut.lean` never proved, and
+* **`JSP90.maxDef_le_zero_iff_exists_monoSet_empty` — all of Erdős #73 at `k = 0` through the cut.**
+* **`JSP90.card_monoSet_pos_of_not_isBipartite`** — on a non-bipartite graph every cut has a mono set
+  of at least **two** vertices (a mono vertex's mono neighbour is a second, distinct vertex).
+* **`JSP90.monoSet_compl`** — the mono set does not depend on which side is called `A`.
+
+### 2 — stability: the first use of cut optimality
+
+`SameDeg G A v` / `CrossDeg G A v` are the neighbours of `v` on its own / the other side, with
+`SameDeg + CrossDeg = deg v` (`JSP90.sameDeg_add_crossDeg`).  `JSP90.StableCut G A` is the classical
+one-vertex-flip optimality condition (no vertex of `A` has more neighbours on its own side).
+
+* **`JSP90.exists_notMem_adj_of_stableCut`** — a stable cut pushes every mono vertex of `A` out.
+* **`JSP90.sum_sameDeg_le_sum_crossDeg_of_stableCut`** — **the internal edges of a stable side number
+  at most half the cut.**
+
+### 3 — the reduction
+
+* **`JSP90.MaxCutMonoLe c`** (a `def`, **not** assumed): every graph of deficiency `≤ k` admits a
+  *stable* cut whose mono set has at most `c` vertices;
+  **`JSP90.erdos73On_of_maxCutMonoLe` / `JSP90.erdos73_of_maxCutMonoLe`** turn it into Erdős #73 with
+  constant `c`.
+
+### 4 — the NEGATIVE result, machine-checked
+
+* **`JSP90.card_monoSet_ge_card_sub_one_completeGraph` — for `n ≥ 4` EVERY cut `A` of `K_n` has
+  `n − 1 ≤ |MonoSet K_n A|`**, and since `CloseToBipartite (n−2) (K_n)`
+  (`JSP90.closeToBipartite_iff_completeGraph_add_two`), **`JSP90.not_card_monoSet_le_opt_completeGraph`:
+  no cut of `K_n` attains the optimal transversal number** — and no *maximum* cut repairs it, the
+  statement holding for all cuts.
+* **`JSP90.card_monoSet_singleton_completeGraph`** — a singleton side gives *exactly* `n − 1`, so the
+  best the cut axis can do on `K_n` is one vertex worse than optimal.
+* **`JSP90.closeToBipartite_and_monoSet_completeGraph`** — both facts in one statement.
+
+### What is *not* proved
+
+`jsp_000090_main` is **not** declared and `JSP90.OddCycleErdosPosa r`
+(Reed–Robertson–Seymour–Thomas) is untouched, so the harness keeps reporting
+`missing_theorems = ["jsp_000090_main"]`; `score.py --strict-prize` reports `build_ok = true,
+sorry = 0, admit = 0, placeholder_total = 0, partial_ok = true, prize_ready = false`.  `#print
+axioms` on the thirteen headline declarations gives only `[propext, Classical.choice, Quot.sound]`.
+The new residual is **`JSP90.MaxCutMonoLe c`, refuted for every `c`** (Part 4); the surviving form is
+a bound in terms of `MaxDef`, and the measurements support `phi(1) = 4`: **exhaustively over all
+268 435 456 graphs on 8 vertices**, among the `55 179 262` with `MaxDef ≤ 1` the best maximum cut has
+at most **4** mono vertices (histogram 1: 14 652, 2: 2 104 340, 3: 26 563 064, 4: 26 497 205), and on 7
+vertices the worst case is the friendship graph `F₃` (three triangles sharing a vertex, `tau_odd = 1`)
+(`discovery/JSP-000090/r127d_n8_md1.log`, `r127_n7.log`, programs `r127.c`–`r127d.c`).
+`formalization.yaml` remains `status: wip`, `prize_ready: false`.  No award claim is made.
