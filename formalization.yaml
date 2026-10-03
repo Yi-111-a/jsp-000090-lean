@@ -2,7 +2,7 @@ jsp_id: JSP-000090
 catalog_url: https://github.com/TheJustinSunPrize/awards
 status: wip
 prize_ready: false
-last_round: 123
+last_round: 130
 last_round_summary: |
   Round 123 -- THE CONSTANT 2 AT k = 1 (attack family 60).  NEW lean/JSPProblem/Two.lean: 19 declarations,
   0 sorry/admit, lake build OK with 1273 jobs, imported from the root module JSPProblem.lean.  MOTIVATION:
@@ -193,6 +193,35 @@ build:
       - prove JSP90.PetalSetLeTwoOfOne: LocIndep 1 G forces at most two attachment points at every triangle of G (exhaustively true for all graphs on <= 7 vertices); this would give the k = 1 case with the optimal constant 2 for odd girth 3
       - the odd girth >= 5 case: a two-element transversal at a shortest odd cycle of length >= 5 under LocIndep 1
       - repair lean/JSPProblem/Wheel.lean (round 121), still failing to compile since round 121
+      - JSP90.OddCycleErdosPosa r (unchanged: this is the missing jsp_000090_main)
+    prize_ready: false
+  round_130:
+    module: lean/JSPProblem/OneK.lean
+    attack_family: 61
+    status: wip
+    new_declarations: 38
+    sorry: 0
+    admit: 0
+    headline_results:
+      - JSP90.maxDefIn_univ_sdiff_isNClique_three_eq_zero (at LocIndep 1 a triangle spends the WHOLE deficiency budget)
+      - JSP90.isBipartite_induceFinset_univ_sdiff_isNClique_three_of_locIndep_one (everything outside a triangle is bipartite)
+      - JSP90.closeToBipartite_three_of_locIndep_one_of_isNClique_three (CloseToBipartite 3 G, T itself the transversal)
+      - JSP90.LocIndepOneHasTriangle 3 (HEADLINE INSTANCE: the conclusion of Erdos #73 at k = 1 with the constant 3 for every LocIndep-1 graph that HAS a triangle)
+      - JSP90.isBipartite_deleteFinset_of_isOddCycle_of_locIndep_one (everything outside ANY odd cycle is bipartite at LocIndep 1)
+      - JSP90.closeToBipartite_of_locIndep_one_of_odd_girth (at k = 1 the least odd cycle transversal number is at most the ODD GIRTH)
+      - JSP90.closeToBipartite_of_locIndep_one_of_oddCycles_of_card_eq (+ 5- and 7-cycle corollaries)
+      - JSP90.LocIndepOneTriangleFree, JSP90.erdos73On_one_of_locIndepOneTriangleFree (m) : Erdos73On 1 (3 + m)
+      - JSP90.erdos73_one_iff_exists_locIndepOneTriangleFree (Erdos73 1 <-> exists m, LocIndepOneTriangleFree m)
+      - JSP90.erdos73On_one_two_of_triangle_two_of_locIndepOneTriangleFree (Erdos73On 1 2 = the two sharp halves)
+      - JSP90.not_erdos73On_one_two_of_not_locIndepOneTriangleFree (the triangle-free half is NECESSARY)
+      - JSP90.not_erdos73On_one_one, JSP90.not_erdos73On_one_of_le, JSP90.not_locIndepOneTriangleFree_one (the constant 1 is refuted at k = 1, so f(1) >= 2)
+      - JSP90.not_isNClique_four_of_locIndep_one, JSP90.not_adj_of_common_neigh_two_of_locIndep_one (no K_4; the second neighbourhood of a triangle is independent)
+    next_step:
+      - prove JSP90.LocIndepOneTriangleFree 2: LocIndep 1 G + G.CliqueFree 3 -> CloseToBipartite 2 G, which is now the ENTIRE content of k = 1 up to the triangle half
+      - first concrete step: formalise that the maximum independent sets of an odd cycle C (|C| = 2r+1) are exactly the 2r+1 sets {c_j, c_{j+2}, ..., c_{j+2r-2}}; combined with LocIndep on X = C u {v} (alpha >= r+1) this gives the k = 1 local structure at a shortest odd cycle
+      - then the counting step: three attachment points of a shortest odd cycle in a LocIndep-1 triangle-free graph force deficiency >= 2
+      - JSP90.LocIndepOneTriangleTwo (constant 2 rather than 3 for LocIndep-1 graphs with a triangle)
+      - JSP90.PetalSetLeTwoOfOne: re-verified this round up to n = 10 by petal-seeded hill climbing (discovery/JSP-000090/r130c.c), best |PetalSet(T)| = 2
       - JSP90.OddCycleErdosPosa r (unchanged: this is the missing jsp_000090_main)
     prize_ready: false
     missing_theorems: [jsp_000090_main]

@@ -4338,3 +4338,93 @@ round's measurement is the **complete `k = 1` case with the optimal constant `2`
 search shows to be *optimal*, and the `k = 1` statement is the only remaining case in which the
 deficiency bound `≤ 1` is strong enough to hope for a short proof.  `formalization.yaml` remains
 `status: wip`, `prize_ready: false`.  No award claim is made.
+
+---
+
+## Round 130 — `lean/JSPProblem/OneK.lean`: **the case `k = 1`** — the triangle spends the whole
+## deficiency budget, the odd girth bounds the transversal, and `Erdős73On 1 2` splits into exactly
+## two statements
+
+New module (**38 declarations, 527 lines, 0 `sorry`, 0 `admit`**, `lake build` OK with **1280
+jobs**), imported from the root module `JSPProblem.lean`.  `harness/score.py problems/JSP-000090
+--strict-prize`: `build_ok = true, sorry = 0, admit = 0, placeholder_total = 0, partial_ok = true,
+missing_theorems = ["jsp_000090_main"]`, `prize_ready = false`.  `#print axioms` on the seventeen
+headline declarations gives only `[propext, Classical.choice, Quot.sound]`.
+
+Round 129 left the maximum-cut axis closed and named **one** job: the complete `k = 1` case,
+`Erdős73On 1 2`, whose constant the machine search of rounds 123–129 shows to be optimal
+(`JSP90.k4sub`, `JSP90.p9`).  This round attacks it and splits it into parts that are each provable.
+
+### 1 — at `LocIndep 1` a triangle is an odd cycle transversal (constant `3`)
+
+* **`JSP90.maxDefIn_univ_sdiff_isNClique_three_eq_zero`** — `maxDefIn G (univ \ T) = 0`: at `k = 1` a
+  triangle **spends the whole deficiency budget**, so every vertex set disjoint from it has
+  deficiency `0`;
+* **`JSP90.isBipartite_induceFinset_univ_sdiff_isNClique_three_of_locIndep_one`**,
+  **`JSP90.locIndep_zero_induceFinset_univ_sdiff_isNClique_three_of_locIndep_one`** — everything
+  outside the triangle is bipartite;
+* **`JSP90.closeToBipartite_three_of_locIndep_one_of_isNClique_three`** (with `T` itself as the
+  transversal) and **`JSP90.hitsOddCycles_isNClique_three_of_locIndep_one`**;
+* **`JSP90.LocIndepOneHasTriangle 3`** — **A NEW INSTANCE OF THE CONCLUSION OF ERDŐS #73, at `k = 1`,
+  with the constant `3`, for the class of `LocIndep 1` graphs that contain a triangle.**  Rounds 125
+  and 126 needed "every odd cycle is a triangle" for the constant `2`; here only "some triangle
+  exists".
+
+### 2 — at `LocIndep 1` the odd girth bounds the transversal
+
+* **`JSP90.isBipartite_deleteFinset_of_isOddCycle_of_locIndep_one`** — **everything outside any odd
+  cycle is bipartite** (an odd cycle of the deletion would be disjoint from `C`, while at
+  `LocIndep 1` odd cycles pairwise meet);
+* **`JSP90.closeToBipartite_of_isOddCycle_of_locIndep_one`**,
+  **`JSP90.closeToBipartite_of_locIndep_one_of_isOddCycle_of_card_le`**;
+* **`JSP90.closeToBipartite_of_locIndep_one_of_odd_girth`** — **`CloseToBipartite g G` for the odd
+  girth `g`**, the classical base case of the induction on Erdős's parameter, never stated before;
+* **`JSP90.closeToBipartite_of_locIndep_one_of_oddCycles_of_card_eq`** and its `5`-cycle and
+  `7`-cycle corollaries — a `LocIndep 1` graph whose odd cycles all have the same length `g ≥ 3` is
+  `g`-close to bipartite.
+
+### 3 — the exact decomposition of `Erdős73On 1 2`
+
+* **`JSP90.LocIndepOneTriangleFree m`** — the triangle-free case;
+* **`JSP90.erdos73On_one_of_locIndepOneTriangleFree (m) : Erdős73On 1 (3 + m)`**;
+* **`JSP90.erdos73_one_iff_exists_locIndepOneTriangleFree`** — `Erdős73 1 ↔ ∃ m, LocIndepOneTriangleFree m`,
+  the `k = 1` form of round 68's `JSP90.erdos73_iff_triangleFreeOnly`;
+* **`JSP90.erdos73On_one_two_of_triangle_two_of_locIndepOneTriangleFree`** — **`Erdős73On 1 2`
+  follows from `JSP90.LocIndepOneTriangleTwo` (constant `2` when there is a triangle) and
+  `JSP90.LocIndepOneTriangleFree 2`**, and
+  **`JSP90.not_erdos73On_one_two_of_not_locIndepOneTriangleFree`** shows the triangle-free half is
+  **necessary**.  So the residual of this round is a single statement about triangle-free graphs.
+
+### 4 — two machine-checked facts about the constant
+
+* **`JSP90.not_erdos73On_one_one`**, **`JSP90.not_erdos73On_one_of_le`**,
+  **`JSP90.not_locIndepOneTriangleFree_one`** — **the constant `1` is refuted at `k = 1`, in the
+  `Erdős73On` form and in the triangle-free form** (witness `JSP90.p9` of
+  `JSPProblem/Petersen.lean`).  Hence `f(1) ≥ 2`, and if the triangle-free case holds at all its
+  constant is **exactly `2`**.
+* **`JSP90.not_isNClique_four_of_locIndep_one`**, **`JSP90.not_isClique_card_four_of_locIndep_one`**,
+  **`JSP90.not_adj_of_common_neigh_two_of_locIndep_one`** — no `K_4` at `LocIndep 1`; and two
+  vertices adjacent to the same two vertices of a triangle are **not** adjacent to each other.
+
+### Measurements made this round (not Lean theorems)
+
+`discovery/JSP-000090/r130c.c` hill-climbs on `max |PetalSet(T)|` over `LocIndep 1` graphs seeded with
+petal constructions: the best value is **2** for `n = 6 … 10` (3000 trials each), i.e. round 123's
+residual `JSP90.PetalSetLeTwoOfOne` survives to ten vertices and no counterexample was found.
+`discovery/JSP-000090/r130.c` hill-climbs on `tau_odd` over `LocIndep 1` graphs, unrestricted and
+triangle-free: the best value is **2** for `n = 9` and `n = 10` (250 trials each), i.e. round 129's
+exhaustive result (up to `n = 8`) extended by search to ten vertices, with no witness of
+`tau_odd ≥ 3`.
+
+### What is *not* proved
+
+`Erdős73On 1 2` — and therefore neither half of Part 3.  `JSP90.LocIndepOneTriangleFree 2` is the
+new residual; `JSP90.LocIndepOneTriangleTwo` is the second, since Part 1 reaches `3` rather than `2`
+there.  Behind both stands `JSP90.OddCycleErdosPosa r` (Reed–Robertson–Seymour–Thomas), the
+unchanged primary blocker.  Three statements *attempted and refuted by hand before formalisation*
+are recorded in `discovery/JSP-000090/policy.json` (a vertex outside a triangle may meet two of its
+vertices; a vertex outside a shortest odd cycle may meet two of its vertices; and the deficiency
+hypothesis gives only **lower** bounds on `α`, so no "boundary of a shortest odd cycle" bound of the
+shape `|N(C)| ≤ f(MaxDef G)` can be derived from it).  `jsp_000090_main` is not declared, so the
+harness keeps reporting `missing_theorems = ["jsp_000090_main"]`.  `formalization.yaml` remains
+`status: wip`, `prize_ready: false`.  No award claim is made.
