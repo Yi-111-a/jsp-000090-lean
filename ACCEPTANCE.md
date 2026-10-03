@@ -5038,3 +5038,124 @@ Over **all** `986 787` graphs with `LocIndep 1` on `n ≤ 7` vertices:
 (Reed–Robertson–Seymour–Thomas), the unchanged primary blocker.  `jsp_000090_main` is **not**
 declared, so the harness keeps reporting `missing_theorems = ["jsp_000090_main"]`;
 `formalization.yaml` remains `status: wip`, `prize_ready: false`.  No award claim is made.
+
+---
+
+## Round 139 — `JSPProblem/CrossPair.lean`: **the cross-over points force the certificate**
+
+New file `lean/JSPProblem/CrossPair.lean` (**40 declarations, 0 sorry/admit**, `lake build` OK with
+1291 jobs), imported from the root module `JSPProblem.lean`.  This is the **nineteenth attack family**,
+and it does not decompose anything: it is a one-line observation about *which* two-element certificate
+the sharp case `k = 1` has, and it turns round 138's existential residual into a statement about a
+**finite, forced object**.
+
+### The one-line lemma (Part 1)
+
+With `C` a shortest odd cycle and `X(C)` the **cross-over points** of `C` — the attachment points at
+which some other odd cycle leaves `C` in one point (`JSP90.CrossOverPoint G C x` of round 138, now
+made into the `Finset` `JSP90.crossOverSet G C`) — one has
+
+```lean
+JSP90.subset_pair_of_hitsOddCycles_pair_of_mem :
+    a ≠ b → a, b ∈ C → HitsOddCycles G {a, b} → crossOverSet G C ⊆ {a, b}
+```
+
+**THE CERTIFICATE IS FORCED BY THE CROSS-OVER POINTS.**  For the cross-over cycle `D` through a point
+`x ∉ {a, b}` one has `C ∩ D = {x}`, so `D` avoids both `a` and `b` (they lie on `C`), contradicting
+that `{a, b}` meets every odd cycle.  No minimality of `C`, no packing hypothesis and no `LocIndep` are
+used.  Measured with **0 failures in `3 157 110` pairs** (`discovery/JSP-000090/r139e.c`, question
+`S1`); the weaker version in which the pair merely *meets* the attachment points fails `1 099 680`
+times and the version at `|attachPoints G C| ≤ 2` fails `1 160 160` times, so both hypotheses are
+essential.
+
+### Consequences proved here
+
+* **`JSP90.not_mem_crossOverSet_of_mem_of_hitsOddCycles_pair_of_mem`** and
+  **`JSP90.not_hitsOddCycles_pair_of_mem_of_three_crossOverPoint`** — **machine-checked negative
+  results**: a vertex of `C` outside a two-element certificate of `C` is not a cross-over point, and
+  **three cross-over points obstruct every two-element certificate lying on `C`**.  So a
+  two-element certificate on `C` can exist only if `C` has at most two cross-over points, which
+  explains why the threshold `2` of the residual is the right one;
+* **`JSP90.crossPairResidual_iff_crossOverResidual`** — round 138's residual `JSP90.CrossOverResidual`
+  is **equivalent** to its new *forced* form `JSP90.CrossPairResidual`, in which the certificate is
+  required to contain the whole cross-over set.  Both directions are one-line applications of the
+  lemma above; `JSP90.erdos73On_one_two_of_crossPairResidual` then gives the sharp `Erdős73On 1 2`;
+* **`JSP90.crossPairResidual_iff_low_iff`** — the forced residual **splits into exactly two
+  independent statements**, one per value of the cross-over count:
+  * `JSP90.LowCrossResidual` — the `|crossOverSet| ≠ 2` case (measured: `612 510` cycles with no
+    cross-over point and `650 970` with exactly one, all with 0 failures);
+  * **`JSP90.TwoCrossTransversal` — THE FORCED CERTIFICATE**: `|crossOverSet G C| = 2` makes the two
+    cross-over points themselves meet every odd cycle, so **there is no existential left**
+    (`r139.c` `Q5` and `r139b.c` `R1`: 0 failures in `5 040` cases);
+  * `JSP90.crossPairResidual_of_three` also gives the three-way split by `0 / 1 / 2` cross-over
+    points, `JSP90.NoCrossPairResidual` and `JSP90.OneCrossPairResidual`;
+* **`JSP90.closeToBipartite_two_of_subset_crossOverSet`** — **a new instance of the headline
+  theorem**: a pair of attachment points containing the cross-over set and meeting every odd cycle
+  which meets the attachment points in two points gives `CloseToBipartite 2 G`, for every `k`
+  satisfying the packing condition, the certificate lying on the shortest odd cycle;
+* **`JSP90.TriangleCrossResidual` and `JSP90.erdos73On_one_two_of_triangleCrossResidual` — a second,
+  tighter residual in NEGATIVE form, and a new instance of the headline theorem.**
+  `TriangleCrossResidual` says that at `LocIndep 1` the three vertices of a shortest odd triangle do
+  not all carry a cross-over; it is a statement about a *configuration that does not occur* (measured
+  **0 times** for `n ≤ 7`, and **0 times** among the `2 503 867` graphs with `LocIndep 1` on `n = 8`
+  that contain a triangle), and it gives `Erdős #73` at `k = 1` with the optimal constant `2` **for the
+  class of graphs whose shortest odd cycles are triangles** (a class given by a property of the odd
+  cycles alone: odd girth `3`);
+* **`JSP90.inter_ne_of_crossOverPoint_pair`** — the two cross-over cycles at two distinct points of `C`
+  must meet (they are odd cycles, and `LocIndep 1` bounds the packing number by one), which is what
+  makes the triangle configuration tight;
+* `JSP90.exists_pair_of_hitsOddCycles_attachPoints_sdiff` — round 138's erase-one construction read
+  off in forced form;
+* four numerical helpers (`card_sdiff_singleton_of_mem`, `two_le_card_sdiff_singleton_of_card_ge_three`,
+  `card_le_two_sdiff_singleton_of_card_le_three`, `exists_third_of_card_eq_three_mem_pair`).
+
+### Measurements this round (`discovery/JSP-000090/r139.c`, `r139b.c`, `r139c.c`, `r139d.c`, `r139e.c`)
+
+Over the `986 787` graphs with `LocIndep 1` on `n ≤ 7` vertices (`1 268 520` shortest odd cycles with
+`3 ≤ |attachPoints G C|`, of which `5 040` have `4 ≤ |attachPoints G C|`):
+
+| question | statement | result |
+| --- | --- | --- |
+| `Q1` | `|attachPoints G C| ≤ |C|` | 0 failures |
+| `Q3` | a *prescribed* non-cross-over point of `A` completes to a certificate | **5 040 failures** — rules out that shape |
+| `Q4` | for `4 ≤ |A|` a certificate made of two *non-cross-over* points | 0 failures (vacuous: all such cases have `X = ∅`) |
+| `Q5` | `|X| = 2 ⟹ X` is a transversal | **0 failures**, `5 040` cases, all with `|A| = 3` |
+| `Q6` | `4 ≤ |A| ⟹ A ∖ {b}` is a transversal for *every* `b ∈ A` | 0 failures |
+| `Q7`,`Q9` | a shortest triangle all of whose vertices are cross-over points | **0** for `n ≤ 7` and **0** among the `2 503 867` `LocIndep-1` graphs on `n = 8` containing a triangle |
+| `Q8` | `|A| ≤ 2 · |fan|`, and `3 ≤ |A| ⟹ ≥ 2` fan vertices | 0 failures |
+| `r139b` | the split by cross-over count: `612 510` / `650 970` / `5 040` / `0` | **0 failures** everywhere |
+| **`S1`** | **a transversal pair inside `A` contains `crossOverSet G C`** | **0 failures in `3 157 110` pairs** |
+| `S2` | the same with a pair merely *meeting* `A` | `1 099 680` failures |
+| `S5` | the same at `|A| ≤ 2` with arbitrary pairs | `1 160 160` failures |
+| `r139e` | a shortest cycle with `3 ≤ |A|` and no 2-element transversal inside `A` | **0** occurrences |
+
+### What is *not* proved
+
+`JSP90.LowCrossResidual`, `JSP90.TwoCrossTransversal` and `JSP90.TriangleCrossResidual` — the remaining
+statements — and behind them `JSP90.OddCycleErdosPosa r` (Reed–Robertson–Seymour–Thomas), the
+unchanged primary blocker.  `jsp_000090_main` is deliberately **not** declared, so that the harness
+keeps reporting `missing_theorems = ["jsp_000090_main"]`; `score.py --strict-prize` reports
+`build_ok = true, sorry = 0, admit = 0, partial_ok = true`.  `formalization.yaml` remains
+`status: wip`, `prize_ready: false`.  No award claim is made.
+
+### Toolchain notes (they cost most of the round)
+
+* `Finset.nonempty_iff_ne_empty` at the pinned revision is `(s = ∅ → False) ↔ s.Nonempty`, so `.mp`
+  produces `≠ ∅` and `.mpr` produces `Nonempty`; `Finset.card_pos.mpr` consumes a `Nonempty`.
+* `a - b` is opaque to `omega`; the step `3 ≤ n - 1` needs the equation `heq : n - 1 + 1 = n`
+  (`Nat.sub_add_cancel (by omega : 0 < n)`) *as a hypothesis*, after which the goal `2 ≤ n - 1` is
+  linear in the atom `n - 1`.
+* `2 ≤ n - 1` is **false** for `n = 2`: erasing one element of a two-element set leaves one element, so
+  the helper needs `3 ≤ n.card`, not `2 ≤ n.card`.
+* `Finset.inter_eq_self.mpr` does not exist at this revision; use `Finset.card_sdiff_of_subset` with an
+  explicit `{x} ⊆ S` proof, or the `ext` + `simp only [Finset.mem_inter, Finset.mem_singleton]` dance.
+* `rcases Finset.mem_insert.mp hz with rfl | rfl` fails on a three-element set (dependent
+  `Decidable.rec` elimination on `List.Mem.head`); peel with `rcases Finset.mem_insert.mp hz with hz | hz`
+  and `rw [hz]` instead, and use `Finset.mem_singleton.mp` for the last component.
+* `(mem_attachPoints.mp ha).2.1` is rejected ("projections extract constructor fields for
+  one-constructor inductive types") because `a ∈ attachPoints G C` is a `Quot.lift`; route every such
+  projection through `mem_attachPoints.mp` / `mem_crossOverSet.mp`.
+* `decide` and `simp` cannot settle `Fin` numeral equations in a file with a classical `DecidableEq`;
+  the new `crossOverSet` therefore gets an explicit
+  `local instance crossPairDecidable (C) : DecidablePred (CrossOverPoint G C) :=
+  fun _ => Classical.propDecidable _`.

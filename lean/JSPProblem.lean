@@ -1287,3 +1287,4 @@ import JSPProblem.Segment
 import JSPProblem.CrossOver
 import JSPProblem.SharpTwo
 import JSPProblem.Fan4
+import JSPProblem.CrossPair
