@@ -1281,3 +1281,5 @@ import JSPProblem.PetalOverlap
 import JSPProblem.MeetSet
 import JSPProblem.Nonagon
 import JSPProblem.AttachErase
+import JSPProblem.BoundaryOne
+import JSPProblem.Fan4

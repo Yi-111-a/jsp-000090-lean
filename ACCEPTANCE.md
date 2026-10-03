@@ -4728,3 +4728,95 @@ triangle-free half of it in its strongest available form (no containment require
 whole family of *triangle-based* certificates for `k = 1` (attachment sets, petals, two vertices of an
 odd cycle) is closed.  `formalization.yaml` remains `status: wip`, `prize_ready: false`.  No award
 claim is made.
+
+---
+
+## Round 135 — `JSPProblem/BoundaryOne.lean` + `JSPProblem/Fan4.lean`: **the fan of a shortest odd
+cycle at `k = 1`**, a new instance with the optimal constant `2`, and the refutation of the
+"small fan" route
+
+Attack family 64.  Two new files (19 + 17 declarations, **0 sorry/admit**), `lake build` OK with
+**1286 jobs**; `score.py --strict-prize` reports `build_ok = true, sorry = 0, admit = 0,
+partial_ok = true, missing_theorems = ["jsp_000090_main"]`.
+
+Round 134 closed the attachment-*point* axis by a machine-checked refutation (`g9`) and left one
+residual, `JSP90.TwoTransversal 2` (`⟺ Erdős73On 1 2`).  This round takes the third certificate shape
+— the two vertices may lie anywhere in the **closed neighbourhood of a shortest odd cycle** — and
+proves the exact structural content of the fan at `k = 1`, which no earlier round had.
+
+### Part 1–2 — the structural content (`JSPProblem/BoundaryOne.lean`)
+
+* **`JSP90.isBipartite_outerLayer_of_locIndep_one`** — **at `LocIndep 1` the part of `G` at distance
+  `≥ 2` from an odd cycle is bipartite.**  The outer layer is separated from the cycle by
+  construction (`JSP90.separated_outerLayer`), so an odd cycle in it would be a second odd cycle
+  *disjoint* from `C`, which `LocIndep 1` forbids (`JSP90.inter_oddCycle_of_locIndep_one`).  This
+  discharges the extra hypothesis of `JSP90.closeToBipartite_of_bipartite_outerLayer` (round 61),
+  which therefore now applies at `k = 1` for free;
+* **`JSP90.oddCycle_eq_or_inter_boundary_of_locIndep_one`** — **THE FAN OF A SHORTEST ODD CYCLE IS AN
+  ODD-CYCLE TRANSVERSAL**: for every odd cycle `D`, `D = C ∨ D ∩ boundary G C ≠ ∅`.  The hypothesis
+  that `C` is *shortest* is essential (`JSPProblem/BoundaryOne.lean`'s search finds counterexamples
+  for arbitrary `C`, e.g. `C = V`);
+* **`JSP90.sub_C_or_outer_of_oddCycle`** — the layer lemma behind it: a cycle meeting a shortest odd
+  cycle lies on one side of the anticomplete split `C ⊔ outerLayer G C`.
+
+### Part 3 — new instances, constant = the size of the fan
+
+* `JSP90.closeToBipartite_boundary_add_one_of_locIndep_one` — the conclusion of Erdős #73 with the
+  constant `|boundary G C| + 1`;
+* `JSP90.closeToBipartite_one_of_boundary_empty` — **constant `1`** when the fan is empty;
+* **`JSP90.erdos73On_one_of_boundary_le_one` — A NEW INSTANCE OF THE HEADLINE THEOREM** with the
+  **sharp** constant `2` when the fan has at most one vertex;
+* `JSP90.hitsOddCycles_boundary_singleton_of_locIndep_one` — the certificate is
+  `boundary G C ∪ {c}`.
+
+### Part 4 — the fan is unbounded at `k = 1` (`JSPProblem/Fan4.lean`, machine-checked)
+
+The witness is the six-vertex graph `fan4` = the triangle `{0, 4, 5}` with three pendant vertices at
+`5`:
+
+* `JSP90.locIndep_one_fan4` (exhaustive kernel decision over the `2^6` vertex sets);
+* `JSP90.mem_isOddCycle_fan4` — **`{0, 4, 5}` is the only odd cycle of `fan4`** (a vertex of an odd
+  cycle has two neighbours, `JSP90.two_le_card_neigh_of_mem_oddCycle`, and `1, 2, 3` are pendant);
+* `JSP90.card_boundary_fan4` — its fan is `{1, 2, 3}`, of size `3`;
+* **`JSP90.not_exists_boundary_le_two_fan4` — THE "SMALL FAN" ROUTE IS DEAD**: `LocIndep 1` does not
+  supply an odd cycle with a fan of at most `m` elements for any `m ≥ 2`;
+* `JSP90.closeToBipartite_one_fan4` — yet `fan4` is `1`-close to bipartite, so the big fan is not a
+  counterexample.
+
+### Part 5 — the same content under the packing condition, without Erdős's hypothesis
+
+* `JSP90.isBipartite_outerLayer_of_packing_one`,
+  `JSP90.oddCycle_eq_or_inter_boundary_of_packing_one`,
+  `JSP90.closeToBipartite_boundary_add_one_of_packing_one`;
+* **`JSP90.erdos73On_of_boundary_le_one_of_packing_one` — A NEW INSTANCE OF THE HEADLINE THEOREM**:
+  for **every** `k`, `LocIndep k G` + `PackingNumberOne G` + a shortest odd cycle whose fan has at
+  most one vertex give `CloseToBipartite 2 G`, the **optimal constant**, with no bound on the odd
+  girth, packing weight or number of branch vertices.  It is incomparable with
+  `JSP90.erdos73On_of_packing_one` (round 40), which bounds the transversal by the **odd girth** `ℓ`:
+  `K_5` has packing number one and fan `2`, `fan4` has `LocIndep 1` and fan `3`.
+
+### The residual of the sharp case `k = 1`, in one statement
+
+* **`JSP90.FanTwoResidual`** — `LocIndep 1 G`, `C` a shortest odd cycle, `2 ≤ |boundary G C|`, then
+  some set of at most two vertices of `C ∪ boundary G C` meets every odd cycle of `G`;
+* **`JSP90.erdos73On_one_two_of_fanTwoResidual`** — that single statement implies the **sharp**
+  `Erdős73On 1 2` (the three cases: bipartite; fan `≤ 1`, handled by Part 3; fan `≥ 2`, the
+  hypothesis).  So the case `k = 1` is reduced to a statement about the **fan of one shortest odd
+  cycle** and nothing else.
+
+### Measurements (exhaustive search outside Lean, `discovery/JSP-000090/r135.c`)
+
+Over **all** `903 792` graphs with `MaxDef ≤ 1` on `n ≤ 7` vertices:
+
+* `τ_odd ≤ 2` everywhere (`τ_odd = 2` first at `n = 6`);
+* `FanTwoResidual` holds: a two-vertex certificate inside `C ∪ boundary G C` exists for **every**
+  shortest odd cycle `C` in **every** case (0 failures);
+* the maximum of `min_C |boundary G C|` over shortest odd cycles `C` is `4` (at `n = 7`, `fan4`),
+  `3` at `n = 6`, and `2` restricted to triangle-free graphs — so `FanTwoResidual`'s threshold `2` is
+  the smallest possible;
+* for an arbitrary (non-shortest) odd cycle `C`, the fan-transversal statement of Part 2 **fails**
+  (e.g. `C = V` in a graph with two odd cycles), confirming that "shortest" is essential.
+
+`jsp_000090_main` is **not** declared, so the harness keeps reporting
+`missing_theorems = ["jsp_000090_main"]`; `formalization.yaml` remains `status: wip`,
+`prize_ready: false`.  No award claim is made.
