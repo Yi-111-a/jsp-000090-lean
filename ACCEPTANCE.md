@@ -3913,3 +3913,91 @@ six-vertex count is the concrete first formalisation target recorded in
   `not_isOddCycle_of_isBipartite` takes an `∃`-witness.
 
 `formalization.yaml` remains `status: wip`, `prize_ready: false`.  No award claim is made.
+
+---
+
+## Round 125 — `JSPProblem/Petal3.lean`: **the six-vertex obstruction at a triangle**, and the
+**first settled class** of the `k = 1` route
+
+New file `lean/JSPProblem/Petal3.lean` (**55 declarations**, ~1000 lines, **0 sorry/admit**, `lake
+build` OK with 1275 jobs), imported from the root module `JSPProblem.lean`.  This is the **twenty-second
+attack family**.  It does two things:
+
+1. it **proves**, in Lean, the obstruction that round 124 recorded only in words in
+   `policy.json` (three triangle petals of a triangle, meeting pairwise in three distinct vertices,
+   force deficiency `2`), and
+2. it uses that obstruction to **settle a class of graphs for Erdős #73 with the optimal constant
+   `2`**: graphs all of whose odd cycles are triangles.
+
+### Part 1 — the counting lemmas
+
+* `JSP90.adj_of_isOddCycle_card_three` — **a triangle is a `K_3`**: any two of its vertices are
+  adjacent.  (`JSP90.IsOddCycle` is a *cyclic ordering*, so this is not a field of it.)
+* `JSP90.indepCard_le_one_of_completeOn`, `JSP90.defOf_ge_card_sub_two_of_completeOn`,
+  `JSP90.not_locIndep_one_of_clique_four` — **a `K_n` has deficiency `n - 2`**, hence a `K_4` forbids
+  `LocIndep 1`.
+* **`JSP90.maxDef_ge_two_of_threeParts` — THE MULTIPARTITE OBSTRUCTION**: three pairwise disjoint sets
+  of two vertices each, with every vertex of one part adjacent to every vertex of each of the other
+  two — i.e. `G` *contains* the octahedral graph `K_6` minus a perfect matching — give
+  `MaxDef G ≥ 2`, so `LocIndep 1 G` fails (`JSP90.not_locIndep_one_of_threeParts`).  The proof is the
+  exact count: an independent set of `A ⊎ B ⊎ C` lies in **one** part
+  (`JSP90.subset_part_of_isIndepSet_of_threeParts`), so `α ≤ 2` while `|A ⊎ B ⊎ C| = 6`.
+
+### Part 2 — the six-vertex obstruction
+
+* **`JSP90.maxDef_ge_two_of_threePetalTriangle`**: `{a,b,c}` a triangle, `p`, `q`, `r` three distinct
+  vertices outside it, and the twelve edges of `{a,b,c}`, `{a,p,r}`, `{b,p,q}`, `{c,q,r}` present —
+  then the six vertices carry `K_6` minus a perfect matching with parts `{a,q}`, `{b,r}`, `{c,p}`, so
+  `MaxDef G ≥ 2` (`JSP90.not_locIndep_one_of_threePetalTriangle`).
+* **`JSP90.not_locIndep_one_of_three_triangle_petals` — THE HEADLINE STATEMENT OF THE FILE**: a
+  triangle `C` cannot have three *triangle* petals at three **different** attachment points which
+  **pairwise meet**.  The proof separates the two possible arrangements: the petals either share a
+  point (that point together with the three vertices of `C` is a `K_4`) or they meet in three distinct
+  points outside `C` (the six-vertex obstruction).
+* **`JSP90.not_three_triangle_petals_of_locIndep_one`**: three triangle petals with three different
+  attachment points **cannot exist at all** under `LocIndep 1`, because under `LocIndep 1` any two odd
+  cycles meet (`JSP90.hitsOddCycles_of_isOddCycle_of_locIndep_one`), so the meeting is automatic.
+
+### Part 3 — the new instance of the headline theorem
+
+* `JSP90.TriPetalSet`, `JSP90.card_triPetalSet_le_two_of_locIndep_one` — **at a triangle of a graph
+  satisfying Erdős's hypothesis, at most two vertices lie alone on a triangle**.  This is the case of
+  `JSP90.PetalSetLeTwoOfOne` in which the witness petals are triangles; the remaining case (a witness
+  of length `≥ 5`) is what is still open.
+* **`JSP90.erdos73On_one_of_allTriangles` — A NEW INSTANCE OF THE HEADLINE THEOREM, WITH THE OPTIMAL
+  CONSTANT `2`**: if **every odd cycle of `G` is a triangle**, then `LocIndep 1 G` forces
+  `CloseToBipartite 2 G`.  The constant mentions neither the number of triangles, the branch vertices,
+  the packing weight nor the packing number; no bound on the odd girth is used.
+  `JSP90.erdos73On_one_of_allTriangles_of_exists` is the same statement for a *class* of graphs.
+
+### Part 4 — the witness `octa6`, and sharpness
+
+`JSP90.octa6` is `K_6` minus a perfect matching (the complete tripartite graph with parts `{0,3}`,
+`{1,4}`, `{2,5}`), and
+
+* `JSP90.locIndep_two_octa6`, `JSP90.maxDef_octa6 : MaxDef octa6 = 2`,
+  `JSP90.not_locIndep_one_octa6` — the deficiency is **exactly** `2`, so the bound
+  `MaxDef ≥ 2` of Part 1 is *attained* and sharp;
+* **`JSP90.petalSet_octa6_tri`, `JSP90.card_petalSet_octa6_tri`** — the attachment set of the
+  triangle `{0,1,2}` has **three** elements (witnesses: the petals `{0,4,5}`, `{3,1,5}`, `{3,4,2}`),
+  the first graph in this development where a triangle's attachment set is not a proper subset of
+  it;
+* `JSP90.closeToBipartite_iff_octa6 : CloseToBipartite m octa6 ↔ 2 ≤ m` — its odd cycle transversal
+  number is exactly `2`.
+
+### What is *not* proved
+
+`JSP90.PetalSetLeTwoOfOne` itself (an attachment point witnessed by a petal of length `≥ 5`), the odd
+girth `≥ 5` case at `LocIndep 1`, and `JSP90.OddCycleErdosPosa r`
+(Reed–Robertson–Seymour–Thomas) are untouched.  An exhaustive check of this round
+(`discovery/JSP-000090/r125.c`, `r125.log`) confirms over **all** graphs on `8` vertices containing a
+triangle (`2 503 867` of them satisfy `LocIndep 1`) that **no** triangle has three attachment points:
+the maximum of `|PetalSet G C|` is `2`.  A second check (`r125_tau.c`) shows that no `LocIndep 1`
+graph on `≤ 7` vertices has odd cycle transversal number `≥ 3`, i.e. the target of the new instance
+(`f(1) = 2`) is consistent with the data.
+
+`jsp_000090_main` is **not** declared, so the harness keeps reporting
+`missing_theorems = ["jsp_000090_main"]`; `score.py --strict-prize` reports
+`build_ok = true, sorry = 0, admit = 0, placeholder_total = 0, partial_ok = true,
+prize_ready = false`.  `formalization.yaml` remains `status: wip`, `prize_ready: false`.
+No award claim is made.

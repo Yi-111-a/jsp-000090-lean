@@ -1252,3 +1252,4 @@ import JSPProblem.Hub
 import JSPProblem.HubSharp
 import JSPProblem.Two
 import JSPProblem.Wheel
+import JSPProblem.Petal3
