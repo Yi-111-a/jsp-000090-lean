@@ -4540,3 +4540,98 @@ one computable — coexist, and `Finset.instInter` terms built from them are not
 `JSPProblem/Petal.lean`'s local instance must be shadowed by hand in any file that mixes its
 statements with `decide`.  `formalization.yaml` remains `status: wip`, `prize_ready: false`.  No
 award claim is made.
+
+---
+
+## Round 132 — `lean/JSPProblem/MeetSet.lean`: **the MEETING-SET axis** — a new instance of Erdős #73
+   for every `t`, its exact constant, and its exact threshold
+
+Round 131's policy asked for the *family* behind its single statement ("every odd cycle meets a
+fixed triangle in at least two vertices" ⇒ two vertices suffice): **the odd cycles meet a fixed set
+`S` in at least `t` points ⇒ `t` vertices suffice**.  That family is proved here for **every `t`**,
+together with **both** sharpness results, so the axis is closed on both sides.
+
+### Part 1 — the pigeonhole step
+
+`JSP90.MeetSet G S t` (`lean/JSPProblem/MeetSet.lean`): every odd cycle of `G` meets `S` in at least
+`t` of its vertices.  The step is elementary:
+
+* **`JSP90.hitsAllOddCycles_of_meetSet_of_card_le`** — if `Z ⊆ S` leaves fewer than `t` points of `S`
+  uncovered (`|Z| + t > |S|`), every odd cycle meets `Z`;
+* **`JSP90.closeToBipartite_of_meetSet_of_card_le_two_mul_sub_one`** — **A NEW INSTANCE OF THE
+  HEADLINE THEOREM, FOR EVERY `t`**: `1 ≤ t`, every odd cycle meets a set `S` with `|S| ≤ 2t - 1` in
+  at least `t` points ⇒ `G` is `t`-close to bipartite.  Erdős's hypothesis is **not used**;
+* **`JSP90.exists_hitsAllOddCycles_of_meetSet_of_card_le_two_mul_sub_one`** — the same statement with
+  the location of the transversal made explicit: the transversal can be **chosen inside `S`**;
+* **`JSP90.erdos73On_of_meetSetHypothesis_of_le`** — the instance form,
+  `LocIndep k G → MeetSetHypothesis t G → CloseToBipartite m G` for every `t ≤ m`, and
+  **`JSP90.erdos73On_of_meetSetHypothesis_one`** (the `t = 1` level: every odd cycle passes through
+  one fixed vertex);
+* the quantified class **`JSP90.MeetSetErdős73On`**, discharged by
+  **`JSP90.meetSetErdős73On`** and consumed by **`JSP90.erdos73On_of_meetSetErdős73On`**.
+
+### Part 2 — round 131 recovered without the triangle hypothesis
+
+* **`JSP90.closeToBipartite_two_of_oddCycles_meet_set_of_card_three`** — the `t = 2` level with an
+  **arbitrary three-set**: the set need not be a cycle, and need not be adjacent.  It implies round
+  131's statement (`JSP90.closeToBipartite_two_of_oddCycles_meet_C` recovers it verbatim), so the
+  triangle hypothesis of `JSP90.closeToBipartite_two_of_oddCycles_meet_two` is **dead weight**;
+* **`JSP90.meetSet_two_of_neigh_outside`** — a reusable structural lemma: if every vertex outside `S`
+  has all of its neighbours in `S`, then every odd cycle meets `S` in at least two vertices (a vertex
+  of an odd cycle carries two of its cycle-neighbours, and both lie on `S`; an odd cycle avoiding `S`
+  would have exactly three vertices).
+
+### Part 3 — the hypothesis forces Erdős–Pósa to be at `r = 1`
+
+* **`JSP90.exists_mem_inter_of_meetSet_of_card_le_two_mul_sub_one`** — **any two odd cycles of `G`
+  share a point of `S`** (two `t`-point subsets of a set of `≤ 2t - 1` points meet);
+* **`JSP90.inter_oddCycle_of_meetSet_of_card_le_two_mul_sub_one`**,
+  **`JSP90.subset_singleton_of_meetSet_of_card_le_two_mul_sub_one`** and
+  **`JSP90.card_isOddCycleFamily_le_one_of_meetSet_of_card_le_two_mul_sub_one`** — so **every family
+  of pairwise vertex-disjoint odd cycles of `G` has at most one member**: under the hypothesis the
+  packing number is `≤ 1`.
+
+### Part 4 — sharpness, machine-checked in both directions
+
+* **The constant `t` is optimal at `|S| = 2t - 1`.**  `sun3`, the 3-sun, satisfies
+  `MeetSet T₀ 2` (`JSP90.meetSet_two_sun3`, from `JSP90.meetSet_two_of_neigh_outside`: the three
+  degree-two vertices outside `T₀` have all their neighbours on `T₀`) and is not one vertex away from
+  bipartite (`JSP90.not_closeToBipartite_one_of_meetSet_two_sun3`).  So the meeting-set hypothesis
+  buys nothing at `t = 2` even at a `LocIndep 1` graph (`JSP90.locIndep_one_sun3`).
+* **The threshold `2t - 1` is optimal.**  `K₅` with `S` four of its five vertices satisfies
+  `MeetSet S 2` (`JSP90.meetSet_completeGraph_five`, from the new
+  `JSP90.meetSet_two_of_card_sdiff_le_one`: a set missing at most one vertex is met in two points) and
+  is not `2`-close to bipartite (`JSP90.not_closeToBipartite_two_completeGraph_five`), so
+  `JSP90.closeToBipartite_of_meetSet_of_card_le_two_mul_sub_one` **cannot be extended from `|S| ≤ 3`
+  to `|S| ≤ 4`** (`JSP90.not_forall_closeToBipartite_two_of_meetSet_two_of_card_four`).
+* **The packing conclusion fails at `2t` as well.**  `twoPend` — `K₄` with a pendent triangle on each
+  of the disjoint edges `0 – 1` and `2 – 3` — satisfies `MeetSet pendS 2` for the four-set `pendS`
+  (`JSP90.meetSet_two_twoPend`) and has **two vertex-disjoint odd cycles**
+  (`JSP90.exists_two_oddCycles_of_twoPend`), so "any two odd cycles share a point" fails at `2t`
+  (`JSP90.not_forall_oddCycles_meet_of_meetSet_two_of_card_four`).
+* **The pigeonhole claim itself is false at `2t`.**  `JSP90.PigeonholeClaim` (elementwise) is proved
+  for `|S| ≤ 2t - 1` (`JSP90.pigeonholeClaim_of_card_le_two_mul_sub_one`) and refuted for
+  `|S| = 2t` (`JSP90.not_pigeonholeClaim_two_mul`).
+
+### Toolchain note (new this round)
+
+Every finset statement of this file is built with `JSP90.instDecidableEqMeetSet`, which differs both
+from the instance of the imported statements (`Transversal.lean`, `Packing.lean`) **and**, for a
+concrete vertex type such as `Fin 5` or `Fin 6`, from the *computable* `DecidableEq` that instance
+synthesis then picks.  The consequences are recorded in `policy.json`: a statement about
+`C ∩ S` for a concrete `S` is **not** the statement inside `MeetSet`, and `exact` cannot cross;
+`rw`, `simp`, `ext`, `subst` and `Finset.eq_empty_iff_forall_notMem` do cross, and the elementwise
+predicates `JSP90.HitsAllOddCycles` / `JSP90.PigeonholeClaim` avoid the problem entirely.  Two
+further traps: `Finset.exists_subset_card_eq` has **both** arguments implicit — `(... (n := t) h)` —
+or the goal is proved against a fresh metavariable; and `Finset.card_le_one` at this revision is
+`#s ≤ 1 ↔ ∀ a ∈ s, ∀ b ∈ s, a = b`, not the `∃ a, s ⊆ {a}` of later Mathlib.
+
+### What is *not* proved
+
+`jsp_000090_main` is **not** declared: `JSP90.OddCycleErdosPosa r` (Erdős–Pósa for odd cycles,
+Reed–Robertson–Seymour–Thomas) is untouched, so the harness keeps reporting
+`missing_theorems = ["jsp_000090_main"]`.  The meeting-set family is an instance of the headline
+theorem on a *structural* class, not a step towards `Erdős73 k m` for all graphs: in particular
+`JSP90.LocIndepOneTriangleTwo` and `JSP90.LocIndepOneTriangleFree 2` are still unproved, and
+`JSP90.PetalSetLeTwoOfOne` is untouched.  `formalization.yaml` remains `status: wip`,
+`prize_ready: false`.  No award claim is made.
