@@ -5159,3 +5159,71 @@ keeps reporting `missing_theorems = ["jsp_000090_main"]`; `score.py --strict-pri
   the new `crossOverSet` therefore gets an explicit
   `local instance crossPairDecidable (C) : DecidablePred (CrossOverPoint G C) :=
   fun _ => Classical.propDecidable _`.
+
+## Round 140 (`lean/JSPProblem/Tau.lean`, attack family 69) — **the odd cycle transversal number
+`τ_odd`: exact additivity, the exact accounting at cuts, and the budget-split form of Erdős #73**
+
+Every constant in the development so far has been stated as `CloseToBipartite m G`, i.e. as a
+one-sided statement about a number `m`.  This round introduces the object the conclusion of
+Erdős #73 actually talks about — the **odd cycle transversal number** `JSP90.tauOdd G = min {|Z| :
+Z meets every odd cycle of G}` — and 47 declarations (0 `sorry`/`admit`, `lake build` OK, 1292 jobs).
+
+| result | content |
+| --- | --- |
+| **`JSP90.tauOdd`, `tauOdd_spec`, `tauOdd_le`, `tauOddMin`** | the minimum exists, is attained, and every transversal is at least it (`Nat.find` on cardinalities; the minimum is packaged as a `Subtype` because an `∃` in `Prop` cannot be projected) |
+| **`JSP90.closeToBipartite_iff_tauOdd_le : CloseToBipartite m G ↔ tauOdd G ≤ m`** | **the conclusion of Erdős #73 IS a bound on `τ_odd`** |
+| **`JSP90.maxDef_le_tauOdd : MaxDef G ≤ tauOdd G`**, **`tauOdd_zero_iff : tauOdd G = 0 ↔ G.IsBipartite`** | Erdős's hypothesis is a lower bound on `τ_odd`; bipartiteness is `τ_odd = 0` |
+| **`JSP90.tauOdd_anticover_add : tauOdd G = ∑ X ∈ 𝒬, tauOdd (G[X])`** | **`τ_odd` is EXACTLY additive over an anticomplete cover** — the converse direction round 105's `closeToBipartite_iff_cost_cover` explicitly did not have (there the pieces only *pay jointly*, `∑ c X ≤ m`) |
+| `tauOdd_eq_of_two_covers`, `tauOdd_induceFinset_le` | the number is a function of the vertex set only, and is monotone in the vertex set |
+| **`JSP90.tauOdd_induceFinset_add : tauOdd G = tauOdd G[A] + tauOdd G[B]`** over `Anticover G A B` | the two-piece form (no `Finset` sum, so the degenerate `A = B` case needs no split) |
+| **`JSP90.tauOdd_le_sum_onePieces`** | **at a 1-cut, `τ_odd` adds over the PIECES with NO `+1`, each piece charged its own minimum** — against the uniform `m * t` of `JSPProblem/Piece.lean` |
+| **`JSP90.tauOdd_ge_sum_parts`**, **`tauOdd_onePiece_le`**, **`tauOdd_oneSplit_interval`** | `∑ τ_odd T_i ≤ τ_odd G ≤ ∑ τ_odd T_i + t`: **`τ_odd` is within the number of parts of the sum over the parts** |
+| `tauOdd_eq_onePiece_of_bipartite_pieces` | round 110's one-sided 1-cut reduction as an equality of numbers |
+| **`JSP90.tauOdd_le_add_two_of_vertexSplit`** | at a **2-cut** the error is `+2`, the sharp form of the `2 + m * t` of `JSPProblem/CutVertex.lean` |
+| **`JSP90.erdos73On_of_anticoverCover_of_pieceDeficit`** | **THE MASTER REDUCTION: Erdős #73 for `G` follows from Erdős #73 for the pieces, each piece at every parameter up to ITS OWN deficiency, with the constants added up** |
+| **`JSP90.erdos73On_of_anticoverCover_of_piecePacking`** | the same in the Erdős–Pósa shape — *Erdős–Pósa splits over an anticomplete cover* |
+| `erdos73On_of_anticoverCover_of_maxDef`, **`erdos73On_of_anticoverCover_of_bounded_pieceGirth`** (new instance, odd girth `≤ ℓ X` **per piece**), `erdos73On_of_anticoverCover_of_bounded_girth` | round 105 recovered; a per-piece odd-girth instance with constants `ℓ X * MaxDef (G[X])`; the classical `ℓ * k` back |
+| **`JSP90.closeToBipartite_of_anticover_two_of_maxDef`, `erdos73On_of_anticover_two`** | **the two budgets split as well**: `MaxDef G[A] ≤ k₁`, `MaxDef G[B] ≤ k₂` and Erdős #73 at `k₁`/`k₂` give Erdős #73 at `k₁ + k₂` with constant `m₁ + m₂` |
+| **`JSP90.tauOdd_p9Family : tauOdd (p9Family k) = 2 * k`** | round 76's lower bound `f(k) ≥ 2k` as a number |
+| **`JSP90.tauOdd_wf : tauOdd wf = 1`**, `tauOdd_wf_piece_0/1 = 1`, **`JSP90.not_tauOdd_additive_oneSplit`** | **MACHINE-CHECKED OBSTRUCTION: the exactness of Part 2 does NOT extend to cuts.**  On the windmill the transversal number is `1` while the two non-bipartite pieces of its 1-cut cost `1` each, so the pieces over-count by the shared cut vertex — which is why the `+2` at a 2-cut cannot be removed |
+
+The exact value of `τ_odd` at the two windmill pieces is obtained by the **transversal** route rather
+than the clique route (`{1}` and `{3}` are transversals because an odd cycle of a three-vertex piece
+*is* the piece); see the toolchain notes below for why the clique route is blocked.
+
+### What is *not* proved
+
+`JSP90.OddCycleErdosPosa r` (Reed–Robertson–Seymour–Thomas) and hence `jsp_000090_main`: this file
+gives exact arithmetic for `τ_odd`, not a bound on it in terms of `k`.  `jsp_000090_main` is
+deliberately **not** declared, so the harness keeps reporting `missing_theorems = ["jsp_000090_main"]`;
+`score.py --strict-prize` reports `build_ok = true, sorry = 0, admit = 0, partial_ok = true`,
+`prize_ready = false`.  `formalization.yaml` remains `status: wip`, `prize_ready: false`.
+No award claim is made.
+
+### Toolchain notes (they cost most of the round)
+
+* `Nat.find` searches `ℕ`, so `tauOdd` must be defined on a predicate of *cardinalities*
+  (`p := fun n => ∃ Z, HitsOddCycles G Z ∧ Z.card ≤ n`), and the `DecidablePred` instance for that
+  predicate must be a `local instance` (it is needed by `Nat.find_spec`/`Nat.find_min'` too).  With
+  only the expected type `ℕ` there is nothing to determine `p` from, and instance resolution dies
+  with "`Fintype ?m` is stuck".
+* An `∃` in `Prop` is squashed: `.1`/`.2` are **not** available on `tauOdd_spec`'s statement.  Package
+  the witness as a `Subtype` (`tauOddMin`) and keep `obtain` of an `∃` inside proofs.
+* `∅` is **not** a transversal (`HitsOddCycles G ∅` is false).  The witness for `tauOdd_zero_iff`'s
+  backward direction is `Finset.univ`; for `τ ≥ 1` use `tauOdd_zero_iff` plus non-bipartiteness,
+  never an explicit `HitsOddCycles G ∅`.
+* `Finset.nonempty_iff_ne_empty` is `s ≠ ∅ ↔ s.Nonempty`, so **`.mpr`** goes `≠ ∅ → Nonempty`;
+  `.mp` goes the other way.  `Finset.Subset.card_le_card` is one-way; the converse is
+  `Finset.eq_of_subset_of_card_le : s ⊆ t → t.card ≤ s.card → s = t` (it returns `s = t` with `s`
+  the *subset* — no `.symm`).  `Finset.card_union_le s t` takes both finsets explicitly.
+* **The `DecidableEq` trap that blocked a whole route.**  The `Finset`s of `JSPProblem/Windmill.lean`
+  and `JSPProblem/Piece.lean` were elaborated with Mathlib's computable `instDecidableEqFin`, while
+  a file-local classical `DecidableEq V` wins for *most* literals but not all, so
+  `insert 0 (wfPiece 0)` and `({0, 1, 2} : Finset (Fin 6))` can be two syntactically different
+  finsets of the same vertex set.  The *equality* between them is provable (`rw [insert_0_wfPiece_0]`
+  closes it), but passing a term whose *type* mentions one where the other is expected fails with
+  "synthesized instance is not definitionally equal to expression inferred by typing rules".  Since
+  `SimpleGraph.IsClique` is stated on a **`Set`**, even `wf.IsClique ({0,1,2} : Finset (Fin 6))` is
+  out of reach this way, and lowering the priority of the classical instance (`attribute [instance
+  2000]`) breaks the generic parts of the file with kernel errors.  Work-around used here: the
+  transversal route instead of the clique route.
