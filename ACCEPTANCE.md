@@ -4428,3 +4428,115 @@ hypothesis gives only **lower** bounds on `α`, so no "boundary of a shortest od
 shape `|N(C)| ≤ f(MaxDef G)` can be derived from it).  `jsp_000090_main` is not declared, so the
 harness keeps reporting `missing_theorems = ["jsp_000090_main"]`.  `formalization.yaml` remains
 `status: wip`, `prize_ready: false`.  No award claim is made.
+
+---
+
+## Round 131 — `lean/JSPProblem/PetalOverlap.lean`: **THE OVERLAP BUDGET**, and the **REFUTATION of
+## the petal-overlap bound** (the `k = 1` attachment route is closed)
+
+New module (**46 declarations, 0 `sorry`, 0 `admit`**, `lake build` OK with **1281 jobs**), imported
+by the root module `JSPProblem.lean`.  `harness/score.py problems/JSP-000090 --strict-prize`:
+`build_ok = true, sorry = 0, admit = 0, placeholder_total = 0, partial_ok = true,
+missing_theorems = ["jsp_000090_main"]`, `prize_ready = false`.  `#print axioms` on the eight
+headline declarations of the file gives only `[propext, Classical.choice, Quot.sound]`.
+
+Round 130 left the `k = 1` case to two statements, `JSP90.LocIndepOneTriangleTwo` and
+`JSP90.LocIndepOneTriangleFree 2`, and the second half of the first of those had been attacked for
+rounds 123–130 through the **attachment set** of a triangle.  Round 131 proves the natural
+*counting* statement behind that approach and then **refutes the family of statements the counting
+was supposed to support**.
+
+### Part 1 — the overlap budget
+
+* **`JSP90.two_card_inter_add_one_le_card_of_isOddCycle_of_isIndepSet`** — the classical
+  `α(C_m) ≤ ⌊m/2⌋`, for an *arbitrary* independent set of `G` meeting an odd cycle.
+* **`JSP90.two_mul_card_add_two_card_inter_add_one_le_card_add_card_of_isOddCycle`** — **THE OVERLAP
+  BUDGET, TWO CYCLES**: odd cycles `D`, `E` of `G` and an independent `S ⊆ D ∪ E` satisfy
+
+  > `2 * |S| + 2 * |S ∩ D ∩ E| ≤ |D| + |E| - 2`.
+
+  A vertex of `D ∩ E` that lies in `S` is counted twice on the left: the overlap is *not free*.
+* **`JSP90.not_mem_inter_of_locIndep_one`** — **at `LocIndep 1`, the unique meeting point of two odd
+  cycles that meet in exactly one point is in no independent set supplied by Erdős's hypothesis**;
+  `JSP90.exists_indepSet_avoiding_inter_of_locIndep_one` is the same with `S` produced by the
+  hypothesis.
+
+### Part 2 — a vertex of an odd cycle has two neighbours on it
+
+* **`JSP90.two_le_card_inter_neigh_of_mem_isOddCycle`** — `2 ≤ |N(v) ∩ C|` for `v ∈ C`, an odd cycle
+  (`JSPProblem/Layer.lean` has the version for a vertex *avoiding* `S`; this is the version for the
+  cycle itself, proved from the `CycleOrder` predecessor of `JSPProblem/Branch.lean`).
+* **`JSP90.subset_inter_neigh_of_card_neigh_eq_two`** — hence a vertex of an odd cycle whose whole
+  neighbourhood has two elements carries **both** of them on every odd cycle through it.
+
+### Part 3 — `sun3`: two petals of a triangle at distinct attachment points meet in ONE vertex
+
+`sun3` (the 3-sun, the graph round 123 called `g6`) is provided by `JSPProblem/Sun.lean` together
+with `locIndep_one_sun3` and `not_closeToBipartite_one_sun3`.  Round 131 only computes the attachment
+structure of its triangle `T₁ = {0, 1, 2}`:
+
+* **`JSP90.inter_sun3_petal_zero`** (`T₃ = {0, 4, 5}` is the petal at `0`),
+  **`JSP90.inter_sun3_petal_two`** (`T₂ = {2, 3, 5}` is the petal at `2`),
+  **`JSP90.card_inter_sun3_petals_eq_one`** (`|T₃ ∩ T₂| = 1`), and
+  **`JSP90.sun3_three_petals_data`**, which packages the witness.  So the attachment set of `T₁` has
+  at least two elements — `JSP90.PetalSetLeTwoOfOne` is *sharp* at `sun3` if it is a theorem — and
+  **two petals of a triangle at distinct attachment points need not meet in two vertices.**
+
+### Part 4 — `JSP90.petalOverlapGe_iff`: the **complete classification** of the petal-overlap bound
+
+```lean
+JSP90.PetalOverlapGe k : ∀ G T D E a b, LocIndep k G → IsOddCycle G T → T.card = 3 →
+    IsOddCycle G D → IsOddCycle G E → (D ∩ T = {a}) → (E ∩ T = {b}) → a ≠ b →
+    ∃ S, S ⊆ D ∧ S ⊆ E ∧ 3 - k ≤ |S|
+```
+
+(the two petal conditions are stated elementwise, so the definition carries no `DecidableEq`
+instance).  Then
+
+* **`JSP90.petalOverlapGe_of_ge_three`** — it holds trivially for `k ≥ 3`;
+* **`JSP90.not_petalOverlapGe_one`** — **it is false at `k = 1`**, witnessed by `sun3`;
+* **`JSP90.petalOverlapGe_iff : PetalOverlapGe k ↔ k = 0 ∨ 3 ≤ k`** — the complete answer: the bound
+  is not a theorem at any `k` at which it is not trivial (at `k = 0` it holds vacuously, because
+  `LocIndep 0` forces bipartiteness);
+* **`JSP90.pinch`, `JSP90.locIndep_two_pinch`** — the `k = 2` witness: a triangle with a pendant
+  triangle at each of two of its vertices, whose two petals are **disjoint**
+  (**`JSP90.not_petalOverlapGe_two`**).
+
+### Part 5 — a new instance of the headline theorem
+
+* **`JSP90.erdos73On_of_triangle_of_oddCycles_meet_two`** — **A NEW INSTANCE OF ERDŐS #73, FOR EVERY
+  `k`, WITH THE CONSTANT `2`**: if every odd cycle of `G` meets a fixed triangle in at least two
+  vertices, two vertices suffice.  The hypothesis is structural — it counts nothing and bounds no
+  size, no degree and no girth — and, as in `JSP90.erdos73On_of_edgeCount`, Erdős's hypothesis is
+  not needed for the conclusion.
+
+### Measurements (not Lean theorems)
+
+`discovery/JSP-000090/r131.c`, `r131b.c`: exhaustive over **all** `LocIndep 1` graphs on `n ≤ 7`
+vertices (up to `986 787` at `n = 7`), all odd cycles computed by a Hamiltonian-path DP:
+
+* **the maximum number of attachment points of a triangle is `0, 0, 1, 2, 2` for `n = 3 … 7`**, so
+  `JSP90.PetalSetLeTwoOfOne` survives exhaustively to seven vertices and is *attained* at the 3-sun
+  (6 vertices), the smallest graph where a triangle has two attachment points;
+* **the minimum `|D ∩ E|` over pairs of petals at distinct attachment points is `1`**, attained at the
+  same 6-vertex graph — this is the witness formalised in Part 4;
+* `discovery/JSP-000090/r131d.c`: **the geometric form of `JSP90.not_mem_inter_of_locIndep_one` is
+  false**: at `LocIndep 1` two odd cycles may meet in exactly one point `x` while a third odd cycle
+  avoids `x` — 360 counterexamples at `n = 6`, `45 972` at `n = 7`, the smallest being again the
+  3-sun (`{0,3,4} ∩ {1,3,5} = {3}`, and `{2,4,5}` avoids `3`).
+
+### What is *not* proved
+
+`jsp_000090_main` is **not** declared and `JSP90.OddCycleErdosPosa r`
+(Reed–Robertson–Seymour–Thomas) is untouched, so the harness keeps reporting
+`missing_theorems = ["jsp_000090_main"]`.  `Erdős73On 1 2` and both of its halves
+(`JSP90.LocIndepOneTriangleTwo`, `JSP90.LocIndepOneTriangleFree 2`) are **not** proved;
+`JSP90.PetalSetLeTwoOfOne` is not proved either, and Part 4 shows that the petal-*counting* route to
+it has no counting left: only `JSP90.PetalSetLeTwoOfOne`'s own statement, at petals of length `≥ 5`,
+remains open.  Two toolchain obstacles found this round are recorded in
+`discovery/JSP-000090/policy.json`: the exact value of `PetalSet G C` cannot be computed by `decide`
+(two different `DecidableEq (Fin n)` instances — one classical, leaking from `JSPProblem/Petal.lean`,
+one computable — coexist, and `Finset.instInter` terms built from them are not defeq), and
+`JSPProblem/Petal.lean`'s local instance must be shadowed by hand in any file that mixes its
+statements with `decide`.  `formalization.yaml` remains `status: wip`, `prize_ready: false`.  No
+award claim is made.

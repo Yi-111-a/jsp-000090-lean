@@ -1277,3 +1277,4 @@ import JSPProblem.Mono
 import JSPProblem.CutFlip
 import JSPProblem.MonoWind
 import JSPProblem.OneK
+import JSPProblem.PetalOverlap
