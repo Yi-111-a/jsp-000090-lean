@@ -4934,3 +4934,107 @@ Over **all** `986 787` graphs with `MaxDef ≤ 1` on `n = 7` vertices (and all s
 (Reed–Robertson–Seymour–Thomas), the unchanged primary blocker.  `jsp_000090_main` is **not**
 declared, so the harness keeps reporting `missing_theorems = ["jsp_000090_main"]`;
 `formalization.yaml` remains `status: wip`, `prize_ready: false`.  No award claim is made.
+
+---
+
+## Round 137 — the SEGMENTS of an odd cycle inside a shortest odd cycle, and the sharpness of the
+constant `2` at `k = 1` (`lean/JSPProblem/Segment.lean`, `lean/JSPProblem/SharpTwo.lean`)
+
+### The key lemma (machine-checked, no hypothesis on `k`)
+
+```
+JSP90.two_le_card_attachPoints_inter_of_card_inter_ge_two
+  2 ≤ (C ∩ D).card  ⟹  2 ≤ (attachPoints G C ∩ D).card
+```
+
+for every odd cycle `D ≠ C` and every **shortest** odd cycle `C`.  Reading the vertices of `D` in the
+order of its cyclic numbering, those lying on `C` come in maximal **segments**, and the classical fact
+is that *both ends of each segment are attachment points of `C`*:
+
+* `JSP90.mem_attachPoints_exit` — if `o.f i ∈ C` and `o.f (cycSucc i) ∉ C`, then
+  `o.f i ∈ attachPoints G C` (the successor is a fan vertex attached to it);
+* `JSP90.mem_attachPoints_entry` — the mirror image at the other end of a gap;
+* `JSP90.exists_exit_of_mem_of_exists_not_mem` / `…_entry_…` — the same statement with the whole walk
+  inside `C` (`JSP90.CycleOrder.exists_iter`, `iter_succ`, `prev_iter` do the index bookkeeping).
+
+The only obstruction is a **one-point cross-over** `C ∩ D = {a}`, which contributes a *single*
+attachment point.  Hence the new hypothesis
+
+```
+JSP90.NoCrossOver G C := ∀ D, IsOddCycle G D → D ≠ C → (C ∩ D).card ≠ 1
+```
+
+### The instances: attachment points pay `|attachPoints| − 1`
+
+* **`JSP90.hitsOddCycles_erase_of_attachPoints_of_noCrossOver`** —
+  `attachPoints G C \ {a}` meets **every** odd cycle of `G`, for every `a ∈ attachPoints G C` and
+  `2 ≤ |attachPoints G C|`; only `PackingNumberOne` is used, so it holds for **every** `k`;
+* `JSP90.closeToBipartite_of_noCrossOver` — the conclusion with the constant `|attachPoints G C| − 1`,
+  the certificate lying **on the shortest odd cycle**;
+* `JSP90.closeToBipartite_one_of_noCrossOver_of_card_attachPoints_eq_two` — the **optimal** constant
+  `1` at `k = 1`;
+* `JSP90.erdos73On_one_two_of_noCrossOver_of_card_attachPoints_le_three` — the **optimal** constant
+  `2`, for every `k`;
+* `JSP90.hitsOddCycles_pair_of_noCrossOver_of_card_attachPoints_eq_three` — **any pair** of the three
+  attachment points is a certificate (again on `C`, not in its fan).
+
+### The tighter residual
+
+```
+JSP90.AttachThreeResidualRefined : LocIndep 1 G → C shortest odd cycle → 3 ≤ |attachPoints G C| →
+      ∃ a b, a ≠ b ∧ a, b ∈ attachPoints G C ∧ HitsOddCycles G {a, b}
+```
+
+* `JSP90.erdos73On_one_two_of_attachThreeResidualRefined` — it implies the **sharp**
+  `Erdős73On 1 2`;
+* `JSP90.attachThreeResidual_of_attachThreeResidualRefined` — it implies round 136's
+  `AttachThreeResidual`, i.e. the residual is *formally weaker*;
+* it is equivalent to a single hard case: with `A = {a, b, c}` and no cross-over, every odd cycle meets
+  `A` twice, so **every** pair of `A` works; the whole difficulty is the one-point cross-over, where the
+  certificate must come from **outside** `C` (measured: the cross-over vertex itself never works).
+
+### The sharpness of the constant `2` at `k = 1`, machine-checked on six vertices
+
+`JSPProblem/SharpTwo.lean`, the graph `sharp2` on `Fin 6` with edges
+
+```
+0-1  0-2  0-4  0-5  1-2  1-3  1-5  2-3  2-4
+```
+
+* **`JSP90.locIndep_one_sharp2`** — `LocIndep 1 sharp2` (exhaustive kernel decision over the `2⁶`
+  vertex sets), so `sharp2` is a genuine member of the class of JSP-000090;
+* **`JSP90.hitsOddCycles_sharp2_pair`** / **`JSP90.closeToBipartite_two_sharp2`** — the pair `{0, 2}`
+  meets every odd cycle (an odd cycle has three or five vertices; a three-element set of `Fin 6`
+  contains `0` or `2` because `|Fin 6 \ {0, 2}| = 4 < 5`, and a triangle inside `{1, 3, 4, 5}` is
+  impossible);
+* **`JSP90.not_closeToBipartite_one_sharp2`** — for every vertex there is a triangle avoiding it, so
+  `¬ CloseToBipartite 1 sharp2`: **`Erdős73On 1 1` is false**;
+* **`JSP90.optimal_constant_one_is_two`** — the three statements together: `f(1) = 2` exactly, and the
+  constant cannot be lowered;
+* `JSP90.short_of_isOddCycle_sharp2_012`, `JSP90.boundary_sharp2_T` (the fan of `{0, 1, 2}` is
+  `{3, 4, 5}`), `JSP90.attachPoints_sharp2_T` / `JSP90.card_attachPoints_sharp2` (its attachment
+  points are `{0, 1, 2}`, of size `3`) — the **smallest** instance of `AttachThreeResidualRefined`,
+  with the certificate `{0, 2}` inside the attachment points.  Both the fan *and* the attachment points
+  have three elements here, which closes the two "small object" routes at once.
+
+### Measurements (exhaustive search outside Lean, `discovery/JSP-000090/r137.c`)
+
+Over **all** `986 787` graphs with `LocIndep 1` on `n ≤ 7` vertices:
+
+* `Q1`: **0 failures** for the segment lemma `2 ≤ |C ∩ D| → 2 ≤ |attachPoints G C ∩ D|`;
+* `Q2`: the naive "no cross-over ⇒ *every* pair of attachment points is a certificate" has `2520`
+  failures (it fails for `|attachPoints| ≥ 4`), which is why only the `|A| ≤ 3` form is kept;
+* `Q4`: "the vertex of a one-point cross-over is a transversal" has `63720` failures — the cross-over
+  case genuinely needs a certificate outside `C`;
+* `Q6`: in **all** `258 550` graphs with `min_C |attachPoints G C| ≥ 3` the two-vertex certificate can
+  be taken **inside the attachment points**, which is what `AttachThreeResidualRefined` asks for;
+* `Q7`: `max τ_odd = 2`, the first example having **six** vertices — the witness formalized above;
+* `Q8`: with `|A| = 3` all three pairs of `A` do occur on some common odd cycle, so the
+  "some pair never co-occurs" route is refuted.
+
+### What is *not* proved
+
+`JSP90.AttachThreeResidualRefined`, and behind it `JSP90.OddCycleErdosPosa r`
+(Reed–Robertson–Seymour–Thomas), the unchanged primary blocker.  `jsp_000090_main` is **not**
+declared, so the harness keeps reporting `missing_theorems = ["jsp_000090_main"]`;
+`formalization.yaml` remains `status: wip`, `prize_ready: false`.  No award claim is made.
