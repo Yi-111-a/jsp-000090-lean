@@ -3813,3 +3813,103 @@ placeholder_total = 0, partial_ok = true, missing_theorems = ["jsp_000090_main"]
   round 101), so the contradictory pair must be introduced with a single `have` in terms of
   `C.card` (`omega` handles `b ≤ C.card - 2` and `C.card - 1 ≤ b` together, but not after the
   subtraction has been pushed into the other hypothesis).
+
+---
+
+## Round 124 — `lean/JSPProblem/Wheel.lean`: the STANDING REGRESSION IS CLOSED, and the wheel is
+## resolved exactly (transversal number `2`, attachment set `n`)
+
+The file was written in round 121 and **did not compile** in rounds 121, 122 or 123, so every
+declaration in it was dead code — including round 121's negative result, which the harness had been
+reporting as unproved.  Round 124 repairs it and adds a seventh part that settles the family in the
+positive direction.  `lean/JSPProblem/Wheel.lean` now has **63 declarations, 883 lines, 0 `sorry`,
+0 `admit`**, is imported by the root module, and `lake build` succeeds with 1274 jobs.
+
+### What the repair restores (dead code until this round)
+
+* **`JSP90.no_petalSet_bound_of_maxDef` — NO FUNCTION OF THE DEFICIENCY BOUNDS THE ATTACHMENT
+  SET.**  There is **no** `φ : ℕ → ℕ` with `|PetalSet (wheel n) C| ≤ φ (MaxDef (wheel n))` for every
+  odd `n ≥ 3`, although the family has deficiency at most `2` throughout (`|PetalSet (wheel n) C| =
+  n`).  The whole family of numerical bounds `φ(MaxDef G)` — the blocker named by rounds 119 and 120
+  — is refuted by one machine-checked family.  **The proof is a pigeonhole argument, and it has to
+  be**: an arbitrary `φ : ℕ → ℕ` need not be monotone, so the round-121 draft's `φ.monotone` step was
+  unsound; `MaxDef (wheel n)` is a natural number at most `2`, hence one of `0, 1, 2`, so every odd
+  `n` forces `n ≤ max (φ 0) (φ 1) (φ 2)`.
+* **`JSP90.not_card_petalSet_le_maxDef_add_wheel`** (`|PetalSet| ≤ MaxDef + c` is false for every
+  `c`), **`JSP90.not_card_petalSet_le_mul_maxDef_wheel`** (false for every `c ≥ 1`) and
+  **`JSP90.not_petalSet_le_of_locIndep_two`** — the same refutation *under Erdős's own hypothesis*
+  `LocIndep 2 G`, not only under the deficiency bound.
+* **`JSP90.subset_wheelCycleFins_of_oddCycle_avoid_hub`** (every odd cycle of the wheel avoiding the
+  hub lies on the rim), **`JSP90.hitsOddCycles_wheelCycleFins`**, **`JSP90.hubCover_wheelCycleFins`**
+  (the single hub is a hub cover of the rim), **`JSP90.closeToBipartite_wheel_hub`**
+  (`CloseToBipartite n (wheel n)`, the constant `|C| − 1 + 1` where the attachment-set route of round
+  119 would have paid `2n − 1`) and **`JSP90.hubCover_constant_lt_wheel`**.
+
+### What is new (Part 7): the wheel, resolved exactly
+
+* **`JSP90.exists_oddCycle_avoiding_vertex`** — no vertex of the wheel meets every odd cycle (the hub
+  is avoided by the rim, every rim vertex and every leaf by the petal triangle at a different rim
+  index), with the reusable input **`JSP90.wheel_exists_index_ne`**;
+* **`JSP90.not_closeToBipartite_zero_wheel`**, **`JSP90.not_closeToBipartite_one_wheel`** and hence
+  **`JSP90.closeToBipartite_wheel_iff`: `CloseToBipartite m (wheel n) ↔ 2 ≤ m`** for odd `n ≥ 3` —
+  **the odd cycle transversal number of the wheel is exactly `2`**;
+* **`JSP90.wheel_triple`** — the three numbers together:
+
+  > `MaxDef (wheel n) ≤ 2`  ∧  `|PetalSet (wheel n) C| = n`  ∧  `CloseToBipartite 2 (wheel n)`  ∧
+  > `¬ CloseToBipartite 1 (wheel n)`.
+
+  So the wheel is **not** a counterexample to Erdős #73: an attachment set of `n` vertices costs
+  *nothing* here, because one vertex (the hub) carries all of them at once.  It is the
+  machine-checked demonstration that the object to be charged is a **hub set**
+  (`JSPProblem/Hub.lean`), never a function of the deficiency;
+* **`JSP90.not_petalSet_le_of_locIndep_ge_two`** — the refutation of the numerical blocker now holds
+  under Erdős's own hypothesis **for every `k ≥ 2`**, not only at `k = 2`;
+* the local lemmas the proofs need: **`JSP90.wheelC_of_adj_two`** (a wheel vertex with two distinct
+  neighbours, neither of them the hub, is a rim vertex — the only axioms it uses are none),
+  **`JSP90.wheelColour`** / **`JSP90.wheelStarColour`**, **`JSP90.wheelColour_rim`**,
+  **`JSP90.wheelColour_leaf`**.
+
+### What is *not* proved, and one obstruction newly located
+
+`jsp_000090_main` is **not** declared and `JSP90.OddCycleErdosPosa r`
+(Reed–Robertson–Seymour–Thomas) is untouched, so the harness keeps reporting
+`missing_theorems = ["jsp_000090_main"]`; `score.py --strict-prize` reports
+`build_ok = true, sorry = 0, admit = 0, placeholder_total = 0, partial_ok = true,
+prize_ready = false`.  `#print axioms` on the ten headline declarations of the round gives only
+`[propext, Classical.choice, Quot.sound]`.
+
+Round 123's single named residual, **`JSP90.PetalSetLeTwoOfOne`** (under `LocIndep 1 G` a triangle
+of `G` has at most **two** attachment points), was **re-verified independently this round** and
+**survives**: over *all* graphs on 5, 6 and 7 vertices there is no graph with `MaxDef ≤ 1` carrying a
+triangle with three attachment points (`discovery/JSP-000090/r124.c`,
+`discovery/JSP-000090/r124_petalSet.log`), and every candidate construction fails for a structural
+reason — `LocIndep 1` forbids two vertex-disjoint odd cycles, so the three petals must pairwise
+meet, and a hub adjacent to all three vertices of the triangle completes a `K₄`.
+
+The **smallest case is now isolated**: if the three petals are *triangles* meeting pairwise in three
+**distinct** vertices `w`, `w'`, `w''`, then the six vertices `{a, b, c, w, w', w''}` induce
+`K₆` minus a perfect matching, whose deficiency is exactly `2`, so `LocIndep 1` fails.  The unproved
+part of the lemma is the general case (petals of length `≥ 5`, arbitrary intersections); that
+six-vertex count is the concrete first formalisation target recorded in
+`discovery/JSP-000090/policy.json`.
+
+### Toolchain findings (they cost four rounds the repair)
+
+* **`intro` / `fun` on a negation introduce the POSITIVE statement**: `intro h` on `a ≠ b` gives
+  `h : a = b`, and `fun _ _ hxh => hxh` matched against `∀ x ∈ C, x ∉ X` binds `hxh : x ∈ X` with the
+  body required to be `False`.  `absurd` / `False.elim` must be written explicitly;
+* **`omega` cannot see a variable modulus**: any hypothesis `(…) % n = …` with `n` a variable makes
+  every later `omega` call fail (`clear` it first), and `omega` does not read the bound out of
+  `k : Fin n` (`have hklt : k.val < n := k.isLt` first);
+* `Finset.card_insert_of_notMem`, `Finset.inter_eq_self.mpr`, `Finset.eq_empty_of_not_mem`,
+  `Finset.not_mem_empty`, `Finset.disjoint_singleton_singleton` do not exist at this revision; use
+  `Finset.card_union_of_disjoint` with `Finset.disjoint_left.mpr`, `Finset.not_nonempty_iff_eq_empty`,
+  `Finset.ext fun y => …`, and `by simp` for `¬ (x ∈ ∅)`;
+* `rcases` on the indexed edge family `WheelEdgeKind n u v` fails with *Dependent elimination
+  failed*: match the vertex type instead so that the `match` in `wheelAdj` reduces by iota, and keep
+  the structural facts as separate small lemmas;
+* `Finset ⊆` takes the element **implicitly** (`hsub hy`, not `hsub y hy`), `obtain ⟨v, hv⟩ := hne`
+  **clears** `hne`, `Finset.card_eq_one` is an `∃`-statement, and
+  `not_isOddCycle_of_isBipartite` takes an `∃`-witness.
+
+`formalization.yaml` remains `status: wip`, `prize_ready: false`.  No award claim is made.
