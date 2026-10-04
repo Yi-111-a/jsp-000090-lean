@@ -1332,3 +1332,4 @@ import JSPProblem.Five
 import JSPProblem.Six
 import JSPProblem.Seven
 import JSPProblem.TriPair
+import JSPProblem.FiveWitness

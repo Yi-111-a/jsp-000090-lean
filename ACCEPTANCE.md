@@ -6045,3 +6045,102 @@ along it are both adjacent to `c`* — was written and machine-checked up to its
 two neighbours of `c` inside `C` are the two ends of the new five-cycle) but did not close in this
 round's budget; it is **not** in the repository and is recorded verbatim as *Missing Lemma 1* in
 `discovery/JSP-000090/policy.json`.
+
+## Round 152 (`lean/JSPProblem/FiveWitness.lean`, 13 declarations, 0 sorry/admit) — THE FIVE-CYCLE
+## WITNESS: round 150's named missing step, proved
+
+Attack family 79.  The open item that rounds 150 and 151 both pointed at is the **five-cycle case** of
+the sharp seven-vertex instance `JSP90.closeToBipartite_two_of_locIndep_one_card_le_seven`
+(`LocIndep 1 G`, `|V| ≤ 7` ⟹ `CloseToBipartite 2 G`, sharp at seven vertices per
+`discovery/JSP-000090/r148_n7.log`).  Round 150 split that instance by the cardinality of a *shortest
+odd cycle* and settled the case `|C| = 7` with the optimal constant `1`; round 151 settled the
+triangle-free instance with no five-cycle and, after correcting a bug in the measurement code of
+round 150, recorded as **the only missing step of the five-cycle case**
+
+> *"an outside vertex `w` witnesses at most one five-cycle of the form `(C \ {c}) ∪ {w}`"*.
+
+**This file proves it, together with the two local facts it rests on.**
+
+* **`JSP90.card_witness_le_one` — THE WITNESS LEMMA.**  For a five-cycle `C` with cyclic numbering
+  `f : Fin 5 → V` and a vertex `w ∉ C`, the set of indices at which `w` is adjacent to **both**
+  ring-neighbours of `f i` — the configuration in which `(C \ {f i}) ∪ {w}` closes up — has **at most one
+  element**.  The proof is the one-line pigeonhole of round 150's plan: two witnesses would give `w`
+  two *different* two-element sets of neighbours inside `C`, contradicting
+  `JSP90.card_le_two_neighOf_card_C_five_of_triangleFree` (round 150, `JSPProblem/Seven.lean` Part 3).
+  `JSP90.WitnessSet` and `JSP90.mem_witnessSet` name the counted set.
+* **`JSP90.card_neighIn_five_eq_two` — A FIVE-CYCLE OF A TRIANGLE-FREE GRAPH IS INDUCED.**  Every
+  vertex of a five-cycle has *exactly* two neighbours inside it: a chord of a five-cycle closes a
+  triangle.  Stated in the counting form so that **no case analysis is needed** — the upper bound is
+  round 150's lemma, the lower bound is the two ring-neighbours.
+* **`JSP90.filter_adj_eq_of_fiveCycle_singleton` — THE BRIDGE.**  Let `C` be a *shortest* odd cycle of
+  five vertices, `c ∈ C`, `x ∉ C`, and suppose `(C \ {c}) ∪ {x}` is a five-cycle.  Then
+
+  > `C.filter (fun z => G.Adj x z) = C.filter (fun z => G.Adj c z)`,
+
+  i.e. **`x` is adjacent to exactly the two ring-neighbours of `c` and to nothing else of `C`**.  Here
+  "a shortest odd cycle is induced" enters through `JSP90.neigh_eq_of_adj_of_adj`: a neighbour of `x`
+  inside the five-cycle whose two ring-neighbours in `C` are both different from `c` would have three
+  neighbours inside the five-cycle, which the previous bullet forbids; and `x ≁ c`, since that would
+  close a triangle with any neighbour of `x` (rounds 151's `no_triangle_of_not_isNClique`).
+* **`JSP90.five_pair_inj`, `JSP90.five_succ_ne_pred`, `JSP90.five_flip_false`,
+  `JSP90.adj_ringPred`, `JSP90.cycPred`** — the arithmetic of a five-cycle; in particular the pair of
+  ring-neighbours `{cycSucc i, cycPred i}` *determines* the point `i`, which is the "the missed point is
+  determined" step of the counting.
+
+Parts 1 and 3 together give the machine-checked statement that was missing: a point of a shortest odd
+five-cycle is witnessed by at most one outside vertex.
+
+### The measurement of this round
+
+An independent odd-cycle detector (a subset is an odd cycle iff its size is odd, every vertex has
+exactly two neighbours inside it, and it is connected) and an independent `MaxDef ≤ 1` test
+(`|W| ≤ 2 α(G[W]) + 1` for every `W`, `α` by the subset DP), over **all** `2^21` graphs on seven
+vertices (`discovery/JSP-000090/r152.c`):
+
+| quantity | value |
+| --- | --- |
+| `LocIndep 1` graphs | `986 787` (bipartite `103 237`, triangle-free `133 501`) |
+| `max tauOdd` | `2` |
+| pairs `(G, C)`, `G` triangle-free `LocIndep 1`, `C` a five-cycle | `50 904` |
+| **max five-cycles `(C \ {c}) ∪ {w}` per outside vertex `w`** | **`1`** |
+| max five-cycles meeting `C` in exactly three points | `1`, occurring `12 600` times |
+| max points of `C` missed by an odd cycle | `2` |
+| violations of "some point of `C` meets every odd cycle" | `0` |
+| triangles `(G, T)` at `LocIndep 1`, `|V| = 7` | `2 071 405`; violations of round 151's "some **pair** of `T` is a transversal" | `0` |
+
+The first version of the program (`r152.c`, `r152b.c`) ranged over the bit positions `0, 1, 2` instead
+of over the elements of the triangle and produced a spurious `208 440` violations; both were corrected
+(`r152c.c`) and the corrected run reproduces round 151's count `2 071 405 / 0`.
+
+### What is still missing
+
+The counting around Parts 1–3, i.e. the five-cycle case itself: with `|V| ≤ 7`, `C` a shortest odd cycle
+of five vertices and `G` triangle-free, an odd cycle meets `C` in `5` (it is `C`), in `4` (of the form
+`(C \ {c}) ∪ {x}`, at most `|V \ C| ≤ 2` of them by Parts 1 + 3), in `3` (**at most one**, measured) or
+is a seven-cycle (hence contains `C`).  At most `2 + 2 = 4` of the `5` points of `C` are missed, so
+some point of `C` meets every odd cycle and `CloseToBipartite 1 G` follows.  The single unproved input
+is the uniqueness of the three-intersection five-cycle; the pigeonhole itself is standard `Finset`
+counting.  The triangle case of the seven-vertex instance (round 151's `CONCRETE MISSING LEMMA 1`) is
+unchanged and remains open.
+
+`jsp_000090_main` remains undeclared and `JSP90.OddCycleErdosPosa r` (Reed–Robertson–Seymour–Thomas) is
+unchanged: the remaining obstruction is the general, 3-connected case.
+
+### Addendum (Parts 4 of the same round): the injectivity of the witness
+
+Two further declarations close the counting around Parts 1–3:
+
+* **`JSP90.filter_adj_C_eq_ringPair`** — the neighbours of `c = f i` inside the shortest odd five-cycle
+  `C` are exactly its two ring-neighbours.  Together with `JSP90.five_pair_inj` (on `Fin 5`) and
+  `JSP90.five_pair_inj'` (on the vertices of `G`), a *pair of ring-neighbours identifies a point*.
+* **`JSP90.x_ne_y_of_two_fiveCycles_singleton`** — **two different points of `C`, each missed by a
+  five-cycle of the form `(C \ {c}) ∪ {x}`, are missed by five-cycles with different outside vertices**:
+  with `(C \ {c}) ∪ {x}` and `(C \ {c'}) ∪ {y}` five-cycles and `c ≠ c'`, one gets `x ≠ y`.  This is the
+  pairwise form of the injection "point of `C` missed by a five-cycle meeting `C` in four points" ↦ "its
+  one vertex outside `C`", so the standard `Finset` pigeonhole bounds the number of missed points by
+  `|V \ C| ≤ 2`.
+
+The five-cycle case of the seven-vertex instance is therefore reduced to a `Finset` pigeonhole plus one
+combinatorial statement (`MISSING LEMMA 3` in `discovery/JSP-000090/policy.json`: at most **one**
+five-cycle meets a shortest odd five-cycle `C` in exactly three points — measured, maximum `1`, attained
+`12 600` times among the `50 904` pairs `(G, C)`, so it is not vacuous).
