@@ -5435,3 +5435,105 @@ nothing yet proves that the six-traces configuration cannot occur.  `jsp_000090_
 **not** declared, so the harness keeps reporting `missing_theorems = ["jsp_000090_main"]`;
 `score.py --strict-prize` reports `build_ok = true, sorry = 0, admit = 0, partial_ok = true`.
 `formalization.yaml` remains `status: wip`, `prize_ready: false`.  No award claim is made.
+
+---
+
+## Round 144 — `lean/JSPProblem/TraceComplex.lean` (new file): **the TRACE COMPLEX of a shortest odd
+cycle, and the sharp case reduced to TWO named statements**
+
+Attack family 72.  Rounds 136–143 attacked the sharp case `Erdős73On 1 2` through the attachment
+points `A = attachPoints G C` and the fan `B = boundary G C`; round 142 introduced the "traces"
+`D ∩ A` one at a time.  Round 144 replaces that ad-hoc language by **one object**
+
+```lean
+JSP90.traceFamily G C  =  { D ∩ attachPoints G C  :  D  an odd cycle of G }
+```
+
+(the *trace complex* of `C`; the two-element members, the *edges of the trace graph*, are collected
+separately as `JSP90.tracePairs : Finset (Finset V)`), and proves that every question the development
+asks about transversals at a shortest odd cycle is a question about this one family.
+
+### Part 1 — the trace complex (`JSP90.traceFamily`, `JSP90.mem_traceFamily`)
+
+* `subset_traceFamily_attachPoints`, `inter_attachPoints_mem_traceFamily`,
+  `attachPoints_mem_traceFamily` — every trace lies in the attachment points; the trace of `C` is `A`;
+* `ne_empty_of_inter_attachPoints_of_packing_one` — at packing number one every trace of an odd cycle
+  `D ≠ C` is nonempty (this is what rules out singleton traces in Part 3);
+* `exists_oddCycle_avoid_of_not_hitsOddCycles`, `hitsOddCycles_of_inter_empty`,
+  `exists_oddCycle_avoid_of_inter_traceFamily` — the odd cycles of `G` are accounted for by their
+  traces: **a trace disjoint from `X` is witnessed by an odd cycle avoiding `X`**.
+
+### Part 2 — the cover–transversal duality
+
+* **`JSP90.hitsOddCycles_iff_covers_traceFamily`** — if every odd cycle `D ≠ C` meets the attachment
+  points (which is exactly what `PackingNumberOne` gives for a shortest odd cycle), then for
+  `X ⊆ attachPoints G C`, `X ≠ ∅`,
+
+  ```lean
+  (X meets every odd cycle of G)  ↔  (X meets every trace of C)
+  ```
+
+  No Erdős hypothesis, no fan, no cross-over analysis.  `JSP90.hitsOddCycles_iff_covers_traceFamily_of_packing_one`
+  is the packing-number-one form used below.
+* `JSP90.not_hitsOddCycles_pair_iff_exists_trace_disjoint` — a **failing pair** of attachment points
+  is witnessed by a trace disjoint from it.
+* `JSP90.tracePairs` / `JSP90.mem_tracePairs` — the two-element traces.
+
+### Part 3 — the sharp case is TWO named statements
+
+* **`JSP90.not_hitsOddCycles_iff_exists_trace_subset_complement`** — the general form: a pair
+  `Q ⊆ A` fails to be a transversal **iff some trace lies inside `A \ Q`**.
+* **`JSP90.not_hitsOddCycles_iff_exists_trace_eq_complement_of_card_attachPoints_eq_three`** — at
+  `|A| = 3` the complement has **one** element, so the trace **is** the complementary singleton; **no
+  `NoCrossOver` hypothesis is needed**.  Hence
+  **`JSP90.not_cover_le_two_iff_threeSingletons_of_card_attachPoints_eq_three`**: the sharp case fails
+  at `|A| = 3` **iff all three attachment points are singleton traces**
+  (`JSP90.ThreeSingletonTraces`) — the trace-complex form of round 141's cross-over configuration,
+  with its instance-level corollaries `exists_cover_le_two_of_card_attachPoints_eq_three_of_noSingletonTraces`
+  and `hitsOddCycles_pair_of_card_attachPoints_eq_three_of_noSingletonTraces` (the latter strengthening
+  round 141's `∃` to `∀`: with no singleton trace **every** pair of attachment points is a transversal).
+* **`JSP90.not_hitsOddCycles_iff_mem_tracePair_of_card_attachPoints_eq_four_of_noCrossOver`** and
+  **`JSP90.not_cover_le_two_iff_sixTraces_of_card_attachPoints_eq_four_of_noCrossOver`** (`JSP90.TraceK4`) —
+  the same at `|A| = 4` under `NoCrossOver`: the failing pairs are exactly the complements of the edges
+  of the trace graph, so the sharp case fails **iff** the six-traces configuration occurs.  The
+  `NoCrossOver` hypothesis **is** needed here and round 144's measurement `r144c` `U2` shows why: at
+  `LocIndep 1` two odd cycles may meet in **three or four** points (55 800 cases), so the counting
+  `|A \ Q| = 2` alone does not make the trace two-element.  Round 142's theorem is therefore *not*
+  superseded; it is re-proved here in the trace language.
+* **`JSP90.TraceCoverResidual`** — the whole `3 ≤ |A|` half of the sharp case as ONE statement ("the
+  trace complex of `C` has a cover of size `≤ 2` inside `A`"), and
+  **`JSP90.erdos73On_one_two_of_allCrossResidual_and_traceCoverResidual`** — the sharp case
+  `Erdős73On 1 2` follows from round 141's `AllCrossResidual` together with this one statement, so the
+  residual is **two** named statements (down from round 142's three), one of them in negative form
+  (`JSP90.NoTraceK4`, `JSP90.NoThreeSingletonTraces`).
+  `JSP90.attachFourResidual_of_traceCoverResidual` (new statement ⇒ round 142's) and
+  `JSP90.traceCoverResidual_of_attachThreeResidualRefined` (round 137's ⇒ new statement) locate it
+  exactly between rounds 137 and 142.
+* **`JSP90.exists_cover_le_two_of_card_attachPoints_eq_four_of_oneTracePair`** — a *sharper* target
+  than `NoTraceK4`: at `|A| = 4` it suffices that the trace graph has at most **one** edge
+  (`JSP90.OneTracePair`).
+
+### Measurements (`discovery/JSP-000090/r144.c`, `r144b.c`, `r144c.c`)
+
+| question | statement | result |
+| --- | --- | --- |
+| `T1` | traces of size `≥ 3` | 27 720 occur, so `NoCrossOver` alone does **not** bound the traces |
+| `T3` | `\|A\| = 4`: "no transversal pair" `↔` "trace graph `= K₄`" | **0** violations in 5 040 cases |
+| `T4` | `\|A\| = 4`: number of edges of the trace graph | **only 0 or 1** (2 520 each) |
+| `T5` | a cover of size `≤ 2` inside `A` always exists | **0** failures in 1 268 520 cases with `\|A\| ≥ 3` |
+| `T6` | `\|A\| ≥ 4`: number of transversal pairs of `A` | **5 or 6**, never fewer |
+| `T7` | the trace graph `= K₄` | **never**, 0 occurrences |
+| `U1` | edges of the trace graph by `\|A\|` | `\|A\|=2`: always 1; `\|A\|=3`: `0,1,2,3`; `\|A\|=4`: `0,1` |
+| `U2` | two odd cycles of a `LocIndep`-1 graph meeting in `≥ 3` points | **yes**, 55 800 cases |
+| `U7` | `\|A\| ≥ 4`, no one-point cross-over: minimum cover size | **always 1** (5 040 cases) |
+| `B` | is there a `LocIndep`-1 graph with `τ_odd ≥ 3`? | **no**: `r144b.c` searches **all** 55 179 262 `LocIndep`-1 graphs on 8 vertices (search complete).  This is round 143's question; its `r143.c` pruned every branch at the root — `τ_odd < 3` is not a sound pruning rule — and was vacuous. |
+
+### What is *not* proved
+
+`JSP90.TraceCoverResidual`, and behind it `JSP90.NoTraceK4`, `JSP90.OneTracePair`,
+`JSP90.NoThreeSingletonTraces` and `JSP90.OddCycleErdosPosa r` (Reed–Robertson–Seymour–Thomas), the
+unchanged primary blocker.  `jsp_000090_main` is deliberately **not** declared, so the harness keeps
+reporting `missing_theorems = ["jsp_000090_main"]`; `score.py --strict-prize` reports
+`build_ok = true, sorry = 0, admit = 0, placeholder_total = 0, partial_ok = true`,
+`prize_ready = false`.  `formalization.yaml` remains `status: wip`, `prize_ready: false`.
+No award claim is made.

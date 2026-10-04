@@ -1325,3 +1325,4 @@ import JSPProblem.CrossPair
 import JSPProblem.Tau
 import JSPProblem.CrossThree
 import JSPProblem.FanCount
+import JSPProblem.TraceComplex
