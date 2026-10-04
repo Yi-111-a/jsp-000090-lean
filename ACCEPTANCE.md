@@ -54,6 +54,103 @@ set `X` then every independent set of `H` is one of `G[X]`, so `α(H) ≤ α(G[X
 `jsp_000090_main` — the Lean name that the prize gate checks. It must be the **complete** Erdős
 #73 theorem above (`Erdős73 k` for every `k`), proved with no `sorry`.
 
+## Round 151 (`lean/JSPProblem/TriPair.lean`) — **THE LOCAL STRUCTURE AT A BAD VERTEX OF A
+TRIANGLE**, and a **measurement bug that voids the five-cycle counts of round 150**
+
+New file `lean/JSPProblem/TriPair.lean` (23 declarations, 0 `sorry`/`admit`), `lake build` OK with 1301
+jobs), imported from the root module `JSPProblem.lean`.  Attack family 78, the **triangle axis**: the
+concrete target of rounds 149–150 was the sharp seven-vertex instance
+`JSP90.closeToBipartite_two_of_locIndep_one_card_le_seven` (`LocIndep 1 G`, `|V| ≤ 7` ⟹
+`CloseToBipartite 2 G`), whose two open cases are a shortest odd cycle of `5` or of `3` vertices.
+
+### What is proved
+
+* **`JSP90.adjIn_card_two_and_edge_or_path` — THE LOCAL STRUCTURE AT A BAD VERTEX OF A TRIANGLE.**
+  Write `X = V \ T` for the residue of a triangle `T` (at most four vertices when `|V| ≤ 7`, and
+  `G[X]` bipartite by Part 0b of `JSPProblem/Seven.lean`) and `S_t = AdjIn G t X`.  Then
+
+  ```lean
+  (deleteFinset G T).IsBipartite → ¬ (deleteFinset G (T \ {t})).IsBipartite →
+    (AdjIn G t X).card = 2 ∧
+      ((∃ p q, p ∈ AdjIn G t X ∧ q ∈ AdjIn G t X ∧ G.Adj p q) ∨
+       (∃ p q x y, p ∈ AdjIn G t X ∧ q ∈ AdjIn G t X ∧
+          x ∈ X \ AdjIn G t X ∧ y ∈ X \ AdjIn G t X ∧
+          G.Adj p x ∧ G.Adj x y ∧ G.Adj y q))
+  ```
+
+  i.e. **a bad vertex of a triangle sits on either a triangle (`S_t` an edge of `G[X]`) or a
+  five-cycle (`S_t` the two ends, `X \ S_t` the two adjacent middle vertices, all four adjacencies
+  given)**.  The content is: the odd cycle through `t` avoiding the other two vertices of `T` lies
+  in `X ∪ {t}`, so it has three or five vertices, and Erdős's hypothesis
+  (`JSP90.card_adjIn_le_two_of_isNClique_three`) says the two neighbours of `t` on it exhaust its
+  neighbours outside `T`.  `JSP90.exists_isOddCycle_through_of_not_isBipartite` is the first step:
+  the odd cycle really meets `t`, because the residue is bipartite.
+* **`JSP90.card_ge_five_of_isOddCycle_of_triangleFree`** — in a triangle-free graph every odd cycle
+  has at least five vertices;
+* **`JSP90.closeToBipartite_one_of_locIndep_one_card_le_seven_of_triangleFree_no5`** (with the
+  transversal form `hitsOddCycles_singleton_…`, the `tauOdd` form, the class
+  `LocIndepOneTriangleFreeNoFive`, the `Erdős73On` form `erdos73On_one_triangleFree_no5_seven` and
+  the sharpness `not_closeToBipartite_zero_of_triangleFree_no5_of_not_isBipartite`) — **a new
+  instance of the headline theorem with the optimal constant `1`**:
+
+  ```lean
+  LocIndep 1 G → |V| ≤ 7 → (no 3-clique) → (no five-cycle) → CloseToBipartite 1 G
+  ```
+
+### **A MEASUREMENT BUG, AND THE CORRECTED CENSUS**
+
+The odd-cycle detector used by `discovery/JSP-000090/r150b.c` — and re-used by this round's first
+measurements — performs its connectivity walk by pushing the **accumulated vertex mask** instead of a
+vertex, so the search never leaves the lowest-numbered vertex and **every five-cycle is missed**.
+Consequently the claims
+
+* "a `LocIndep 1` graph on `|V| ≤ 7` contains no five-cycle", and
+* "every non-bipartite triangle-free `LocIndep 1` graph on seven vertices has a spanning seven-cycle",
+
+made in round 150 and re-measured here, are **void**.  In particular `LocIndep 1` together with
+`|V| ≤ 7` does **not** give odd girth at least seven, so round 150's instance
+`closeToBipartite_one_of_locIndep_one_card_le_seven_of_oddGirth_ge_seven` does **not** apply to the
+triangle-free seven-vertex graphs; the version with an explicit "no five-cycle" hypothesis is what
+this file proves.
+
+The corrected census (`discovery/JSP-000090/r151q.c`; all `986787` `LocIndep 1` graphs on seven
+vertices, classified by the cardinality of a shortest odd cycle) is
+
+| shortest odd cycle | graphs |
+| --- | --- |
+| 3 | 853 286 |
+| 5 | **29 904** (all of them triangle-free) |
+| 7 | 360 |
+| bipartite | 103 237 |
+
+and the extremal values are unchanged: `max tauOdd = 1` over the `133501` triangle-free `LocIndep 1`
+graphs and `max tauOdd = 2` over the `853286` graphs containing a triangle, so the constant `2` at
+seven vertices is still sharp and the sharp instance still splits as: **no triangle** ⟹ one
+deletion (now known to need the five-cycle case, *not* the odd girth), **a triangle** ⟹ two
+deletions.
+
+### What is *not* proved
+
+* **the triangle case** of `closeToBipartite_two_of_locIndep_one_card_le_seven`: the input
+  `adjIn_card_two_and_edge_or_path` is now proved, together with the empty-triple-intersection
+  consequence of `card_adjIn_le_two_of_isNClique_three` (no vertex outside `T` meets all three
+  vertices of `T`) and Erdős's hypothesis read on the six-element subsets `V \ {t}` and `V \ {x}`;
+  what remains is the finite four-element counting step, verified exhaustively in
+  `discovery/JSP-000090/r151d.log`/`r151i.log`/`r151k.log` (bipartite graph on four vertices, three
+  two-element sets each an edge or carrying the five-cycle path, empty triple intersection, no
+  repeated pair an edge, at most one complement carrying an edge).  A hypothesis-free version of the
+  claim is **false** (the star of `r151f.c`), so the `K₄` exclusion is essential;
+* **the five-cycle case**: with the corrected census this is now the *only* missing step for the
+  triangle-free seven-vertex instance (`CloseToBipartite 1`), and it is exactly round 150's Missing
+  Lemma 1: an outside vertex witnesses **at most one** five-cycle of the form
+  `(C \ {c}) ∪ {w}` with `C` a shortest five-cycle.
+
+`jsp_000090_main` is deliberately **not** declared, so `harness/score.py --strict-prize` keeps
+reporting `missing_theorems = ["jsp_000090_main"]` (`build_ok = true`, `sorry = 0`, `admit = 0`,
+`placeholder_total = 0`, `partial_ok = true`).
+
+---
+
 ## Round 149 (`lean/JSPProblem/Six.lean`) — the sharp six-vertex instance and the **piece bridge**
 
 Round 148 left as its concrete target `JSP90.closeToBipartite_two_of_locIndep_one_card_le_six`
