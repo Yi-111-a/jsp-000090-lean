@@ -54,6 +54,59 @@ set `X` then every independent set of `H` is one of `G[X]`, so `α(H) ≤ α(G[X
 `jsp_000090_main` — the Lean name that the prize gate checks. It must be the **complete** Erdős
 #73 theorem above (`Erdős73 k` for every `k`), proved with no `sorry`.
 
+## Round 149 (`lean/JSPProblem/Six.lean`) — the sharp six-vertex instance and the **piece bridge**
+
+Round 148 left as its concrete target `JSP90.closeToBipartite_two_of_locIndep_one_card_le_six`
+(`LocIndep 1 G`, `|V| ≤ 6` ⇒ `CloseToBipartite 2 G`), whose sharpness was measured exhaustively
+(all `32768` graphs on six vertices: `max tauOdd` over `MaxDef ≤ 1` is exactly `2`, witnessed by the
+three-sun `sun3`).  The instance turns out to follow from a *reduction*, and the reduction — not the
+instance — is the reusable content of the round.
+
+* **THE PIECE BRIDGE** (the real new content, and one that every decomposition argument in this
+  development needs): `JSP90.closeToBipartite_pieceOf_closeToBipartite_of_card_le` says that an
+  instance of Erdős #73 at `k = 1` on graphs of order at most `n` with constant `m` applies to
+  **every induced piece** `U` with `|U| ≤ n`.  The class `JSP90.LocIndepOneSmallOrder` of round 148
+  counts the vertices of the *type*, whereas the residue of any decomposition is a vertex *set*; the
+  bridge closes that gap, using `JSPProblem/FiniteSharp.lean`'s `moveGraph` together with
+  `JSP90.locIndep_one_of_locIndep_one_moveGraph` (Erdős's hypothesis read on the moved piece) and
+  `JSP90.mem_Z_image_of_mem` (the witness and a `Fin 2`-colouring pulled back).
+* **THE ONE-MORE-VERTEX STEP**: `JSP90.closeToBipartite_succ_of_closeToBipartite_one` (delete a
+  vertex `a`; the witness of the residue is intersected with `V \ {a}` — which does not change the
+  residue, `A \ (X ∩ A) = A \ X` — and `a` is added back) and
+  `JSP90.LocIndepOneSmallOrder.succ` (the same reduction for the class of round 148).
+* **THE INSTANCE**: > **`JSP90.closeToBipartite_two_of_locIndep_one_card_le_six`:
+  > `LocIndep 1 G → |V| ≤ 6 → CloseToBipartite 2 G`** — a new instance of the headline theorem
+  > with the **optimal constant `2`** on the class of graphs of order at most `6`, with no
+  > hypothesis beyond Erdős's own (no odd girth, no packing weight, no degree bound, no
+  > decomposition).  In the `Erdős73On` shape: `JSP90.erdos73On_one_two_of_card_le_six`; in the
+  > transversal shape: `JSP90.tauOdd_le_two_of_locIndep_one_card_le_six`.
+* **EXACTNESS**: `JSP90.smallOrder_k1_exact` collects the small-order constants at `k = 1` through
+  six vertices: `LocIndepOneSmallOrder 1 5`, `¬ LocIndepOneSmallOrder 0 5` (witness `K₃`),
+  `LocIndepOneSmallOrder 2 6`, `¬ LocIndepOneSmallOrder 1 6` (witness `sun3`) — so `f(1) = 1` for
+  every graph on at most five vertices and `f(1) = 2` for every graph on at most six, and neither
+  constant can be lowered.
+* **THE REDUCTION ITERATES**: `JSP90.LocIndepOneSmallOrder.iter` — `(m, n) → (m + k, n + k)` — so
+  `LocIndepOneSmallOrder 1 5` alone settles every larger order at the cost of one deletion per
+  vertex (`LocIndepOneSmallOrder (1 + k) (5 + k)`).  These are the *non-sharp* constants; the sharp
+  ones at order seven and beyond are the next target.  The piece form of the six-vertex instance,
+  `JSP90.closeToBipartite_two_of_locIndep_one_of_card_le`, is the form a decomposition reads.
+* **A REFUTED LEMMA, recorded**: "if `C` is a shortest odd cycle and `|V| ≤ |C| + 1` then every
+  vertex of `C` meets every odd cycle" is **false** (with `|V| = 6`, `|C| = 5`, and a second
+  `5`-cycle `V \ {v}` for a vertex `v` of `C`, the vertex `v` misses it).  What is proved instead is
+  the parity statement `JSP90.card_eq_of_shortest_oddCycle_of_card_le_succ`: with at most one vertex
+  outside a shortest odd cycle, **all** odd cycles have the same cardinality.  The six-vertex
+  instance needs neither.
+
+`lake build` succeeds (1299 jobs) with **0 `sorry`, 0 `admit`**; `#print axioms` on the theorems
+above reports only `[propext, Classical.choice, Quot.sound]`.
+
+**The next order with anything to prove is seven.**  The reduction costs one vertex, so it gives `3`
+at seven vertices (`JSP90.closeToBipartite_three_of_locIndep_one_card_le_seven`), whereas the
+measurement says `2` suffices there (`r148_n7.log`, all `2097152` graphs on seven vertices) and also
+at eight vertices (`r144b_n8.log`, a *complete* search over the `55179262` `LocIndep 1` graphs on
+eight vertices: none has `tauOdd ≥ 3`).  So the concrete next target is
+`JSP90.closeToBipartite_two_of_locIndep_one_card_le_seven`.
+
 ## Status as of round 46
 
 * `lake build` succeeds (1215 jobs); **0 `sorry`, 0 `admit`** (harness `partial_ok = true`).
