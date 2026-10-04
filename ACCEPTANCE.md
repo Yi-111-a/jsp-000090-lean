@@ -54,6 +54,110 @@ set `X` then every independent set of `H` is one of `G[X]`, so `α(H) ≤ α(G[X
 `jsp_000090_main` — the Lean name that the prize gate checks. It must be the **complete** Erdős
 #73 theorem above (`Erdős73 k` for every `k`), proved with no `sorry`.
 
+## Round 155 (`lean/JSPProblem/FiveCount.lean`) — **THE COUNTING LAYER OF THE FIVE-CYCLE CASE**, and
+the five-cycle case reduced to one statement
+
+New file `lean/JSPProblem/FiveCount.lean` (24 declarations, 0 `sorry`/`admit`), imported from the root
+module `JSPProblem.lean`; `lake build` OK with 1303 jobs.  Attack family 80.  This round executes the
+*next bet* of `policy.json` verbatim — parts (a) and (b) of round 152's plan, i.e. the cardinal form
+of the injectivity of round 152's Part 4 and the pigeonhole built on it — and turns it into the exact
+reduction of the five-cycle case of the sharp seven-vertex instance to **one** statement.
+
+### What is proved
+
+* **`JSP90.card_missed_le_card_univ_sdiff` — THE PIGEHOLE OF ROUND 152, PART (a).**  With
+  `JSP90.Missed C = {c ∈ C : (C \ {c}) ∪ {x} is a five-cycle for some x ∉ C}`,
+
+  ```lean
+  IsOddCycle G C → C shortest odd → C.card = 5 → G triangle-free → cyclic numbering f : Fin 5 → V →
+    |Missed C| ≤ |univ \ C|
+  ```
+
+  proved by exhibiting the injective carrier `JSP90.Witness c := c` (the outside vertex of the
+  five-cycle which misses `c`) and applying `Finset.card_le_card_of_injOn`.  No hypothesis beyond round
+  152's: the injectivity is `JSP90.x_ne_y_of_two_fiveCycles_singleton`, read as an injection.
+* **`JSP90.card_missed_le_two_of_card_le_seven`** — at `|V| ≤ 7`, `|Missed C| ≤ 2`.
+* **`JSP90.card_missedFour_le_one`** — the *set* form of round 152's per-vertex bound: an outside
+  vertex witnesses at most one point of `C`, proved through the bridge
+  `JSP90.filter_adj_eq_of_fiveCycle_singleton` and the ring-pair arithmetic
+  (`JSP90.filter_adj_C_eq_ringPair`, `JSP90.five_pair_inj'`).
+* **`JSP90.exists_mem_not_mem_missed`** (round 152's part (b)) — some point of `C` is missed by no
+  four-intersection five-cycle.
+* **`JSP90.exists_mem_meetsFour` and `JSP90.MeetsFour` — THE INSTANCE OF THE ROUND.**  For a shortest
+  odd five-cycle `C` in a graph on at most seven vertices there is a point `c ∈ C` with
+
+  ```lean
+  ∀ D, IsOddCycle G D → 4 ≤ |D ∩ C| → c ∈ D
+  ```
+
+  i.e. **`c` meets every odd cycle of `G` that meets `C` in at least four points**.  Notably this half
+  of the five-cycle case needs *no* triangle-freeness.
+* **`JSP90.isOddCycle_five_or_mem_of_meetsFour` — THE REDUCTION.**  With `JSP90.MeetsFour` and
+  triangle-freeness (odd girth ≥ 5, `JSP90.card_ge_five_of_isOddCycle_of_triangleFree`), the order
+  bound and `JSP90.mem_C_of_isOddCycle_of_card_eq_seven` (a seven-cycle is `univ`, hence contains `C`):
+
+  > **every odd cycle of `G` either contains `c`, or is a five-cycle meeting `C` in exactly three
+  > points.**
+
+  (the intersection is at least `5 + 5 − 7 = 3` for two five-cycles and at most three by
+  `JSP90.MeetsFour`).  `JSP90.mem_hits_ge_four_of_meetsFour` is the transversal shape: a point of `C`
+  meets every odd cycle that is not a three-intersection five-cycle.
+
+### The blocker of this round: MISSING LEMMA 3, named and measured
+
+`JSP90.ThreeIntersectionFiveCycleUnique`: **at most one five-cycle of `G` meets a shortest odd
+five-cycle `C` in exactly three points.**  It is now the *only* missing input: with it the missed
+points of `C` are a set of at most two (Part 2) together with the missed pair of a single five-cycle,
+hence at most four of the five, so some point of `C` meets every odd cycle and
+`JSP90.closeToBipartite 1 G` follows at `LocIndep 1`, `|V| ≤ 7`.
+
+Measured by `discovery/JSP-000090/r155.c` over all `2^21` graphs on seven vertices (`50904` triangle-free
+pairs `(G, C)` with `C` a five-cycle): **max `# {five-cycles D : |C \ D| = 2} = 1`, `0` violations**; and
+the two shapes such a `D` can take are also verified exhaustively (`0` violations each):
+
+| shape | `D` | occurrences | `S = D ∩ C` | `N_C(w₁), N_C(w₂)` | missed pair |
+| --- | --- | --- | --- | --- | --- |
+| A | `w₁ ~ w₂` in `D` | `10080` | three *consecutive* vertices of `C`, the middle one with no neighbour in `W` | each contains one endpoint | an **edge** of `C` |
+| B | `w₁ ≁ w₂` in `D` | `2520` | not consecutive; `\|E(S,W)\| = 4` | forced: `w₁ ~ {a,c}`, `w₂ ~ {b,c}` | a pair at **distance two** in `C` |
+
+In shape B a four-intersection five-cycle always also exists (`2520 / 2520`), which is why the overall
+bound on the number of missed points is `2` (`0` cases with more than four).  Two bugs of the
+measurement program were found and fixed while writing it (self-adjacency counted by `eidx i i`, and a
+broken cyclic-order walk); both were caught by the program's own `NOORDER`/`BADMISS` checks.
+
+### Part 6 — the closure: `ThreeIntersectionFiveCycleUnique` really is the only missing input
+
+`JSP90.AllMissed` (the points of `C` missed by *some* odd cycle) and `JSP90.Miss` (an odd cycle missing
+a point) are named, and the following are proved:
+
+* **`JSP90.mem_missed_or_three`** — **every missed point is either a four-intersection miss or the miss
+  of a three-intersection five-cycle**:
+  `z ∈ Missed C ∨ ∃ D, IsOddCycle G D ∧ D.card = 5 ∧ |D ∩ C| = 3 ∧ z ∉ D`.  (Part 5 plus the two counting
+  facts: two five-cycles on at most seven vertices meet in at least three points, and a triangle is
+  excluded.)
+* **`JSP90.card_allMissed_le_four_of_unique`** — **at most four of the five points of `C` are missed by
+  any odd cycle**, given `∀ D D', IsOddCycle G D → IsOddCycle G D' → D.card = 5 → D'.card = 5 →
+  |D ∩ C| = 3 → |D' ∩ C| = 3 → D = D'`.  (Two misses from the four-intersection cycles, two from the
+  unique three-intersection five-cycle.)
+* **`JSP90.hitsOddCycles_singleton_of_unique`** and **`JSP90.closeToBipartite_one_of_unique`** — the
+  conclusion:
+
+  ```lean
+  JSP90.closeToBipartite_one_of_unique : CloseToBipartite 1 G
+  ```
+
+  So **the five-cycle case of `JSP90.closeToBipartite_two_of_locIndep_one_card_le_seven` follows from
+  `JSP90.ThreeIntersectionFiveCycleUnique` and nothing else**; no other input is missing, and Parts 1
+  to 6 use no instance of `LocIndep 1` (for triangle-free graphs on at most seven vertices the
+  hypothesis is vacuous, since `R(3,3) = 6`).  The *one* remaining lemma of this development's five-cycle
+  case is thus precisely the `Fin 5` case analysis recorded in `discovery/JSP-000090/r155.log`.
+
+`jsp_000090_main` is deliberately **not** declared, so `harness/score.py --strict-prize` keeps reporting
+`missing_theorems = ["jsp_000090_main"]` (`build_ok = true`, `sorry = 0`, `admit = 0`,
+`placeholder_total = 0`, `partial_ok = true`; `lake build` OK with 1303 jobs).
+
+---
+
 ## Round 151 (`lean/JSPProblem/TriPair.lean`) — **THE LOCAL STRUCTURE AT A BAD VERTEX OF A
 TRIANGLE**, and a **measurement bug that voids the five-cycle counts of round 150**
 
