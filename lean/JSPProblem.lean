@@ -1338,3 +1338,4 @@ import JSPProblem.Three
 import JSPProblem.ThreeRing
 import JSPProblem.ThreeB
 import JSPProblem.ThreeA
+import JSPProblem.ThreeOrder

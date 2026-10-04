@@ -54,6 +54,103 @@ set `X` then every independent set of `H` is one of `G[X]`, so `α(H) ≤ α(G[X
 `jsp_000090_main` — the Lean name that the prize gate checks. It must be the **complete** Erdős
 #73 theorem above (`Erdős73 k` for every `k`), proved with no `sorry`.
 
+## Round 162 (`lean/JSPProblem/ThreeOrder.lean`) — **MISSING LEMMA 3 IS CLOSED, AND THE
+FIVE-CYCLE CASE OF THE SHARP SEVEN-VERTEX INSTANCE WITH IT**
+
+New file `lean/JSPProblem/ThreeOrder.lean` (17 declarations, 0 `sorry`/`admit`), imported from the root
+module `JSPProblem.lean`; `lake build` OK with **1308 jobs**.  Attack family 85.  This round executes
+the concrete next bet of `policy.json` verbatim — *"MISSING LEMMA 3, order bookkeeping"* — and closes
+the lemma that `lean/JSPProblem/FiveCount.lean` (round 155) and `lean/JSPProblem/Three.lean`
+(round 159) have been naming as **the only missing input** of the five-cycle case.
+
+### What is proved
+
+* **`JSP90.sdiff_D_eq_pair_of_isShapeA`, `JSP90.sdiff_D_eq_pair_of_isShapeB` — THE OUTSIDE PART OF A
+  THREE-INTERSECTION FIVE-CYCLE IS THE OUTSIDE PAIR OF ITS SHAPE.**
+* **`JSP90.isShapeA_swap`, `JSP90.isShapeB_swap` — THE TWO SHAPES ARE SYMMETRIC IN THE OUTSIDE PAIR.**
+  A shape A read over the reversed ordered pair is the shape A of the reversed path `c - b - a`
+  (`IsShapeA G C D w2 w1 ⟹ IsShapeA G C D w1 w2`, with `(a, b, c)` replaced by `(c, b, a)`); a shape
+  B read over the reversed ordered pair is the shape B of the same three points with `b` and `c`
+  exchanged (`w1 - a - w2 - b - c - w1`, read from `w2`, is `w2 - a - w1 - c - b - w2`).  **This is
+  the whole content of the bookkeeping**, and it is why the order of the outside pair never carries
+  information.
+* **`JSP90.exists_ordered_shape`** — `JSP90.exists_shape` in the form that names the two outside
+  points in *one* existential, so a single proof handles both shapes.
+* **`JSP90.three_intersection_fiveCycle_unique` — MISSING LEMMA 3, PROVED.**  At `|V| ≤ 7`, if `D`
+  and `D'` are five-cycles of a triangle-free `G` meeting a shortest odd five-cycle `C` in exactly
+  three points, then `D = D'`.  The four steps are exactly those recorded in `policy.json`:
+
+  1. the two outside pairs are the same two-element set — at `|V| ≤ 7` the outside part of a
+     three-intersection five-cycle is all of `V \ C` (`JSP90.diffC_eq_univ_sdiff`), and each is
+     exactly the shape's outside pair (`sdiff_D_eq_pair_of_isShapeA` / `…_of_isShapeB`);
+  2. `JSP90.exists_ordered_shape` gives an **ordered** pair for each cycle, and each pair is a pair
+     of **distinct** points, so the two orders are either the same or opposite;
+  3. same order ⟹ `JSP90.shape_unique_of_shapes` (rounds 160–161) applies at once;
+  4. opposite order ⟹ `isShapeA_swap` / `isShapeB_swap` turn the reversed shape back into the same
+     statement over the same ordered pair, and `shape_unique_of_shapes` applies again.
+
+* **`JSP90.three_intersection_fiveCycle_unique'` / `JSP90.three_intersection_fiveCycle_unique''` — THE
+  SAME STATEMENT WITHOUT THE RING DATA**, the second being exactly the `huniq` that
+  `lean/JSPProblem/FiveCount.lean` left as a hypothesis.  **MISSING LEMMA 3 is now proved in the form
+  `JSP90.ThreeIntersectionFiveCycleUnique` of `FiveCount.lean` asks for.**
+* **`JSP90.htf_of_shortest_five'`** — a shortest odd cycle of five vertices forces `G` triangle-free.
+* **`JSP90.hitsOddCycles_singleton_of_shortest_five`, `JSP90.closeToBipartite_one_of_shortest_five` —
+  THE FIVE-CYCLE CASE, CLOSED: A NEW INSTANCE OF THE HEADLINE THEOREM WITH THE OPTIMAL CONSTANT `1`.**
+
+  ```lean
+  IsOddCycle G C → (C shortest odd cycle) → C.card = 5 → |V| ≤ 7 → CloseToBipartite 1 G
+  ```
+
+  **no `LocIndep` hypothesis at all**, and no triangle-freeness hypothesis either (it follows).
+* **`JSP90.card_five_or_seven_of_triangleFree_card_le_seven`,
+  `JSP90.closeToBipartite_one_of_locIndep_one_card_le_seven_of_triangleFree`,
+  `JSP90.hitsOddCycles_singleton_of_locIndep_one_card_le_seven_of_triangleFree`,
+  `JSP90.LocIndepOneTriangleFree7`, `JSP90.erdos73On_one_triangleFree_seven` — THE TRIANGLE-FREE
+  SEVEN-VERTEX INSTANCE WITH THE OPTIMAL CONSTANT `1`, A NEW INSTANCE OF THE HEADLINE THEOREM AND A
+  STRICT STRENGTHENING OF ROUND 151.**
+
+  ```lean
+  LocIndep 1 G → |V| ≤ 7 → (G has no 3-clique) → CloseToBipartite 1 G
+  ```
+
+  `lean/JSPProblem/TriPair.lean` (round 151) could only prove this with the extra hypothesis "no
+  five-cycle", because the five-cycle case was then open.  **That hypothesis is no longer needed.**
+  Equivalently, the odd cycles of such a graph have a **common vertex**.
+* **`JSP90.closeToBipartite_two_of_card_le_seven_of_triangleCase` — THE SEVEN-VERTEX AXIS REDUCED TO
+  THE SINGLE REMAINING CASE, WITH THE OPTIMAL CONSTANT `2`.**
+
+  ```lean
+  |V| ≤ 7 → (every triangle T of G has a vertex t ∈ T with G − (T \ {t}) bipartite)
+    → CloseToBipartite 2 G
+  ```
+
+  A shortest odd cycle `C` has three, five or seven vertices: `|C| = 5` is
+  `closeToBipartite_one_of_shortest_five`, `|C| = 7 = |V|` is round 148's
+  `closeToBipartite_one_of_shortest_oddCycle_of_card_eq` (`C` spans `V`), and `|C| = 3` makes `C` a
+  triangle (`JSP90.isNClique_three_of_isOddCycle`), so the hypothesis supplies `t` with
+  `G − (C \ {t})` bipartite and `JSP90.closeToBipartite_of_residue`
+  (`lean/JSPProblem/Residue.lean`) turns that into `CloseToBipartite (0 + |C \ {t}|) G =
+  CloseToBipartite 2 G`.  The constant `2` is optimal (`sun3`).
+
+`#print axioms` on all of the above reports only `[propext, Classical.choice, Quot.sound]`.
+
+### What is still missing — a single statement
+
+**MISSING LEMMA 1, the triangle case, `|X| = 4` sub-case**: at `LocIndep 1`, `|V| ≤ 7`,
+`G.IsNClique 3 T`, `X = V \ T`, NOT all three of `(deleteFinset G (T \ {t})).IsBipartite` can fail.
+This is now the *whole* remaining content of the seven-vertex axis:
+`JSP90.closeToBipartite_two_of_card_le_seven_of_triangleCase` shows that `htri` above is sufficient,
+and `LocIndep 1` forces two vertex-disjoint triangles to be absent
+(`JSP90.not_isNClique_three_of_disjoint_of_locIndep_one`, round 149), which is the hypothesis the
+four-element counting step consumes.  The counting step itself is verified exhaustively in
+`discovery/JSP-000090/r151k.log`; it is the concrete next bet of `policy.json`.
+
+`jsp_000090_main` is deliberately **not** declared, so `harness/score.py --strict-prize` keeps
+reporting `missing_theorems = ["jsp_000090_main"]` (`build_ok = true`, `sorry = 0`, `admit = 0`,
+`placeholder_total = 0`, `partial_ok = true`).
+
+---
+
 ## Round 161 (`lean/JSPProblem/ThreeB.lean`, `lean/JSPProblem/ThreeA.lean`) — **BOTH HALVES OF
 MISSING LEMMA 3, PROVED**
 
