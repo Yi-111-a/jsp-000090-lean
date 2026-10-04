@@ -1335,3 +1335,4 @@ import JSPProblem.TriPair
 import JSPProblem.FiveWitness
 import JSPProblem.FiveCount
 import JSPProblem.Three
+import JSPProblem.ThreeRing
