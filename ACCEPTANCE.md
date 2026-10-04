@@ -54,6 +54,90 @@ set `X` then every independent set of `H` is one of `G[X]`, so `α(H) ≤ α(G[X
 `jsp_000090_main` — the Lean name that the prize gate checks. It must be the **complete** Erdős
 #73 theorem above (`Erdős73 k` for every `k`), proved with no `sorry`.
 
+## Round 159 (`lean/JSPProblem/Three.lean`) — **THE SHAPE OF A THREE-INTERSECTION FIVE-CYCLE**, and a
+correction: the uniqueness statement is **false without the order bound**
+
+New file `lean/JSPProblem/Three.lean` (36 declarations, 0 `sorry`/`admit`), imported from the root
+module `JSPProblem.lean`; `lake build` OK with 1304 jobs.  Attack family 81.  This round executes the
+concrete next bet of `policy.json` — MISSING LEMMA 3, `JSP90.ThreeIntersectionFiveCycleUnique` — as far
+as the local structure allows, and **corrects the statement itself**.
+
+### The correction (this is the round's main finding)
+
+`JSP90.ThreeIntersectionFiveCycleUnique` as written in round 155 carries **no order bound**, and it is
+`False` in that form.  `discovery/JSP-000090/r159.c` (machine checked, output in
+`discovery/JSP-000090/r159.log`) exhibits nine vertices in a triangle-free graph:
+
+```text
+V = {0,1,2,3,4} ∪ {5,6} ∪ {7,8},   C  = 0-1-2-3-4-0
+D1 = 6-0-1-2-5-6   (outside pair {5,6}, inside {0,1,2}, missed pair {3,4})
+D2 = 2-3-4-7-8-2  (outside pair {7,8}, inside {2,3,4}, missed pair {0,1})
+```
+
+`G` is triangle-free (`NOORDER 0`), so the odd girth is 5 and `C` is a shortest odd cycle; `D1` and `D2`
+are two **distinct** five-cycles, each meeting `C` in exactly three points (`INTER_D1C 3`,
+`INTER_D2C 3`).  The two cycles use **disjoint** pairs of outside vertices, which is exactly what
+`|V| ≤ 7` forbids.  The `def` in `JSPProblem/FiveCount.lean` has been **corrected** to carry
+`Fintype.card V ≤ 7`, which is the hypothesis under which round 155's `2^21`-graph measurement was taken,
+and the only one for which the statement is true.  (The conditional consumer
+`JSP90.closeToBipartite_one_of_unique` already had the order bound among its hypotheses, so nothing
+downstream changes.)
+
+### What is proved
+
+* **Part 0 — `JSP90.htf_of_shortest_five`.**  A shortest odd cycle of five vertices is triangle-free: a
+  triangle is an odd cycle with three vertices.  (No order bound needed.)
+* **Part 1 — the ring arithmetic of a five-cycle.**  `JSP90.five_dist` (two distinct points are at
+  distance one or two), `JSP90.five_iterate_ne`, `JSP90.five_iterate_five`, the five "iterate = nested
+  successor" lemmas `five_iterate_one … five_iterate_five'`, `JSP90.five_univ_eq_iter` (the ring, written
+  out), `JSP90.five_iterate_ne_pair`, `JSP90.not_mem_pair`, and the two localisation lemmas
+  `JSP90.five_iterate_mem` / `JSP90.five_iterate_mem2` (which of the five points a position is).
+* **Part 2 — `JSP90.neighIn_C_inj`: THE RING PAIR DETERMINES THE POINT.**  Two points of a shortest odd
+  five-cycle with the same neighbours inside `C` are equal (round 152's `JSP90.five_pair_inj'` applied to
+  `JSP90.filter_adj_C_eq_ringPair`).  This is the "the middle of a path in `C` is determined" step.
+* **Part 3 — `JSP90.diffC_eq_univ_sdiff`: THE ORDER HYPOTHESIS BUYS THE OUTSIDE SET.**  At `|V| ≤ 7` a
+  five-cycle meeting `C` in three points has `D \ C = V \ C` (`|C ∪ D| = 7 = |V|`), so `D` is determined
+  by `D ∩ C`, i.e. **by the missed pair `C \ D`** (`JSP90.eq_of_inter_eq_of_diffC`).  This is the formal
+  content of why the `r159.c` counterexample needs nine vertices, and it turns MISSING LEMMA 3 into
+  "at most one of the **ten** candidate pairs of `C` is realised".
+* **Part 4 — `JSP90.IsShapeA`, `JSP90.IsShapeB`, `JSP90.exists_shape`: THE TWO SHAPES.**  Every
+  three-intersection five-cycle of a triangle-free graph has exactly one of the two shapes that round
+  155's measurement found, now as a kernel proof from the cyclic ordering:
+
+  ```lean
+  IsShapeA G C D w1 w2 : ∃ a b c, a b c ∈ C, (distinct), w1 w2 ∉ C, w1 ≠ w2, D = {a,b,c,w1,w2} ∧
+                         G.Adj a b ∧ G.Adj b c ∧ G.Adj c w1 ∧ G.Adj w2 a ∧ G.Adj w1 w2
+  IsShapeB G C D w1 w2 : ∃ a b c, a b c ∈ C, (distinct), w1 w2 ∉ C, w1 ≠ w2, D = {a,b,c,w1,w2} ∧
+                         G.Adj b c ∧ G.Adj a w1 ∧ G.Adj a w2 ∧ G.Adj b w2 ∧ G.Adj c w1
+  exists_shape : (∃ w1 w2, w1 ≠ w2 ∧ IsShapeA …) ∨ (∃ w1 w2, w1 ≠ w2 ∧ IsShapeB …)
+  ```
+
+  Shape A is `w1 - w2 - a - b - c - w1` (the outside vertices adjacent in `D`, `a - b - c` a path of
+  `C`); shape B is `w1 - a - w2 - b - c - w1` (outside vertices at distance two, `a` sees both, `b - c`
+  the only edge of `D` inside `C`).  The proof is the ring arithmetic: the two positions of `D` outside
+  `C` are at distance one or two along the ring (`JSP90.five_dist`), and `JSP90.compl_eq_pair` turns the
+  cardinality-two complement of `P = {i | g i ∈ C}` into the corresponding pair.
+* **Part 5 — what the shapes force.**  `JSP90.card_adjIn_D_eq_two` (round 152's degree lemma in the
+  language of `AdjIn`) plus `JSP90.eq_pair_of_card_two` give the *whole* neighbour sets:
+  * `JSP90.adjIn_D_pair_of_shapeA`: `AdjIn G w1 D = {c, w2}` and `AdjIn G w2 D = {a, w1}`;
+  * `JSP90.adjIn_D_pair_of_shapeB`: `AdjIn G w1 D = {a, c}` and `AdjIn G w2 D = {a, b}`;
+  * `JSP90.disjoint_adjIn_C_of_shapeA`: in shape A the two outside vertices have **no** common neighbour
+    in `C` (it would close a triangle with `w1 - w2`), and `JSP90.inter_adjIn_C_ne_empty_of_shapeB`:
+    in shape B they **do** (namely `a`) — so **the two shapes are mutually exclusive over a fixed
+    outside pair**.
+
+### What is still missing
+
+`JSP90.ThreeIntersectionFiveCycleUnique` at `|V| ≤ 7`, and with it
+`JSP90.closeToBipartite_one_of_unique` → the five-cycle case of
+`JSP90.closeToBipartite_two_of_locIndep_one_card_le_seven` and then the triangle case (MISSING LEMMA 1,
+the `|X| = 4` sub-case).  Given Parts 4 and 5 the remaining step is now short and is spelled out in
+`JSPProblem/Three.lean` and in `discovery/JSP-000090/policy.json`: for `D` of shape A one has
+`AdjIn G w1 C = {c}` and `AdjIn G w2 C = {a}` up to the single extra ring point (shape A forces
+`|AdjIn G w1 C| = |AdjIn G w2 C| = 1`), so the missed pair `{a, c}` determines the middle by
+`JSP90.neighIn_C_inj`; for shape B the missed pair is `{a, b, c}`'s complement and `N1 ∩ N2 = {a}`
+determines `a`.  The two shapes cannot mix (`AdjIn G w1 C ∩ AdjIn G w2 C` empty vs. nonempty).
+
 ## Round 155 (`lean/JSPProblem/FiveCount.lean`) — **THE COUNTING LAYER OF THE FIVE-CYCLE CASE**, and
 the five-cycle case reduced to one statement
 

@@ -504,17 +504,31 @@ theorem mem_hits_ge_four_of_meetsFour {C : Finset V} (hC : IsOddCycle G C)
 
 Named exactly, as the `def` the remaining proof of the five-cycle case consumes.  It is **not** proved;
 it is measured in `discovery/JSP-000090/r155.c` (max one such five-cycle over all `50904` relevant
-pairs `(G, C)`, `0` violations) together with the two shapes such a five-cycle can take. -/
+pairs `(G, C)`, `0` violations) together with the two shapes such a five-cycle can take.
+
+**CORRECTION (round 159).**  The statement as first written carried **no order bound**, and it is
+`False` in that form: `discovery/JSP-000090/r159.c` exhibits nine vertices — `C = 0-1-2-3-4-0`,
+`D1 = 6-0-1-2-5-6`, `D2 = 2-3-4-7-8-2` — in a triangle-free graph, `C` a shortest odd cycle and `D1`,
+`D2` two *distinct* five-cycles each meeting `C` in three points.  The two cycles use **disjoint**
+pairs of outside vertices, which `|V| ≤ 7` forbids (`JSPProblem/Three.lean`,
+`JSP90.diffC_eq_univ_sdiff`: at `|V| ≤ 7` both cycles have `D \ C = V \ C`).  The `def` below
+therefore carries `Fintype.card V ≤ 7`, which is the hypothesis under which the seven-vertex
+measurement was taken and the only one for which the statement is true. -/
 
 /-- **MISSING ⟨EMMA 3 OF ⟩OUNDS 152–154, NAMED: AT MOST ONE FIVE-CYC⟨E OF `G` MEETS A SHO⟩TEST ODD
-FIVE-CYC⟨E `C` IN EXACT⟨Y TH⟩EE POINTS.**
+FIVE-CYC⟨E `C` IN EXACT⟨Y TH⟩EE POINTS — FOR `|V| ≤ 7`.**
 
 This is the single remaining input of `JSP90.isOddCycle_five_or_mem_of_meetsFour`: with it, the set of
 points of `C` missed by *some* odd cycle is the union of a set of at most two points (Part 2) with the
 missed pair of a single five-cycle, hence has at most four of the five points of `C`, so one point of
-`C` meets every odd cycle and `JSP90.closeToBipartite 1 G` follows.  **Not proved here.** -/
+`C` meets every odd cycle and `JSP90.closeToBipartite 1 G` follows.  **Not proved here.**
+
+Round 159 proves the local structure it needs — `JSP90.exists_shape`,
+`JSPProblem/Three.lean`: the two shapes, and the two neighbour sets each outside vertex has — but not
+the uniqueness. -/
 def ThreeIntersectionFiveCycleUnique (C D D' : Finset V) : Prop :=
   IsOddCycle G C ∧ (∀ E : Finset V, IsOddCycle G E → C.card ≤ E.card) ∧ C.card = 5 ∧
+    Fintype.card V ≤ 7 ∧
     IsOddCycle G D ∧ IsOddCycle G D' ∧ D.card = 5 ∧ D'.card = 5 ∧
     (D ∩ C).card = 3 ∧ (D' ∩ C).card = 3 → D = D'
 
