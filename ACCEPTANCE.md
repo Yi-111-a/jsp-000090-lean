@@ -5836,3 +5836,115 @@ are `19 637` LocIndep-1 graphs, of which `171` have `MaxDef = 2` and one (`K₆`
 (`JSPProblem/TraceComplex.lean`) and `JSP90.OddCycleErdosPosa r` (Reed–Robertson–Seymour–Thomas).
 `jsp_000090_main` remains undeclared, so `harness/score.py --strict-prize` keeps reporting
 `missing_theorems = ["jsp_000090_main"]`.
+
+---
+
+## Round 150 — `lean/JSPProblem/Seven.lean`: **THE TWO-TRIANGLE EXCLUSION** and the seven-vertex instances built on it
+
+`lake build` succeeds (1300 jobs), with **0 `sorry` and 0 `admit`** in the whole development;
+`#print axioms` on every new declaration reports only `[propext, Classical.choice, Quot.sound]`.
+
+### Round 150, Part 0 — at `LocIndep 1` there are no two vertex-disjoint triangles
+
+```lean
+JSP90.not_isNClique_three_of_disjoint_of_locIndep_one
+  (hG : LocIndep 1 G) (hT : G.IsNClique 3 T) (hD : G.IsNClique 3 D) (hdis : T ∩ D = ∅) : False
+```
+
+Erdős's hypothesis is read on the six elements of `T ∪ D`: an independent set meets each triangle in
+at most one point (`JSP90.card_le_one_of_isIndepSet_sub_of_card_C_eq_three`), so it has at most two
+elements, while `LocIndep 1` demands `2 · |S| + 1 ≥ 6`. Two consequences:
+
+* `JSP90.not_isNClique_three_of_sdiff_of_card_le_four_of_locIndep_one` — the residue `V \ T` of a
+  triangle carries no triangle when `|V \ T| ≤ 4`;
+* **`JSP90.isBipartite_delete_of_isNClique_three_of_locIndep_one_card_le_seven` — `LocIndep 1 G →
+  |V| ≤ 7 → G.IsNClique 3 T → (deleteFinset G T).IsBipartite`.**  An odd cycle of the residue would
+  have odd cardinality `≥ 3` inside at most four vertices, hence *be* a triangle. This is the
+  reduction the seven-vertex triangle case consumes.
+
+### Round 150, Part 1 — a shortest odd cycle spanning `V` is one-delete
+
+`JSP90.closeToBipartite_one_of_shortest_oddCycle_of_card_eq`: if `C` is a shortest odd cycle with
+`C.card = Fintype.card V`, then every odd cycle has `|D| ≥ |C| = |V|`, hence `D = V`, so one vertex
+meets all of them and `CloseToBipartite 1 G` holds. (Minimality is essential: a single odd cycle
+spanning `V` does not suffice, since a chord may create a triangle.)
+
+### Round 150, Part 2 — a new instance of the headline theorem with the optimal constant `1`
+
+```lean
+JSP90.closeToBipartite_one_of_locIndep_one_card_le_seven_of_oddGirth_ge_seven
+  (hG : LocIndep 1 G) (hV : Fintype.card V ≤ 7)
+  (hgirth : ∀ D, IsOddCycle G D → 7 ≤ D.card) (hne : Nonempty V) : CloseToBipartite 1 G
+```
+
+At `|V| ≤ 7` an odd cycle has `3`, `5` or `7` vertices; the first two are excluded by the odd-girth
+hypothesis, so every odd cycle spans `V` and Part 1 applies. Companion statements, all proved:
+
+| statement | content |
+| --- | --- |
+| `JSP90.hitsOddCycles_singleton_of_locIndep_one_card_le_seven_of_oddGirth_ge_seven` | transversal shape: the odd cycles have a common vertex |
+| `JSP90.tauOdd_le_one_of_locIndep_one_card_le_seven_of_oddGirth_ge_seven` | `tauOdd G ≤ 1` |
+| `JSP90.LocIndepOneSmallOrderOddGirth` + `JSP90.erdos73On_one_oddGirth_ge_seven` | the instance in the `Erdős73On` class shape of `Five.lean` |
+| `JSP90.not_closeToBipartite_zero_of_oddGirth_ge_seven_of_not_isBipartite` | the constant `0` fails exactly when `G` is not bipartite, so `1` is optimal in the class |
+| `JSP90.exists_isOddCycle_card_eq_seven_of_oddGirth_ge_seven_of_not_isBipartite` | a non-bipartite member of the class has a spanning seven-cycle |
+
+### Round 150, Part 3 — the counting input of the five-cycle case
+
+`JSP90.card_le_two_neighOf_card_C_five_of_triangleFree`: in a triangle-free graph, the neighbours of a
+vertex inside a five-cycle are **at most two** (three neighbours are pairwise non-adjacent, an
+independent set of three elements of a five-cycle, and
+`JSP90.two_mul_card_add_one_le_card_of_isIndepSet_sub_isOddCycle` reads `2 · 3 + 1 = 7 ≤ 5`).
+`JSP90.isNClique_three_of_adj_adj_adj` is the small tool that reads "no triangle" in clique language.
+
+### The measurements of this round (`discovery/JSP-000090/r150.c`, `r150b.c`)
+
+Both programs were written from scratch this round; the first version of `r150.c` had a bug in the
+independent-set dynamic programme (`a = al[rest]` was written `al[rest \ N(v)]`, which under-counts)
+and in the `2K₃` search (the second triangle was required to come *after* the first in the vertex
+order), and both were found and fixed before use.  Results, over **all** graphs on `n ≤ 7`:
+
+| question | answer |
+| --- | --- |
+| Q1: does `LocIndep 1` forbid `K₄` and two disjoint triangles? (`n = 4,5,6,7`, all `2 222 009` graphs) | **yes, at every order**: `0` graphs contain a `K₄`, `0` contain two vertex-disjoint triangles |
+| Q2: `max τ_odd` over `LocIndep 1` graphs on seven vertices | `2` (`870 530` graphs need `1`, `13 020` need `2`, `0` need `3`) — consistent with `r148_n7.log` |
+| Q3: `max τ_odd` over **triangle-free** `LocIndep 1` graphs on seven vertices | **`1`** (`133 501` graphs) |
+| Q4: for each of the `13 020` sharp graphs, is a *mixed pair* `{a ∈ T, x ∉ T}` an odd cycle transversal? | **yes, in all `13 020`**; **all** of them contain a triangle, so the triangle case cannot be dodged |
+| Q5 (from `r150b.c`): five-cycles of a triangle-free seven-vertex graph relative to a shortest five-cycle `C` | `16 590` cycles meet `C` in `4` points, **at most `2` per graph and at most `1` per outside vertex**; `4 410` cycles meet `C` in `3` points, **at most `1` per graph** |
+
+Q5 is the exact shape of the remaining five-cycle case: the points of `C` missed by some five-cycle
+number at most `2 + 2 = 4 < 5`, so one vertex of `C` is left over.
+
+### What is *not* proved
+
+`JSP90.closeToBipartite_two_of_locIndep_one_card_le_seven`, in its two remaining cases:
+
+* **five-cycle case** (`G` triangle-free, shortest odd cycle of five vertices).  Part 3 supplies the
+  counting input; what is missing is the identification of the two ring-neighbours of the missed point
+  with the neighbours of the outside vertex, which needs the inducedness of a shortest odd cycle
+  (`JSP90.isInduced_shortest_oddCycle`) and a four-step matching of two cyclic orders.
+* **triangle case**: `T` a triangle, `X = V \ T` of four vertices, `G[X]` triangle-free (Part 0) and
+  every `x ∈ X` adjacent to at most two vertices of `T`.  Per Q4 every sharp seven-vertex graph needs a
+  *mixed pair* `a ∈ T`, `x ∉ T`.
+
+`jsp_000090_main` remains deliberately undeclared, so `harness/score.py --strict-prize` keeps
+reporting `missing_theorems = ["jsp_000090_main"]`.
+
+### Round 150, Part 4 — the local structure at a shortest odd cycle (amendment)
+
+Two further declarations were added after the section above, bringing `Seven.lean` to 17 declarations:
+
+* **`JSP90.card_neighIn_C_eq_two` — every vertex of a shortest odd cycle `C` has EXACTLY two neighbours
+  inside `C`**, namely its two ring-neighbours.  The proof uses `JSP90.isInduced_shortest_oddCycle` (a
+  shortest odd cycle carries no chord, so the edges inside `C` are exactly the ring edges) together with
+  the two adjacencies `JSP90.CycleOrder.hcyc` and `JSP90.CycleOrder.adj_prev`; the two ring-neighbours
+  are distinct by `JSP90.CycleOrder.step_prev_ne`.
+* **`JSP90.neigh_eq_of_adj_of_adj` — two distinct neighbours exhaust that neighbourhood**: if
+  `p ≠ q`, `v, p, q ∈ C`, `v ~ p`, `v ~ q`, then every neighbour of `v` inside `C` is `p` or `q`.
+
+Together with Part 3 (`card_le_two_neighOf_card_C_five`) this is the whole neighbourhood theory that the
+five-cycle case needs.  A third lemma of the same family —
+*if `(C \ {c}) ∪ {w}` is a five-cycle and `C` is a shortest odd cycle, then the two neighbours of `w`
+along it are both adjacent to `c`* — was written and machine-checked up to its **last** step (that the
+two neighbours of `c` inside `C` are the two ends of the new five-cycle) but did not close in this
+round's budget; it is **not** in the repository and is recorded verbatim as *Missing Lemma 1* in
+`discovery/JSP-000090/policy.json`.
