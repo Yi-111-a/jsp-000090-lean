@@ -5620,3 +5620,76 @@ unchanged primary blocker.  `jsp_000090_main` is deliberately **not** declared, 
 reporting `missing_theorems = ["jsp_000090_main"]`; `score.py --strict-prize` reports
 `build_ok = true, sorry = 0, admit = 0, placeholder_total = 0, partial_ok = true`, `prize_ready = false`.
 `formalization.yaml` remains `status: wip`, `prize_ready: false`.  No award claim is made.
+
+## Round 146 (`lean/JSPProblem/FiniteSharp.lean`, attack family 74) — **THE IN-KERNEL FINITE AXIS: a computable mirror of Erdős #73, and a measured kernel-memory barrier**
+
+New attack family.  Rounds 76–145 measured their finite configurations with **C programs outside
+Lean** (`discovery/JSP-000090/r1*.c`); round 146 is the first in which **the Lean kernel itself**
+verifies a finite range of Erdős #73, and the first to *measure* why the range is small.
+
+**The mirror (Parts 1–3, 0 sorry/admit).**
+
+* `JSP90.UpTri n` — the **strict upper triangle** of `Fin n × Fin n`; a simple graph on `Fin n` is
+  a symmetric loopless `Bool` matrix, so it is presented by a `Bool` function on `UpTri n`, and
+  `Fintype (UpTri n → Bool)` enumerates **exactly** the graphs, each once (`JSP90.card_upTri_five :
+  Fintype.card (UpTri 5) = 10`, by `decide`, i.e. the `1024` graphs on five vertices);
+* `JSP90.adjBU`, `JSP90.adjBU_irrefl`, `JSP90.adjBU_of_lt`, `JSP90.adjBU_of_ge`, **`JSP90.adjBU_comm`**
+  (the matrix is symmetric) and `JSP90.graphU` (`Adj v w ↔ adjBU a v w = true`, with the symmetry and
+  the irreflexivity proofs);
+* `JSP90.exists_upTri_of_graph` — **every** simple graph on `Fin n` is a `graphU`, and
+  `JSP90.graphU_eq_of_exists_upTri` transfers a statement about `SimpleGraph (Fin n)` through the
+  mirror;
+* `JSP90.locIndepB` / `JSP90.closeToBipartiteB` — the two sides of Erdős #73 re-stated over `Bool`
+  adjacency so that a `Decidable` instance exists, with the **two bridges**
+  **`JSP90.locIndep_of_locIndepB`** and **`JSP90.closeToBipartite_of_closeToBipartiteB`** back to
+  `JSPProblem/Definitions.lean` (`JSP90.isBipartite_of_residueBipartiteB` turns a `Bool` two-colouring
+  into a `SimpleGraph.Coloring`).
+
+**The pipeline, verified end to end (Parts 4–6).**
+
+* the twelve statements `JSP90.finiteSharp_{one,two,three}_fin{0,1,2,3}` are closed by **`decide`**,
+  and `JSP90.erdos73On_one_fin_le` / `_two_fin_le` / `_three_fin_le` carry them through the bridges:
+  **`LocIndep k G → CloseToBipartite k G` for every graph on at most three vertices**;
+* `JSP90.moveGraph` (the graph moved along a bijection) with
+  `JSP90.locIndep_of_locIndep_moveGraph` and `JSP90.closeToBipartite_of_closeToBipartite_moveGraph`
+  pulls the statements back to an **arbitrary finite type** along `Fintype.equivFin V`, giving the
+  instances `JSP90.erdos73On_one_one_card_le_three`, `JSP90.erdos73On_two_two_card_le_three` and
+  `JSP90.erdos73On_three_three_card_le_three` of the headline theorem in the `Erdős73On` form.
+
+**Consequences (Parts 7–8).**
+
+* **`JSP90.exists_hitsOddCycles_singleton_of_locIndep_one_card_le_three`** — at `LocIndep 1` and
+  `|V| ≤ 3` a **non-bipartite** graph has a **single vertex meeting every odd cycle**
+  (`JSP90.tauOdd_le_one_of_locIndep_one_card_le_three`);
+* **`JSP90.optimal_smallOrder`** — the small-order constants are machine-checked **optimal**: for
+  every `1 ≤ k ≤ 3` the complete graph `K_{k+2}` satisfies `LocIndep k` and is **not**
+  `(k − 1)`-close to bipartite, with the three instances
+  `JSP90.not_closeToBipartite_zero_locIndep_one_fin3`,
+  `JSP90.not_closeToBipartite_one_locIndep_two_fin4`,
+  `JSP90.not_closeToBipartite_two_locIndep_three_fin5`.
+
+**The measured barrier, and the two routes past it.**  The C measurement of round 146
+(`discovery/JSP-000090/r146.c`, **all** graphs on `n ≤ 6`) gives `max τ_odd = 1` at `LocIndep 1` for
+`n ≤ 5`, and `2` at `n = 6` (120 witnesses) — so **five vertices is the last order at which the
+constant `1` suffices and six is the first at which the constant `2` of `JSP90.Erdős73On 1 2` is
+needed**.  The kernel cannot follow there: the peak RSS of `lean` on the `decide` statements was
+measured at `1.86 GB` (`n = 2`), `1.89 GB` (`n = 3`), **`5.30 GB` (`n = 4`, killed)** and
+**`≈ 6 GB` (`n = 5`, killed twice)** — `≈ 55 MB` per graph, caused by the `Finset` quantifiers of the
+mirror (every decision re-enumerates `univ.powerset`).  Chunking by the number of edges does **not**
+help, because the cost is per *enumerated* candidate, not per *matching* graph.  Two concrete routes:
+
+1. **replace the `Finset` quantifiers of the mirror by `Fin n → Bool` indicator functions** (the
+   enumeration becomes `Fintype (Fin n → Bool)`, no powerset), which should bring `n = 6` inside the
+   kernel budget;
+2. **prove the five-vertex case structurally**: at `LocIndep 1` a shortest odd cycle has length `3`
+   or `5`; in the `5`-case it is induced (`JSPProblem/Chord.lean`) and spans the whole vertex set, so
+   one deleted vertex leaves a path; in the `3`-case each of the at most two remaining vertices has
+   **at most two** neighbours in the triangle (else `LocIndep 1` applied to `C ∪ {x}` fails), and the
+   four-vertex case analysis closes it.  The inputs are
+   `JSP90.hitsOddCycles_of_isOddCycle_of_locIndep_one`,
+   `JSP90.isBipartite_deleteFinset_of_isOddCycle_of_locIndep_one` and
+   `JSP90.closeToBipartite_of_isOddCycle_of_locIndep_one` (`JSPProblem/OneK.lean`).
+
+`jsp_000090_main` remains undeclared and `JSP90.OddCycleErdosPosa r` (Reed–Robertson–Seymour–Thomas)
+is unchanged: the remaining obstruction is the general, 3-connected case.
+

@@ -1327,3 +1327,4 @@ import JSPProblem.CrossThree
 import JSPProblem.FanCount
 import JSPProblem.TraceComplex
 import JSPProblem.TraceExit
+import JSPProblem.FiniteSharp
