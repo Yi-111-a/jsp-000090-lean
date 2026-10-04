@@ -54,6 +54,128 @@ set `X` then every independent set of `H` is one of `G[X]`, so `α(H) ≤ α(G[X
 `jsp_000090_main` — the Lean name that the prize gate checks. It must be the **complete** Erdős
 #73 theorem above (`Erdős73 k` for every `k`), proved with no `sorry`.
 
+## Round 161 (`lean/JSPProblem/ThreeB.lean`, `lean/JSPProblem/ThreeA.lean`) — **BOTH HALVES OF
+MISSING LEMMA 3, PROVED**
+
+Two new files, `lean/JSPProblem/ThreeB.lean` (14 declarations) and `lean/JSPProblem/ThreeA.lean`
+(8 declarations), 0 `sorry`/`admit`, both imported from the root module `JSPProblem.lean`;
+`lake build` OK with 1307 jobs.  Attack families 83 and 84.  This round executes **both** concrete
+bets of `policy.json` — the **shape-B half** and the **shape-A half** of MISSING LEMMA 3, "at most
+one five-cycle of `G` meets a shortest odd five-cycle `C` in exactly three points" at `|V| ≤ 7`.
+
+**A correction about round 160 first.**  The header of `lean/JSPProblem/ThreeRing.lean` announced a
+"Part 5" (`RingShapeBData`, `exists_ringShapeB`, `inter_adjIn_C_eq_singleton_of_shapeB`) and
+`ACCEPTANCE.md` reported those declarations as proved, but **no such declaration existed anywhere in
+the development** — round 160's file stops at the machine-checked refutation of the singleton claim.
+They are proved now, together with the uniqueness statement they were the input of.
+
+### What is proved
+
+* **`JSP90.exists_ringShapeB` (`JSP90.RingShapeBData`, `JSP90.RingShapeB`) — THE RING DATA OF A SHAPE-B
+  CYCLE.**  For `IsShapeB G C D w1 w2` and a cyclic numbering `g` of `C` in which the edge `b - c` of
+  `D` starts the ring (`g 0 = b`):
+
+  ```text
+        g 4     g 0     g 1     g 2     g 3
+        x ————— b ————— c ————— y ————— a
+  ```
+
+  the point `a` — the one of the three points of `C` which sees **both** outside vertices — is the
+  point of `C` at ring distance **two** from the edge `b - c`, and
+
+  ```lean
+  pos    : (c = g 1 ∧ a = g 3) ∨ (c = g 4 ∧ a = g 2)
+  mid    : g 0 = b
+  missed : ∃ j, a = g j ∧ C \ D = {g (cycSucc j), g (cycPred j)}
+  ```
+
+  The exclusion of the other candidates is exactly the two triangles `w1 - a - c` and `w2 - a - b`:
+  `b` and `c` are each a ring-neighbour of a *candidate* for `a`, so only `g 3` (resp. `g 2`) survives.
+* **`JSP90.sdiff_D_eq_adjIn_C_of_ringShapeB` — THE MISSED PAIR OF THE SHAPE B IS THE NEIGHBOUR SET OF
+  `a`: `C \ D = AdjIn G a C`.**  So **the missed pair determines the point** `a`, the shape-B
+  counterpart of round 160's `adjIn_C_subset_of_shapeA`.
+* **`JSP90.card_adjIn_C_le_two` — EVERY OUTSIDE VERTEX OF A SHORTEST ODD FIVE-CYCLE MEETS IT IN AT
+  MOST TWO POINTS**, in the language of `AdjIn` (round 152's position form `card_inter_neigh_le_two`
+  of `JSPProblem/Fan.lean`, pulled back through the ring numbering).
+* **`JSP90.adjIn_C_pair_of_ringShapeB`, `JSP90.inter_adjIn_C_eq_singleton_of_ringShapeB` — THE
+  COMMON NEIGHBOUR OF THE TWO OUTSIDE VERTICES IS THE SINGLE POINT `a`:**
+
+  ```lean
+  AdjIn G w1 C = {a, c}   ∧   AdjIn G w2 C = {a, b}   ∧   AdjIn G w1 C ∩ AdjIn G w2 C = {a}
+  ```
+* **`JSP90.eq_of_sdiff_eq_of_card_le_seven` — AT `|V| ≤ 7` A THREE-INTERSECTION FIVE-CYCLE IS
+  DETERMINED BY ITS MISSED PAIR.**  Together with round 159's `diffC_eq_univ_sdiff` this says MISSING
+  LEMMA 3 is *exactly* the statement that at most one of the ten candidate pairs is realised.
+* **`JSP90.shapeB_unique` — THE SHAPE-B HALF OF `JSP90.ThreeIntersectionFiveCycleUnique`, PROVED.**
+  At `|V| ≤ 7`, two three-intersection five-cycles of the shape B over the same pair of outside
+  vertices are equal: same `a` (the singleton intersection), hence same missed pair, hence equal.
+* **`JSP90.shapeA_shapeB_exclusive` — THE TWO SHAPES NEVER MIX OVER A FIXED OUTSIDE PAIR**
+  (`AdjIn G w1 C ∩ AdjIn G w2 C` is `∅` in shape A and a singleton in shape B), so the remaining
+  case analysis of MISSING LEMMA 3 is the **shape-A half alone**.
+
+### The shape-A half — `lean/JSPProblem/ThreeA.lean`, also PROVED
+
+* **Part 0 — `JSP90.card_sdiff_eq_two`, `JSP90.ne_of_card_sdiff`, `JSP90.sdiff_pair_facts`: THE TWO
+  MISSED POINTS ARE TWO DISTINCT POINTS OF `C` WHICH `D` DOES NOT USE.**
+* **Part 1 — `JSP90.adjIn_C_eq_pair`, `JSP90.adjIn_C_pairs_of_ringShapeA`: THE NEIGHBOUR SETS INSIDE
+  `C` OF THE FIVE POINTS OF A SHAPE-A CYCLE.**
+
+  ```text
+  N_C(a) = {b, d}   N_C(b) = {a, c}   N_C(c) = {b, e}   N_C(d) = {e, a}   N_C(e) = {d, c}
+  ```
+
+  (a chordless five-cycle gives every vertex exactly two neighbours inside it,
+  `JSP90.card_neighIn_C_eq_two`, and shape A exhibits two adjacencies at each point).
+* **Part 2 — `JSP90.shapeA_unique`: THE SHAPE-A HALF OF `JSP90.ThreeIntersectionFiveCycleUnique`,
+  PROVED.**  At `|V| ≤ 7`, **two three-intersection five-cycles of the shape A over the same ordered
+  pair of outside vertices are equal**.  (The case analysis itself needs no order bound.)
+* **Part 3 — `JSP90.not_shapeA_of_shapeB`, `JSP90.shape_unique_of_shapes`: THE TWO HALVES TOGETHER.**
+  Two three-intersection five-cycles of the same shape over the same ordered outside pair are equal,
+  and the shapes never mix over a fixed pair.
+
+### The shape-A half: the case analysis (as it is formalised in `ThreeA.lean`)
+
+Let `D₁`, `D₂` be three-intersection five-cycles of shape A over the same outside pair `w1, w2`, at
+`|V| ≤ 7`, and read both in the *single* ring `g` of `C` given by `D₁` (`a₁ = g 4`, `b₁ = g 0`,
+`c₁ = g 1`, `d₁ = g 3`, `e₁ = g 2`, missed pair `{g 3, g 2}`).
+
+1. If `a₂ ∈ C ∩ D₁` then `{a₂, b₂, c₂} = C ∩ D₂ = C ∩ D₁` (both triples have three elements), so the
+   missed pairs agree and `D₁ = D₂` (`JSP90.eq_of_sdiff_eq_of_card_le_seven`).
+2. Otherwise `a₂ ∈ C \ D₁ = {d₁, e₁}`, and symmetrically `a₁ ∈ C \ D₂`, while `d₂`, `b₂` are the two
+   **ring-neighbours** of `a₂` and `e₂`, `c₂` the two points at **ring distance two** from `a₂`.
+   * `a₂ = g 3 = d₁`: then `{d₂, b₂} = {g 2, g 4} = {e₁, a₁}`; `a₁ = g 4` is at distance *one* from
+     `a₂`, so it must be `d₂` or `b₂`; if `a₁ = e₂` (distance two) this is impossible, and if
+     `a₁ = d₂` then `b₂ = e₁ = g 2` and `c₂ = b₁ = g 0`, but `b₂ - c₂ = g 2 - g 0` is not an edge of
+     `C` (a chord), while shape B's `G.Adj b c` is required.
+   * `a₂ = g 2 = e₁`: then `{d₂, b₂} = {g 1, g 3} = {c₁, d₁}` and `a₁ = g 4`, being at distance two
+     from `g 2`, must be `e₂`; hence `c₂ ∈ {g 0, g 4}` and, since `G.Adj b₂ c₂` and `c₂ ≠ a₂`,
+     `b₂ = g 1`, `c₂ = g 0` or `b₂ = g 3`, `c₂ = g 4 = a₁ = e₂ ∉ D₂` (impossible).  The remaining case
+     gives `w1 ~ g 0` (from `D₂`) and `w1 ~ g 1` (from `D₁`), **two consecutive points of `C`** — which
+     `JSP90.neigh_pair_close_of_shortest` forbids.
+
+So the shape-A half is a position analysis with no new mathematical input, and it is **proved** as
+`JSP90.shapeA_unique`: each of the four cases is realised in Lean in `lean/JSPProblem/ThreeA.lean`
+(case I forces `b₂ = b₁`, case II forces `c₂ = b₂`, case III forces `b₁ = a₁`, case IV forces
+`b₁ = b₂` and then `a₁ = c₂`, all contradictions).
+
+### What is still missing in MISSING LEMMA 3
+
+Only the **ordering bookkeeping**: at `|V| ≤ 7` two three-intersection five-cycles have the same
+outside set (`JSP90.diffC_eq_univ_sdiff`), and `JSP90.exists_shape` produces an *ordered* pair, so
+`JSP90.shape_unique_of_shapes` has to be applied with the two orders matched — either directly or
+after swapping `w1`, `w2` in exactly one of the two shapes, which is a four-case analysis of the same
+shape (a shape A over `(w2, w1)` is the shape A of the reversed path `c - b - a` over `(w2, w1)`).
+That bookkeeping is the `next_bet` of `policy.json`; with it
+`JSP90.ThreeIntersectionFiveCycleUnique` is closed at `|V| ≤ 7`, and the five-cycle case of
+`JSP90.closeToBipartite_two_of_locIndep_one_card_le_seven` follows from the already proved
+`JSP90.closeToBipartite_one_of_unique`.
+
+`jsp_000090_main` is deliberately **not** declared, so `harness/score.py --strict-prize` keeps
+reporting `missing_theorems = ["jsp_000090_main"]` (`build_ok = true`, `sorry = 0`, `admit = 0`,
+`placeholder_total = 0`, `partial_ok = true`; `lake build` OK with 1307 jobs).
+
+---
+
 ## Round 160 (`lean/JSPProblem/ThreeRing.lean`) — **THE RING POSITIONS OF THE TWO SHAPES**, and a
 **refutation of round 159's next bet**
 

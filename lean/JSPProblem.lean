@@ -1336,3 +1336,5 @@ import JSPProblem.FiveWitness
 import JSPProblem.FiveCount
 import JSPProblem.Three
 import JSPProblem.ThreeRing
+import JSPProblem.ThreeB
+import JSPProblem.ThreeA
