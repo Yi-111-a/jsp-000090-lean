@@ -5537,3 +5537,86 @@ reporting `missing_theorems = ["jsp_000090_main"]`; `score.py --strict-prize` re
 `build_ok = true, sorry = 0, admit = 0, placeholder_total = 0, partial_ok = true`,
 `prize_ready = false`.  `formalization.yaml` remains `status: wip`, `prize_ready: false`.
 No award claim is made.
+
+
+---
+
+## Round 145 — `lean/JSPProblem/TraceExit.lean` (new file, attack family 73): **the sharp case `Erdős73On 1 2`
+is ONE statement, one-point cross-overs are singleton traces, and the exit step**
+
+New file `lean/JSPProblem/TraceExit.lean` (**16 declarations, 0 sorry/admit**, `lake build` OK with
+**1296 jobs**, axiom report clean: `propext, Classical.choice, Quot.sound` only), imported from the root
+module `JSPProblem.lean`.
+
+### Part 1 — the residual is ONE statement
+
+`JSP90.TraceCoverResidual` is stated for `3 ≤ |attachPoints G C|`, so it *already* contains the three
+attachment point case; round 144 nevertheless used round 141's machinery there because it reused the
+`|attachPoints| ≤ 3` branch of the older reduction.  Reorganising the case analysis:
+
+* **`JSP90.erdos73On_one_two_of_traceCoverResidual` — THE SHARP CASE `Erdős73On 1 2` FROM
+  `JSP90.TraceCoverResidual` ALONE.**
+
+So the sharp case of Erdős #73 (the optimal constant `f(1) = 2`) is *equivalent to a single statement* —
+the trace complex of a shortest odd cycle with at least three attachment points has a cover of size `≤ 2`
+inside the attachment points — and round 144's `JSP90.AllCrossResidual` hypothesis is **redundant**.
+`JSP90.erdos73On_one_two_of_allCrossResidual_and_traceCoverResidual` (round 144) remains, as the
+weaker two-hypothesis version.
+
+### Part 2 — a one-point cross-over is a singleton trace
+
+* **`JSP90.mem_traceFamily_of_onePointCrossOver`**: `OnePointCrossOver G C D → a ∈ C ∩ D →
+  ({a} : Finset V) ∈ traceFamily G C`.  Pure set theory (`attachPoints G C ⊆ C` gives
+  `D ∩ attachPoints G C ⊆ D ∩ C = {a}`, and round 139's `JSP90.mem_attachPoints_of_onePointCrossOver`
+  puts `a` in the attachment points): **no hypothesis at all**, not packing number one and not
+  minimality of `C`;
+* `JSP90.singletonTrace_of_crossOverPoint`, `JSP90.singletonTrace_of_mem_crossOverSet`,
+  **`JSP90.threeSingletonTraces_of_subset_crossOverSet`**,
+  `JSP90.threeSingletonTraces_of_eq_crossOverSet`: round 141's cross-over configuration
+  `attachPoints G C = crossOverSet G C` **forces** round 144's `JSP90.ThreeSingletonTraces`, so the
+  configuration compared by round 141 is *contained in* the one compared by round 144.
+
+### Part 3 — no cross-over is a positive instance of the sharp case
+
+* **`JSP90.eq_empty_crossOverSet_of_noCrossOver`**, `JSP90.not_mem_crossOverSet_of_noCrossOver`,
+  `JSP90.not_crossOverPoint_of_noCrossOver` — under `NoCrossOver G C` there are no cross-over points;
+* **`JSP90.hitsOddCycles_attachPoints_sdiff_of_noCrossOver`** — round 139's erasure lemma with **no
+  exception**: `attachPoints G C \ {b}` is an odd cycle transversal for **every** attachment point `b`;
+* **`JSP90.exists_cover_le_two_of_card_attachPoints_eq_three_of_noCrossOver`** — at three attachment
+  points and no cross-over the sharp case holds with the **optimal** constant `2`;
+* **`JSP90.SmallAttachNoCrossOver` + `JSP90.closeToBipartite_two_of_smallAttach_noCrossOver` +
+  `JSP90.erdos73On_one_two_of_smallAttach_noCrossOver` — A NEW INSTANCE OF THE HEADLINE THEOREM**:
+  graphs whose shortest odd cycles have at most three attachment points *and* which have no cross-over
+  satisfy `Erdős73On 1 2` with the optimal constant `2` — no bound on the odd girth, the packing weight
+  or the number of branch vertices, and **no residual statement at all** (rounds 141 and 144 each
+  needed one on this class).
+
+### Part 5 — the exit step
+
+* **`JSP90.attachPoints_inter_D_nonempty_of_not_subset_C`** — **`IsOddCycle G D → (C ∩ D).Nonempty →
+  ¬ D ⊆ C → (attachPoints G C ∩ D).Nonempty`**: a cycle that meets `C` but is not contained in it
+  *leaves* it.  If the nonempty set of positions of the cyclic numbering lying on `C` were closed
+  under `cycSucc`, then by induction every `cycSucc^[d] j` would lie on `C`, and since every position
+  is a `cycSucc^[d]` of any other (`JSP90.exists_arc`) the whole cycle would lie in `C` — a
+  contradiction.  This is the classical *exit step* of the fan argument: the reason every trace
+  `D ∩ attachPoints G C` contains the points at which `D` leaves `C`, and the first step of the
+  classical proof that both ends of a maximal `C`-chain along `D` are attachment points.
+
+### A mathematical finding recorded in the file header
+
+**The converse of Part 2 is false.**  A *singleton trace* does **not** imply a *one-point cross-over*:
+for `C` = a 5-cycle `1-2-3-4-5`, `D` = the triangle `1-2-3` inside it and a pendant vertex `6` at `1`
+(a `LocIndep 1` graph), `attachPoints G C = {1}` and `D ∩ attachPoints G C = {1}` is a singleton trace,
+but `C ∩ D = {1,2,3}`.  `attachPoints` records where a cycle *leaves* `C`, while a trace only records
+the attachment points met: a cycle may enter `C` at a point which is **not** an attachment point (it has
+no neighbour outside `C`) and travel inside `C`.  So `ThreeSingletonTraces` is **weaker** than round
+141's cross-over configuration, which is exactly what Part 2 proves.
+
+### What is *not* proved
+
+`JSP90.TraceCoverResidual`, and behind it `JSP90.NoTraceK4`, `JSP90.OneTracePair`,
+`JSP90.NoThreeSingletonTraces` and `JSP90.OddCycleErdosPosa r` (Reed–Robertson–Seymour–Thomas), the
+unchanged primary blocker.  `jsp_000090_main` is deliberately **not** declared, so the harness keeps
+reporting `missing_theorems = ["jsp_000090_main"]`; `score.py --strict-prize` reports
+`build_ok = true, sorry = 0, admit = 0, placeholder_total = 0, partial_ok = true`, `prize_ready = false`.
+`formalization.yaml` remains `status: wip`, `prize_ready: false`.  No award claim is made.
