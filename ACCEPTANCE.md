@@ -5693,3 +5693,93 @@ help, because the cost is per *enumerated* candidate, not per *matching* graph. 
 `jsp_000090_main` remains undeclared and `JSP90.OddCycleErdosPosa r` (Reed–Robertson–Seymour–Thomas)
 is unchanged: the remaining obstruction is the general, 3-connected case.
 
+
+---
+
+## Round 148 (`lean/JSPProblem/Five.lean`, 31 declarations, 0 sorry/admit) — the FIVE-VERTEX AXIS:
+## `f(1) = 1` on graphs of order ≤ 5, with the **optimal** constant
+
+Round 146 built a *computable mirror* of Erdős #73 and closed the in-kernel range at **three**
+vertices with `decide`; it could not decide `|V| ≤ 4` or `|V| ≤ 5` because the kernel memory of
+`decide` on `Finset`-quantified graph statements is `≈ 55 MB` per enumerated graph on this machine.
+`policy.json` proposed two routes past that barrier, the second being *structural*: prove the
+small-order instances by hand, after the reusable small lemma "a graph on at most four vertices with
+no triangle is bipartite".
+
+**That lemma is not needed, and the barrier is not the interesting obstacle.**  The development
+already has `JSP90.isBipartite_of_no_oddCycle` (`JSPProblem/Transversal.lean`), so "a triangle-free
+graph on at most four vertices is bipartite" is not a colouring problem: on at most four vertices an
+odd cycle has odd cardinality `≥ 3`, hence cardinality `3`, hence *is* a triangle.  Everything below
+is counting on vertex sets, and the whole file builds in seconds with no `decide` and no
+`native_decide`.
+
+### What is proved
+
+* **Part 1 — the local structure at a triangle.**
+  `JSP90.exists_not_adj_of_notMem_of_isNClique_three`: at `LocIndep 1` **every vertex outside a
+  triangle has a non-neighbour in it** (`LocIndep 1` on `T ∪ {x}` gives an independent `2`-set of
+  four vertices, a triangle holds at most one element of an independent set, so `x` is in it and the
+  other element is a non-neighbour of `x`), and its `Finset` form
+  `JSP90.card_adjIn_le_two_of_isNClique_three` for `JSP90.AdjIn G x T` — the neighbours of `x` lying
+  in `T`.
+* **Part 2 — counting in a three-element set.**  `JSP90.card_inter_pos_of_card_two_of_card_two`
+  (two `2`-subsets of a `3`-set which differ as finsets meet),
+  `JSP90.exists_mem_T_of_card_le_two` (Lemma A1) and
+  `JSP90.card_inter_le_one_and_exists_mem_T` (Lemma A2: the intersection is at most a singleton, and
+  a point of `T` lies in both whenever it is a singleton).  All three are about finsets; no graph
+  appears in them.
+* **Part 3 — the shape of a triangle, and the choice of one vertex.**
+  `JSP90.exists_mem_D_shapes`: in a graph whose vertex set is a triangle `T` together with at most
+  two further vertices, every triangle is `T` itself, two vertices of `T` plus one further vertex, or
+  one vertex of `T` plus both further vertices — the complete classification, with the adjacencies
+  that come from the clique.  `JSP90.not_adjIn_eq_card_two_of_locIndep_one` is the `K₄`-exclusion in
+  the `AdjIn` vocabulary (two adjacent vertices outside the triangle with the same two neighbours in
+  it would form a `K₄` with it), `JSP90.exists_mem_T_setup` chooses the vertex of `T` meeting all
+  the triangles, and
+
+  > **`JSP90.exists_common_mem_triangle_of_card_le_five`: at `LocIndep 1`, `|V| ≤ 5` and a triangle
+  > `T` of `G`, the triangles of `G` have a common vertex, and it lies in `T`.**
+
+* **Part 4 — the instance.**
+
+  > **`JSP90.closeToBipartite_one_of_locIndep_one_card_le_five`: `LocIndep 1 G → |V| ≤ 5 →
+  > CloseToBipartite 1 G`** — a **new instance of the headline theorem with the OPTIMAL constant
+  > `1`** on the class of graphs on at most five vertices, with no hypothesis beyond Erdős's own: no
+  > odd girth, no packing weight, no degree bound, no bound on the number of branch vertices, no
+  > decomposition.  `JSP90.erdos73On_one_one_of_card_le_five` is the `Erdős73On` form, and
+  > `JSP90.closeToBipartite_one_of_locIndep_one_card_le_four` the intermediate `|V| ≤ 4` instance.
+
+  The proof is short: a shortest odd cycle of `G` has `3` or `5` vertices; in the `5`-case it spans
+  `V`, so every odd cycle of `G` *is* the vertex set; in the `3`-case it is a triangle and Part 3
+  gives a single vertex meeting every triangle, while every odd cycle is a triangle.
+  `JSP90.hitsOddCycles_of_locIndep_one_card_le_five` exhibits the vertex and
+  `JSP90.tauOdd_le_one_of_locIndep_one_card_le_five` is the `τ_odd ≤ 1` form: the deleted vertex *is*
+  an odd cycle transversal.
+* **Part 5 — optimality.**  `JSP90.optimal_smallOrder_five` and
+  `JSP90.not_erdos73On_one_zero_of_card_le_five`: `K₃` is `LocIndep 1` and is not `0`-close to
+  bipartite, so no instance at `k = 1` on graphs of order at most five can have constant `0`; the
+  constant `1` above is therefore **exact** for the class.
+
+### The measurement that fixes the target (`discovery/JSP-000090/r148.c`, all graphs on `n ≤ 6`)
+
+`MaxDef(G) = max_X |X| − 2α(G[X])` and `τ_odd(G) = min |Z| with G − Z bipartite`, computed exactly:
+
+| `n` | graphs | `max τ_odd` over `MaxDef ≤ 1` | over `≤ 2` | over `≤ 3` | over `≤ 4` |
+|---|---|---|---|---|---|
+| 3 | 8 | **1** | 1 | 1 | 1 |
+| 4 | 64 | **1** | 2 | 2 | 2 |
+| 5 | 1024 | **1** | 2 | 3 | 3 |
+| 6 | 32768 | **2** | 2 | 3 | 4 |
+
+So `f(1) = 1` at order `≤ 5` — the instance proved above is optimal — and `f(1) = 2` is first needed
+at **six** vertices (`120 + ` many witnesses, e.g. the three-sun `sun3`), which is the sharp case
+`Erdős73On 1 2` on the class `|V| ≤ 6` and the concrete next target of this axis.  The count of
+graphs by `MaxDef` (`n = 6`: 5177 / 19637 / 7782 / 171 / 1) is also recorded: at six vertices there
+are `19 637` LocIndep-1 graphs, of which `171` have `MaxDef = 2` and one (`K₆`) has `MaxDef = 4`.
+
+### What is *not* proved
+
+`Erdős73On 1 2` at six vertices and above, and behind it `JSP90.TraceCoverResidual`
+(`JSPProblem/TraceComplex.lean`) and `JSP90.OddCycleErdosPosa r` (Reed–Robertson–Seymour–Thomas).
+`jsp_000090_main` remains undeclared, so `harness/score.py --strict-prize` keeps reporting
+`missing_theorems = ["jsp_000090_main"]`.
