@@ -7058,3 +7058,115 @@ The five-cycle case of the seven-vertex instance is therefore reduced to a `Fins
 combinatorial statement (`MISSING LEMMA 3` in `discovery/JSP-000090/policy.json`: at most **one**
 five-cycle meets a shortest odd five-cycle `C` in exactly three points — measured, maximum `1`, attained
 `12 600` times among the `50 904` pairs `(G, C)`, so it is not vacuous).
+
+---
+
+## Round 172 — `lean/JSPProblem/CycWitness.lean`: the **eight-vertex seven-cycle case** of Erdős #73 is
+closed with the **optimal constant 1**, and the witness lemma loses its five-position hypothesis
+
+Attack family 93.  One new file (**23 declarations, 0 `sorry`/`admit`**), `lake build` OK with **1331
+jobs**; `#print axioms` on every new declaration reports only
+`[propext, Classical.choice, Quot.sound]`; imported from the root module `JSPProblem.lean`.
+`harness/score.py --strict-prize` reports `build_ok = true, sorry = 0, admit = 0, partial_ok = true,
+missing_theorems = ["jsp_000090_main"]`.
+
+Round 171 closed the triangle case at `|V| ≤ 8` (`JSP90.triCaseEight`).  This round closes the
+**seven-cycle case** — and does so by deleting the `Fin 5` hypothesis from the round-152–162 witness
+machinery.
+
+### Part 0–2 — the order-free chain
+
+Only two things in round 152's chain were really about five:
+
+* `JSP90.five_flip_false` / `JSP90.five_pair_inj'` — modular arithmetic on `Fin 5`.  Replaced by
+  `JSP90.cyc_flip_false_seven` / `JSP90.ring_pair_inj_seven`, whose proofs are verbatim (the flip case
+  forces `m ∣ 4`, impossible for `m ≥ 5`);
+* `JSP90.card_neighIn_five_eq_two`, which used **triangle-freeness** to make `D = (C \ {c}) ∪ {x}`
+  chordless.  Replaced by the already order-free pair `JSP90.card_neighIn_C_eq_two` /
+  `JSP90.neigh_eq_of_adj_of_adj` of `lean/JSPProblem/Seven.lean` ("a shortest odd cycle is induced"),
+  applied to `D` itself through the new
+
+  * **`JSP90.hshort_of_card_eq`** — an odd cycle of the same cardinality as a shortest one is
+    shortest.
+
+  The new order-free statements are
+
+  | lemma | content |
+  | --- | --- |
+  | **`JSP90.filter_adj_C_eq_ringPair_of_five_le`** | for a shortest odd cycle of **any** length `≥ 5`, the neighbours of `o.f j` inside the cycle are exactly its two ring-neighbours |
+  | **`JSP90.card_eq_of_union_sdiff_singleton`** | `\|(C \ {c}) ∪ {x}\| = \|C\|` for `c ∈ C`, `x ∉ C` |
+  | **`JSP90.filter_adj_eq_of_cycle_singleton`** | `(C \ {c}) ∪ {x}` an odd cycle of cardinality `\|C\|` ⟹ `C.filter (Adj x) = C.filter (Adj c)`, i.e. `x` sees `C` **exactly** as `c` does.  No triangle-freeness hypothesis: the triangle step of round 152 is replaced by "a triangle is an odd cycle shorter than `C`" |
+  | **`JSP90.x_ne_y_of_two_sevenCycles_singleton`** | **the witness is injective, for any cycle length `≥ 5`**: two different points of `C`, each missed by a cycle of the form `(C \ {·}) ∪ {·}`, are missed by cycles with different outside vertices |
+  | **`JSP90.card_missedSeven_le_card_univ_sdiff`** | the missed points inject into `V \ C`: `\|Missed\| ≤ \|V \ C\|`, order-free (with `\|V \ C\| ≤ 2` this is round 152's `JSP90.card_missed_le_two_of_card_le_seven`) |
+  | **`JSP90.sevenOrder`, `JSP90.filter_adj_C_eq_ringPair_seven`** | the `Fin 7` instance, where `JSP90.CycleOrder.prev` *is* `JSP90.cycPred` |
+
+### Part 3–4 — THE INSTANCE
+
+At `LocIndep 1` and `|V| ≤ 8`, with `C` a shortest odd cycle of **seven** vertices, every odd cycle
+`D` has `7 ≤ |D|` (shortestness), `|D|` odd and `|D| ≤ 8`, hence `|D| = 7`; and `D ≠ C` forces
+`|D \ C| = |C \ D| = 1`.  So **every missed point of `C` is missed by a cycle of the form
+`(C \ {c}) ∪ {x}`**:
+
+* **`JSP90.subset_missed_of_card_V_le_card_C_add_one`** — `AllMissed ⊆ Missed` at `|V| ≤ |C| + 1`,
+  stated for **every** odd cycle, with no `5` in sight;
+* **`JSP90.card_allMissed_le_one_of_shortest_seven_of_card_V_le_add_one`** — `|AllMissed| ≤ 1`;
+* **`JSP90.hitsOddCycles_mem_C_of_shortest_seven_of_card_le_add_one`** — some point of `C` meets
+  **every** odd cycle of `G` (the certificate lies **on** `C`);
+* **`JSP90.closeToBipartite_one_of_shortest_seven_of_card_le_add_one` — A NEW INSTANCE OF THE
+  HEADLINE THEOREM WITH THE OPTIMAL CONSTANT `1`**, stated as
+
+  ```lean
+  IsOddCycle G C → (C shortest odd cycle) → C.card = 7 → |V| ≤ |C| + 1 → CloseToBipartite 1 G
+  ```
+
+  with **no `LocIndep` hypothesis at all**, no packing hypothesis, no triangle-freeness and no bound on
+  anything but the cardinality of the shortest odd cycle;
+* **`JSP90.closeToBipartite_one_of_shortest_seven_of_card_le_eight`**,
+  **`JSP90.closeToBipartite_one_of_locIndep_one_card_le_eight_of_oddGirth_ge_seven`** (the
+  eight-vertex odd-girth-`≥ 7` class instance),
+  **`JSP90.erdos73On_one_oddGirth_ge_seven_eight`** (the same in the `Erdős73On` shape),
+  **`JSP90.hitsOddCycles_singleton_on_C_of_shortest_seven_of_card_le_eight`**,
+  **`JSP90.tauOdd_le_one_of_shortest_seven_of_card_le_eight`**, and
+  **`JSP90.not_closeToBipartite_zero_of_oddGirth_ge_seven_eight_of_not_isBipartite`** — the constant
+  `1` is optimal inside the class.
+
+### Measurements this round
+
+`discovery/JSP-000090/r172b.c` (all `2^21` graphs on `Fin 8` containing the seven-cycle
+`0-1-…-6-0`):
+
+| quantity | value |
+| --- | --- |
+| `LocIndep 1` graphs with odd girth `7` | `160` |
+| `\|{c ∈ C : some odd cycle misses c}\|` | `0` in `128` cases, **`1` in `32`** |
+| violations of `\|AllMissed\| ≤ \|V \ C\| ≤ 1 < \|C\|` | **`0`** |
+| `tau_odd` | `1` in all `160` |
+
+so the pigeonhole is **tight** (the bound `|AllMissed| ≤ 1` is attained) and the theorem is not
+vacuous.
+
+### The remaining eight-vertex case: the five-cycle
+
+`discovery/JSP-000090/r172.c`, over all `2^23` graphs on `Fin 8` containing the five-cycle
+`0-1-2-3-4-0`, restricted to the `3 051 680` `LocIndep 1` graphs in which that five-cycle is shortest:
+
+| question | result |
+| --- | --- |
+| `max \|{c ∈ C : some odd cycle misses c}\|` | **`5`**, attained `110` times |
+| graphs with **no** pair of `C` meeting every odd cycle | **`0`** |
+| `max #` three-intersection five-cycles | **`6`** (round 162's uniqueness fails at order eight) |
+| `max #` points of `C` missed by four-intersection five-cycles | **`4`** (was `≤ 2` at order seven) |
+| `tau_odd` | `1` throughout |
+
+**So the eight-vertex five-cycle case is `CloseToBipartite 1` with the certificate on `C` — that is
+refuted** (110 counterexamples), while **`CloseToBipartite 2` with the certificate a *pair* of points
+of the shortest odd cycle holds with 0 failures**.  With round 171's `triCaseEight` and this round's
+seven-cycle case, the five-cycle case is the *only* thing still missing from
+`JSP90.closeToBipartite_two_of_locIndep_one_card_le_eight`.
+
+### What is *not* proved
+
+`JSP90.OddCycleErdosPosa r` (Reed–Robertson–Seymour–Thomas) and hence `jsp_000090_main`; and, inside
+order eight, the five-cycle case named above.  `jsp_000090_main` is deliberately **not** declared, so
+the harness keeps reporting `missing_theorems = ["jsp_000090_main"]`.  `formalization.yaml` remains
+`status: wip`, `prize_ready: false`.  No award claim is made.

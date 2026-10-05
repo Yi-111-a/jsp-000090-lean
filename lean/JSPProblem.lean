@@ -1390,9 +1390,54 @@ first instance of the headline theorem at order eight.
   reduces bit `0` to `(cellsOf w).val % 2 = 1` before the reading can fire).
 
 `#print axioms` on every declaration of this file reports only
-`[propext, Classical.choice, Quot.sound]`.  The five- and seven-cycle cases at `|V| ≤ 8` are still
-open, so `JSP90.closeToBipartite_two_of_locIndep_one_card_le_eight` and `jsp_000090_main` are
-deliberately **not** declared.
+`[propext, Classical.choice, Quot.sound]`.
+
+### Round 172 — `lean/JSPProblem/CycWitness.lean`: the EIGHT-VERTEX SEVEN-CYCLE CASE, and the witness
+lemma without its five-position hypothesis
+
+Round 171 proved `JSP90.triCaseEight`; the two cases it left at `|V| ≤ 8` were the five- and the
+seven-cycle case.  This round closes the **seven-cycle case** with the **optimal constant `1`**, and it
+does so by deleting the `Fin 5` hypothesis from the round-152–162 witness machinery rather than
+re-instantiating it at `7`.
+
+* **The order-free chain** (`JSPProblem/CycWitness.lean`, 23 declarations, zero placeholders):
+
+  * **`JSP90.hshort_of_card_eq`** — an odd cycle of the same cardinality as a shortest odd cycle is
+    itself shortest.  At `|D| = |C|` this makes `D = (C \ {c}) ∪ {x}` **induced**, so
+    `JSP90.card_neighIn_C_eq_two` / `JSP90.neigh_eq_of_adj_of_adj` (`lean/JSPProblem/Seven.lean`,
+    already order-free) apply to `D` and **no triangle-freeness hypothesis is needed at all**;
+  * **`JSP90.filter_adj_C_eq_ringPair_of_five_le`** — for a shortest odd cycle of **any** length `≥ 5`
+    the neighbours of `o.f j` inside the cycle are exactly its two ring-neighbours;
+  * **`JSP90.filter_adj_eq_of_cycle_singleton`** — `(C \ {c}) ∪ {x}` an odd cycle of cardinality
+    `|C|` means `x` has exactly the same neighbourhood inside `C` as `c`;
+  * **`JSP90.x_ne_y_of_two_sevenCycles_singleton`** — **the witness is injective, for any cycle length
+    `≥ 5`**;
+  * **`JSP90.card_missedSeven_le_card_univ_sdiff`** — the missed points inject into `V \ C`;
+  * **`JSP90.subset_missed_of_card_V_le_card_C_add_one`** — at `|V| ≤ |C| + 1` every missed point of
+    `C` is missed by a cycle of the form `(C \ {c}) ∪ {x}`, so `AllMissed ⊆ Missed`.
+
+* **The instance, four new instances of the headline theorem**:
+  **`JSP90.closeToBipartite_one_of_shortest_seven_of_card_le_add_one`** (`C.card = 7`, `|V| ≤ |C| + 1`,
+  **no `LocIndep` hypothesis**, constant `1`), **`JSP90.closeToBipartite_one_of_shortest_seven_of_card_le_eight`**,
+  **`JSP90.closeToBipartite_one_of_locIndep_one_card_le_eight_of_oddGirth_ge_seven`** and
+  **`JSP90.erdos73On_one_oddGirth_ge_seven_eight`** (the eight-vertex odd-girth-`≥ 7` class instance),
+  with `JSP90.hitsOddCycles_mem_C_of_shortest_seven_of_card_le_add_one` (the certificate lies **on**
+  `C`), `JSP90.tauOdd_le_one_of_shortest_seven_of_card_le_eight`, and
+  `JSP90.not_closeToBipartite_zero_of_oddGirth_ge_seven_eight_of_not_isBipartite` (the constant `1` is
+  optimal).  Measured over all `2^21` graphs on `Fin 8` containing a seven-cycle
+  (`discovery/JSP-000090/r172b.c`): `160` `LocIndep 1` graphs of odd girth `7`, `|AllMissed| ≤ 1` in all
+  of them with the bound **attained** `32` times.
+
+* **What remains.**  The **five-cycle case** is the only case of
+  `JSP90.closeToBipartite_two_of_locIndep_one_card_le_eight` still open, and this round *refuted* its
+  natural certificate rather than proving it: over the `3 051 680` `LocIndep 1` graphs on `Fin 8` whose
+  shortest odd cycle is a five-cycle (`discovery/JSP-000090/r172.c`), `max |AllMissed| = 5`, so
+  `CloseToBipartite 1` with the certificate on `C` is false there (`110` counterexamples), round 162's
+  uniqueness of the three-intersection five-cycle fails (up to `6` of them), and the pigeonhole now
+  gives `3` instead of `2` — **but some *pair* of points of `C` meets every odd cycle in every one of
+  those graphs (0 failures)**, and `tau_odd = 1` throughout.  So
+  `JSP90.closeToBipartite_two_of_locIndep_one_card_le_eight` and `jsp_000090_main` are deliberately
+  **not** declared.
 
 -/
 import JSPProblem.Definitions
@@ -1525,3 +1570,4 @@ import JSPProblem.TriFive
 import JSPProblem.TriFix
 import JSPProblem.TriResidue
 import JSPProblem.TriEight
+import JSPProblem.CycWitness

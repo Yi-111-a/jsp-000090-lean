@@ -2,48 +2,71 @@ jsp_id: JSP-000090
 catalog_url: https://github.com/TheJustinSunPrize/awards
 status: wip
 prize_ready: false
-last_round: 134
+last_round: 172
 last_round_summary: |
-  Round 134 -- REFUTATION OF THE TOP TARGET OF ROUNDS 119-133.  Attack family 63.  Two new files,
-  0 sorry/admit, lake build OK with 1284 jobs, axiom report clean (propext, Classical.choice,
-  Quot.sound), imported from the root module JSPProblem.lean.
+  Round 172 -- THE EIGHT-VERTEX SEVEN-CYCLE CASE OF Erdos #73, CLOSED WITH THE OPTIMAL CONSTANT 1,
+  BY REMOVING THE FIVE-POSITION HYPOTHESIS FROM THE WITNESS LEMMA.  Attack family 93.  One new file
+  lean/JSPProblem/CycWitness.lean (23 declarations, 0 sorry/admit), lake build OK with 1331 jobs,
+  axiom report clean (propext, Classical.choice, Quot.sound), imported from the root module
+  JSPProblem.lean.  score.py --strict-prize: build_ok=true, sorry=0, admit=0, partial_ok=true,
+  missing_theorems = ['jsp_000090_main'].
 
-  (i)  THE RESIDUAL JSP90.PetalSetLeTwoOfOne IS FALSE.  The exhaustive search of this round
-       (discovery/JSP-000090/r134.c) over all graphs with MaxDef <= 1 on n <= 8 (55 179 262 of them,
-       140 216 552 triangles) found no failure, and at n = 9 found the first counterexample: the
-       graph g9 with edges 0-5 0-6 0-7 0-8 1-5 1-6 2-5 2-8 3-6 3-7 4-7 4-8 5-7 6-8 satisfies
-       LocIndep 1 and BOTH of its triangles, T1 = {0,5,7} and T2 = {0,6,8}, have three attachment
-       points.  lean/JSPProblem/Nonagon.lean formalises the witness (JSP90.locIndep_one_g9 is an
-       exhaustive kernel decision over the 2^9 vertex sets; the two triangles and the six petals are
-       explicit cyclic orderings) and lean/JSPProblem/AttachErase.lean draws the consequences:
-       JSP90.not_forall_oddCycle_exists_erase_g9 (no triangle of g9 has a 2-subset meeting every odd
-       cycle), JSP90.not_exists_twoTransversal_sub_g9_T1 / _T2 (no two vertices of a shortest odd
-       cycle suffice either), JSP90.triangleCertificates_are_impossible.  The measured certificate of
-       CloseToBipartite 2 g9 is {5,6}, which lies in NEITHER triangle, so f(1) = 2 survives while every
-       triangle-based certificate shape is dead.
+  (i)  ROUNDS 152-162 WERE STATED ON Fin 5, AND ONLY TWO THINGS IN THAT CHAIN ARE REALLY ABOUT FIVE:
+       five_flip_false / five_pair_inj' (pure modular arithmetic on Fin 5) and
+       card_neighIn_five_eq_two (which used TRIANGLE-FREENESS to make (C \ {c}) u {x} chordless).
+       Both are replaced here by order-free statements:
+         JSP90.hshort_of_card_eq                     -- an odd cycle of the same cardinality as a
+                                                        shortest one is shortest (so |D| = |C| makes D
+                                                        induced, with NO triangle-freeness needed);
+         JSP90.filter_adj_C_eq_ringPair_of_five_le   -- the neighbours of o.f j inside a shortest odd
+                                                        cycle of ANY length >= 5 are exactly its two
+                                                        ring-neighbours (built from the already
+                                                        order-free JSP90.card_neighIn_C_eq_two and
+                                                        JSP90.neigh_eq_of_adj_of_adj of Seven.lean);
+         JSP90.filter_adj_eq_of_cycle_singleton      -- (C \ {c}) u {x} an odd cycle of cardinality
+                                                        |C| means x sees C exactly as c does
+                                                        (round 152's filter_adj_eq_of_fiveCycle_
+                                                        singleton, with the triangle step replaced by
+                                                        "a triangle is an odd cycle shorter than C");
+         JSP90.x_ne_y_of_two_sevenCycles_singleton -- THE WITNESS IS INJECTIVE, FOR ANY CYCLE LENGTH
+                                                        >= 5: two distinct missed points of C have
+                                                        distinct outside vertices;
+         JSP90.card_missedSeven_le_card_univ_sdiff  -- the missed points inject into V \ C, so
+                                                        |Missed| <= |V \ C| order-free.
 
-  (ii) THE ERASABLE VERTICES OF AN ODD CYCLE, EXACTLY.  JSP90.hitsOddCycles_erase_iff_notMem_petalSet
-       proves, for every odd cycle C meeting every odd cycle and every p in C,
-       HitsOddCycles G (C.erase p) <-> p not in PetalSet G C: the vertices that cannot be erased are
-       exactly the attachment points.  Hence JSP90.erdos73On_of_isOddCycle_of_petalSet_lt_card, a new
-       instance of the headline theorem with the constant |C| - 1 for an ARBITRARY odd cycle (Two.lean
-       had it only for triangles), and an odd-girth bound of l - 1 at k = 1.
+  (ii) THE INSTANCE.  At LocIndep 1 and |V| <= 8 with a shortest odd cycle C of SEVEN vertices,
+       every odd cycle D has 7 <= |D| odd and |D| <= 8, hence |D| = 7, and D != C forces
+       |D \ C| = |C \ D| = 1.  So EVERY missed point of C is missed by a cycle of the form
+       (C \ {c}) u {x} (JSP90.subset_missed_of_card_V_le_card_C_add_one, order-free), and the
+       pigeonhole gives |AllMissed| <= |V \ C| <= 1 < 7 = |C|:
+         JSP90.hitsOddCycles_mem_C_of_shortest_seven_of_card_le_add_one  (certificate ON C),
+         JSP90.closeToBipartite_one_of_shortest_seven_of_card_le_add_one  -- A NEW INSTANCE OF THE
+           HEADLINE THEOREM WITH THE OPTIMAL CONSTANT 1, stated as |V| <= |C| + 1 and with NO LocIndep
+           hypothesis at all,
+         JSP90.closeToBipartite_one_of_shortest_seven_of_card_le_eight,
+         JSP90.closeToBipartite_one_of_locIndep_one_card_le_eight_of_oddGirth_ge_seven  -- the
+           eight-vertex odd-girth-at-least-seven class instance,
+         JSP90.erdos73On_one_oddGirth_ge_seven_eight  -- the same in the Erdős73On shape,
+         JSP90.tauOdd_le_one_of_shortest_seven_of_card_le_eight,
+         JSP90.not_closeToBipartite_zero_of_oddGirth_ge_seven_eight_of_not_isBipartite  -- the
+           constant 1 is optimal inside the class.
+       Together with round 171's JSP90.triCaseEight this leaves ONE case of
+       JSP90.closeToBipartite_two_of_locIndep_one_card_le_eight: the five-cycle case.
 
-  (iii) THE HONEST RESIDUAL OF THE SHARP CASE k = 1 IS A SINGLE STATEMENT:
-       JSP90.erdos73On_one_iff_twoTransversal : Erdős73On 1 m <-> TwoTransversal m, i.e. "some m
-       vertices meet every odd cycle".  The two conjectures drafted in this round from measurements
-       (PetalSetLeTwoOfOneAny and ShortestOddCycleTransversal m) were REFUTED by the same witness and
-       are now marked as defs that must not be assumed in the source.  The triangle-free half is
-       JSP90.TriangleFreeTwoTransversal 2, proved equivalent to the triangle-free case of the sharp
-       conclusion by JSP90.triangleFree_iff_triangleFreeTwoTransversal.
+  (iii) MEASUREMENT (discovery/JSP-000090/r172b.c, all 2^21 graphs on Fin 8 containing the 7-cycle):
+       160 LocIndep-1 graphs have odd girth 7; |{c in C : some odd cycle misses c}| is 0 in 128 of
+       them and 1 in 32 (the bound |AllMissed| <= |V \ C| <= 1 is attained 32 times, so the theorem
+       is not vacuous and the pigeonhole is tight); tau_odd = 1 in all 160.
 
-  (iv) The "high intersection" hypothesis of Two.lean item 5 is not automatic at LocIndep 1, even at a
-       shortest odd cycle: JSP90.not_forall_card_sdiff_le_one_wf (the windmill wf of
-       JSPProblem/Windmill.lean).
+  (iv) MEASUREMENT OF THE REMAINING FIVE-CYCLE CASE (discovery/JSP-000090/r172.c, all 2^23 graphs on
+       Fin 8 containing the five-cycle): of 3 051 680 LocIndep-1 graphs in which that five-cycle is
+       shortest, max |AllMissed| = 5 (attained 110 times), so CloseToBipartite 1 with the certificate
+       on C is FALSE at order eight; the number of three-intersection five-cycles reaches 6 (so round
+       162's uniqueness fails), and points missed by four-intersection five-cycles reach 4.  But a PAIR
+       of points of C meets every odd cycle in every one of the 3 051 680 cases (0 failures) and
+       tau_odd = 1 throughout, so the eight-vertex five-cycle case is TRUE with the certificate a pair
+       of points of the shortest odd cycle -- the next concrete target.
 
-  NOT proved: jsp_000090_main.  JSP90.OddCycleErdosPosa r (Reed-Robertson-Seymour-Thomas) is untouched.
-  score.py --strict-prize reports build_ok = true, sorry = 0, admit = 0, partial_ok = true,
-  missing_theorems = ["jsp_000090_main"].  No award claim is made.
 github_owner: Yi-111-a
 lean_repository: https://github.com/Yi-111-a/jsp-000090-lean
 branch: main
@@ -98,9 +121,9 @@ build:
       - JSP90.erdos73On_of_twoAttachCover (new instance of the headline theorem, cost sum |X| - 1)
       - JSP90.erdos73On_of_twoAttachCover_bounded (new instance, cost l * |C|)
     next_step:
-      - the two-attachment COVER for a 3-connected graph: existence of a finite family 𝒞 such that every odd cycle of G meets some member in two vertices, with sum |X| - 1 bounded by a function of the packing number
-      - equivalently the depth-two attachment: two internally disjoint C-paths from a vertex x to C whose union with C is an odd cycle, giving the second attachment
-      - JSP90.OddCycleErdosPosa r (unchanged: this is the missing jsp_000090_main)
+      - 'the two-attachment COVER for a 3-connected graph: existence of a finite family 𝒞 such that every odd cycle of G meets some member in two vertices, with sum |X| - 1 bounded by a function of the packing number'
+      - 'equivalently the depth-two attachment: two internally disjoint C-paths from a vertex x to C whose union with C is an odd cycle, giving the second attachment'
+      - 'JSP90.OddCycleErdosPosa r (unchanged: this is the missing jsp_000090_main)'
     prize_ready: false
     missing_theorems: [jsp_000090_main]
 
@@ -114,20 +137,20 @@ build:
     headline_results:
       - JSP90.TwoAttachCover' and JSP90.closeToBipartite_of_twoAttachCover' (the two-attachment cover WITHOUT the choice function of round 112)
       - JSP90.exists_oneSidedDeletion (a family of nonempty sets has a deletion set leaving at most one vertex per member; no graph in the statement)
-      - JSP90.closeToBipartite_of_twoAttachCover'_bounded (cover with l vertices per member and q members gives CloseToBipartite (l*q) G: the Erdos-Posa shape)
-      - JSP90.TwoAttachCoverExists r l q (THE MACHINE-CHECKED GLOBAL TARGET, a def: no assumption)
+      - 'JSP90.closeToBipartite_of_twoAttachCover''_bounded (cover with l vertices per member and q members gives CloseToBipartite (l*q) G: the Erdos-Posa shape)'
+      - 'JSP90.TwoAttachCoverExists r l q (THE MACHINE-CHECKED GLOBAL TARGET, a def: no assumption)'
       - JSP90.oddCycleErdosPosa_of_twoAttachCoverExists (TwoAttachCoverExists r l q implies OddCycleErdosPosa r, constant l*q)
       - JSP90.erdos73_of_twoAttachCoverExists (hence forall k, Erdos73 k, i.e. jsp_000090_main)
       - JSP90.erdos73On_of_twoAttachCover' (another instance of the headline theorem, constant independent of k)
       - JSP90.twoAttachPacking_triangles and JSP90.sum_card_sub_one_tri (the triangles of kTriangles k ARE a two-attachment packing, of cost 2k)
-      - JSP90.packing_cover_cost_two_of_kTriangles (a cover made of odd cycles loses a factor 2: members must be allowed to be non-cycles)
+      - 'JSP90.packing_cover_cost_two_of_kTriangles (a cover made of odd cycles loses a factor 2: members must be allowed to be non-cycles)'
       - JSP90.cover_cost_ge_of_kTriangles and JSP90.cover_cost_min_kTriangles (the MINIMUM cost of a cover of kTriangles k is exactly k, its odd cycle transversal number)
       - JSP90.cover_cost_kTriangles_is_optimal (the cover method is optimal in constant on the sharp witness)
     next_step:
-      - the existence of the cover itself: JSP90.TwoAttachCoverExists r l q for a 3-connected graph of odd cycle packing number r (unchanged global step, now a def)
+      - 'the existence of the cover itself: JSP90.TwoAttachCoverExists r l q for a 3-connected graph of odd cycle packing number r (unchanged global step, now a def)'
       - the absorption of the ONE-attachment odd cycles (JSP90.oneAttach_of_isCPath_return) along 2-cuts, with the bound on the number of such 2-cuts
-      - a non-vacuity witness for a two-attachment cover on a CONNECTED graph (the wheel): every odd cycle of a wheel meets the rim twice
-      - JSP90.OddCycleErdosPosa r (unchanged: this is the missing jsp_000090_main)
+      - 'a non-vacuity witness for a two-attachment cover on a CONNECTED graph (the wheel): every odd cycle of a wheel meets the rim twice'
+      - 'JSP90.OddCycleErdosPosa r (unchanged: this is the missing jsp_000090_main)'
     prize_ready: false
     missing_theorems: [jsp_000090_main]
   round_119:
@@ -138,22 +161,22 @@ build:
     sorry: 0
     admit: 0
     headline_results:
-      - JSP90.OneAttach G C D (a petal: an odd cycle meeting C in exactly one vertex)
-      - JSP90.PetalSet G C (the attachment set: the vertices of C lying alone on an odd cycle of G)
+      - 'JSP90.OneAttach G C D (a petal: an odd cycle meeting C in exactly one vertex)'
+      - 'JSP90.PetalSet G C (the attachment set: the vertices of C lying alone on an odd cycle of G)'
       - JSP90.petalSet_subset and JSP90.card_petalSet_le_card (PetalSet G C is contained in C)
       - JSP90.petalSet_empty_of_isBipartite (a bipartite graph has no petals)
       - JSP90.oneAttach_mem_petalSet (every petal is met by the petal set at its attachment point)
-      - JSP90.petalSet_transversal (THE PETAL-SET TRANSVERSAL: a subset of C of size at most |C| - 1 + |PetalSet G C| meets every odd cycle of G)
+      - 'JSP90.petalSet_transversal (THE PETAL-SET TRANSVERSAL: a subset of C of size at most |C| - 1 + |PetalSet G C| meets every odd cycle of G)'
       - JSP90.closeToBipartite_of_petalSet and JSP90.erdos73On_of_petalSet (a NEW INSTANCE OF THE HEADLINE THEOREM with the growing parameter a, constant independent of k)
-      - JSP90.closeToBipartite_of_residue_petalSet (THE ABSORPTION STEP QUANTIFIED: q + |PetalSet G C| + (|C| - 1) instead of round 40's q + |C|)
+      - 'JSP90.closeToBipartite_of_residue_petalSet (THE ABSORPTION STEP QUANTIFIED: q + |PetalSet G C| + (|C| - 1) instead of round 40''s q + |C|)'
       - JSP90.closeToBipartite_of_residue_petalSet_zero (q + |C| - 1, one vertex better than round 40, when the petal set is empty)
       - JSP90.erdos73On_of_petalSet_of_residue (the two-parameter instance form)
       - JSP90.closeToBipartite_of_petalSet_empty and JSP90.closeToBipartite_of_twoAttach' (round 111's two-attachment transversal re-derived)
       - JSP90.IsOddCycle.of_finset_ext and JSP90.IsOddCycle.of_finset_eq (transport lemmas removing the round-53 instance pitfall)
     next_step:
-      - the numerical bound |PetalSet G C| <= phi(k) for an odd cycle C of a graph with LocIndep k G: with the absorption step quantified this is the SINGLE missing lemma, and it is purely numerical (the counting half of the Mader step)
-      - the nine-vertex witness that the petal term cannot be dropped (triangle with a pendant triangle at each vertex): the construction and the four elaboration pitfalls are in discovery/JSP-000090/policy.json
-      - JSP90.OddCycleErdosPosa r (unchanged: this is the missing jsp_000090_main)
+      - 'the numerical bound |PetalSet G C| <= phi(k) for an odd cycle C of a graph with LocIndep k G: with the absorption step quantified this is the SINGLE missing lemma, and it is purely numerical (the counting half of the Mader step)'
+      - 'the nine-vertex witness that the petal term cannot be dropped (triangle with a pendant triangle at each vertex): the construction and the four elaboration pitfalls are in discovery/JSP-000090/policy.json'
+      - 'JSP90.OddCycleErdosPosa r (unchanged: this is the missing jsp_000090_main)'
     prize_ready: false
     missing_theorems: [jsp_000090_main]
 
@@ -166,7 +189,7 @@ build:
     admit: 0
     headline_results:
       - JSP90.card_petalSet_le_of_hubCover_trianglePetals (attachment set counted by the hubs at a shortest odd cycle)
-      - JSP90.card_petalSet_gt_of_hubCover_of_longPetal (contrapositive: a cheap hub set forces a long petal)
+      - 'JSP90.card_petalSet_gt_of_hubCover_of_longPetal (contrapositive: a cheap hub set forces a long petal)'
       - JSP90.card_petalSet_inter_attachSet_le_two (a hub is adjacent to at most two attachment points)
       - JSP90.hubCost / JSP90.hubCost_ge_completeGraph (a hub cover of K_n costs at least n - 2)
       - JSP90.card_compl_le_two_completeGraph (a transversal of K_n leaves at most two vertices out)
@@ -187,7 +210,7 @@ build:
       - JSP90.exists_commonVertex_of_oneAttach_pair_of_locIndep_one (the petals of a cycle pairwise meet)
       - JSP90.hitsOddCycles_erase_of_triangle_petalSet_le_two (C meets every odd cycle in all but one vertex)
       - JSP90.closeToBipartite_two_of_triangle_petalSet_le_two (CloseToBipartite 2 G at a triangle)
-      - JSP90.erdos73On_of_triangle_petalSet_le_two (HEADLINE INSTANCE: constant 2, LocIndep k G, k <= 1)
+      - 'JSP90.erdos73On_of_triangle_petalSet_le_two (HEADLINE INSTANCE: constant 2, LocIndep k G, k <= 1)'
       - JSP90.closeToBipartite_two_of_triangle_attachCover (the most general form at a triangle)
       - JSP90.attachCover_of_triangle_petalSet_le_two (route A is an attachment cover)
       - JSP90.closeToBipartite_two_of_oddCycle_high_intersection (constant 2 at a cycle of arbitrary length)
@@ -195,14 +218,14 @@ build:
       - JSP90.closeToBipartite_two_of_triangle_high_intersection (|C| = 3 case of the previous item)
       - JSP90.constant_two_attained_g6 (the constant 2 is attained at k = 1)
       - JSP90.locIndep_mono, JSP90.locIndep_one_of_locIndep (monotonicity of Erdos's hypothesis)
-      - JSP90.PetalSetLeTwoOfOne (def: the SINGLE MISSING LEMMA, stated and NOT assumed)
+      - 'JSP90.PetalSetLeTwoOfOne (def: the SINGLE MISSING LEMMA, stated and NOT assumed)'
       - JSP90.erdos73On_one_of_triangle_of_petalSetLeTwoOfOne (k = 1 case conditional on it)
       - JSP90.erdos73On_of_triangle_of_petalSetLeTwoOfOne (k <= 1 version)
     next_step:
-      - prove JSP90.PetalSetLeTwoOfOne: LocIndep 1 G forces at most two attachment points at every triangle of G (exhaustively true for all graphs on <= 7 vertices); this would give the k = 1 case with the optimal constant 2 for odd girth 3
-      - the odd girth >= 5 case: a two-element transversal at a shortest odd cycle of length >= 5 under LocIndep 1
+      - 'prove JSP90.PetalSetLeTwoOfOne: LocIndep 1 G forces at most two attachment points at every triangle of G (exhaustively true for all graphs on <= 7 vertices); this would give the k = 1 case with the optimal constant 2 for odd girth 3'
+      - 'the odd girth >= 5 case: a two-element transversal at a shortest odd cycle of length >= 5 under LocIndep 1'
       - repair lean/JSPProblem/Wheel.lean (round 121), still failing to compile since round 121
-      - JSP90.OddCycleErdosPosa r (unchanged: this is the missing jsp_000090_main)
+      - 'JSP90.OddCycleErdosPosa r (unchanged: this is the missing jsp_000090_main)'
     prize_ready: false
   round_130:
     module: lean/JSPProblem/OneK.lean
@@ -215,23 +238,23 @@ build:
       - JSP90.maxDefIn_univ_sdiff_isNClique_three_eq_zero (at LocIndep 1 a triangle spends the WHOLE deficiency budget)
       - JSP90.isBipartite_induceFinset_univ_sdiff_isNClique_three_of_locIndep_one (everything outside a triangle is bipartite)
       - JSP90.closeToBipartite_three_of_locIndep_one_of_isNClique_three (CloseToBipartite 3 G, T itself the transversal)
-      - JSP90.LocIndepOneHasTriangle 3 (HEADLINE INSTANCE: the conclusion of Erdos #73 at k = 1 with the constant 3 for every LocIndep-1 graph that HAS a triangle)
+      - 'JSP90.LocIndepOneHasTriangle 3 (HEADLINE INSTANCE: the conclusion of Erdos #73 at k = 1 with the constant 3 for every LocIndep-1 graph that HAS a triangle)'
       - JSP90.isBipartite_deleteFinset_of_isOddCycle_of_locIndep_one (everything outside ANY odd cycle is bipartite at LocIndep 1)
       - JSP90.closeToBipartite_of_locIndep_one_of_odd_girth (at k = 1 the least odd cycle transversal number is at most the ODD GIRTH)
       - JSP90.closeToBipartite_of_locIndep_one_of_oddCycles_of_card_eq (+ 5- and 7-cycle corollaries)
-      - JSP90.LocIndepOneTriangleFree, JSP90.erdos73On_one_of_locIndepOneTriangleFree (m) : Erdos73On 1 (3 + m)
+      - 'JSP90.LocIndepOneTriangleFree, JSP90.erdos73On_one_of_locIndepOneTriangleFree (m) : Erdos73On 1 (3 + m)'
       - JSP90.erdos73_one_iff_exists_locIndepOneTriangleFree (Erdos73 1 <-> exists m, LocIndepOneTriangleFree m)
       - JSP90.erdos73On_one_two_of_triangle_two_of_locIndepOneTriangleFree (Erdos73On 1 2 = the two sharp halves)
       - JSP90.not_erdos73On_one_two_of_not_locIndepOneTriangleFree (the triangle-free half is NECESSARY)
       - JSP90.not_erdos73On_one_one, JSP90.not_erdos73On_one_of_le, JSP90.not_locIndepOneTriangleFree_one (the constant 1 is refuted at k = 1, so f(1) >= 2)
       - JSP90.not_isNClique_four_of_locIndep_one, JSP90.not_adj_of_common_neigh_two_of_locIndep_one (no K_4; the second neighbourhood of a triangle is independent)
     next_step:
-      - prove JSP90.LocIndepOneTriangleFree 2: LocIndep 1 G + G.CliqueFree 3 -> CloseToBipartite 2 G, which is now the ENTIRE content of k = 1 up to the triangle half
-      - first concrete step: formalise that the maximum independent sets of an odd cycle C (|C| = 2r+1) are exactly the 2r+1 sets {c_j, c_{j+2}, ..., c_{j+2r-2}}; combined with LocIndep on X = C u {v} (alpha >= r+1) this gives the k = 1 local structure at a shortest odd cycle
-      - then the counting step: three attachment points of a shortest odd cycle in a LocIndep-1 triangle-free graph force deficiency >= 2
+      - 'prove JSP90.LocIndepOneTriangleFree 2: LocIndep 1 G + G.CliqueFree 3 -> CloseToBipartite 2 G, which is now the ENTIRE content of k = 1 up to the triangle half'
+      - 'first concrete step: formalise that the maximum independent sets of an odd cycle C (|C| = 2r+1) are exactly the 2r+1 sets {c_j, c_{j+2}, ..., c_{j+2r-2}}; combined with LocIndep on X = C u {v} (alpha >= r+1) this gives the k = 1 local structure at a shortest odd cycle'
+      - 'then the counting step: three attachment points of a shortest odd cycle in a LocIndep-1 triangle-free graph force deficiency >= 2'
       - JSP90.LocIndepOneTriangleTwo (constant 2 rather than 3 for LocIndep-1 graphs with a triangle)
-      - JSP90.PetalSetLeTwoOfOne: re-verified this round up to n = 10 by petal-seeded hill climbing (discovery/JSP-000090/r130c.c), best |PetalSet(T)| = 2
-      - JSP90.OddCycleErdosPosa r (unchanged: this is the missing jsp_000090_main)
+      - 'JSP90.PetalSetLeTwoOfOne: re-verified this round up to n = 10 by petal-seeded hill climbing (discovery/JSP-000090/r130c.c), best |PetalSet(T)| = 2'
+      - 'JSP90.OddCycleErdosPosa r (unchanged: this is the missing jsp_000090_main)'
     prize_ready: false
     missing_theorems: [jsp_000090_main]
   round_136:
@@ -244,30 +267,30 @@ build:
     build_jobs: 1287
     headline_results:
       - JSP90.sub_inter_or_sdiff_of_isOddCycle (an odd cycle does not cross a vertex set)
-      - JSP90.exists_mem_boundary_neigh_inter_of_isOddCycle_ne_of_packing_one (FAN ENTRY: every odd cycle D != C contains a fan vertex y of C together with a neighbour of y lying on D n C)
+      - 'JSP90.exists_mem_boundary_neigh_inter_of_isOddCycle_ne_of_packing_one (FAN ENTRY: every odd cycle D != C contains a fan vertex y of C together with a neighbour of y lying on D n C)'
       - JSP90.attachPoints, JSP90.mem_attachPoints, JSP90.subset_attachPoints_C, JSP90.disjoint_attachPoints_boundary (the mirror image of the fan)
       - JSP90.hitsOddCycles_attachPoints_of_packing_one (THE ATTACHMENT POINTS OF A SHORTEST ODD CYCLE ARE AN ODD-CYCLE TRANSVERSAL)
       - JSP90.hitsOddCycles_attachPoints_union_singleton_of_packing_one (the empty-fan case)
       - JSP90.closeToBipartite_of_attachPoints_le_of_packing_one (the conclusion of Erdos #73 with the constant |attachPoints|)
       - JSP90.closeToBipartite_one_of_attachPoints_le_one_of_packing_one (NEW INSTANCE, CONSTANT 1, tight)
-      - JSP90.erdos73On_one_two_of_attachPoints_le_two_of_packing_one (NEW INSTANCE OF THE HEADLINE THEOREM: THE OPTIMAL CONSTANT 2, FOR EVERY k)
+      - 'JSP90.erdos73On_one_two_of_attachPoints_le_two_of_packing_one (NEW INSTANCE OF THE HEADLINE THEOREM: THE OPTIMAL CONSTANT 2, FOR EVERY k)'
       - JSP90.erdos73On_one_two_of_attachPoints_le_two, JSP90.closeToBipartite_one_of_attachPoints_le_one (the k = 1 instances)
-      - JSP90.hitsOddCycles_pair_of_attachPoints_sub, JSP90.erdos73On_one_two_of_boundary_card_eq_two_of_attachPoints_le_two (the provable case of round 135's FanTwoResidual: two NAMED vertices, the certificate lying ON the cycle)
-      - JSP90.AttachThreeResidual, JSP90.erdos73On_one_two_of_attachThreeResidual (NEW, STRICTLY TIGHTER RESIDUAL: 3 <= |attachPoints|, no hypothesis on the fan)
+      - 'JSP90.hitsOddCycles_pair_of_attachPoints_sub, JSP90.erdos73On_one_two_of_boundary_card_eq_two_of_attachPoints_le_two (the provable case of round 135''s FanTwoResidual: two NAMED vertices, the certificate lying ON the cycle)'
+      - 'JSP90.AttachThreeResidual, JSP90.erdos73On_one_two_of_attachThreeResidual (NEW, STRICTLY TIGHTER RESIDUAL: 3 <= |attachPoints|, no hypothesis on the fan)'
       - JSP90.fanTwoResidual_of_attachThreeResidual (the new residual implies round 135's FanTwoResidual, i.e. is formally weaker)
       - JSP90.card_isClique_le_two_add, JSP90.not_isNClique_of_card_ge_three_add, JSP90.card_isClique_le_three_of_locIndep_one (under LocIndep k every clique has at most k+2 vertices)
       - JSP90.card_attachSet_le_two_of_locIndep_one (the missing |C| = 3 half of the fan bound, by K4-freeness)
     measurements:
-      - discovery/JSP-000090/r136.c: 0 failures over all 986787 LocIndep-1 graphs on n = 7 for both the transversal claim and tau_odd <= 2
-      - r136.c: max over G of min over shortest odd cycles C of |attachPoints G C| = 4, so the residual threshold 3 is optimal
-      - r136.c: max |N(x) n C| = 2 for |C| = 3 as well as for |C| >= 5 (the K4-free half of the fan bound)
-      - r136.c: the smallest graph with min_C |attachPoints G C| >= 3 has n = 5, edges 0-2 0-3 0-4 1-2 1-3 1-4 2-3
+      - 'discovery/JSP-000090/r136.c: 0 failures over all 986787 LocIndep-1 graphs on n = 7 for both the transversal claim and tau_odd <= 2'
+      - 'r136.c: max over G of min over shortest odd cycles C of |attachPoints G C| = 4, so the residual threshold 3 is optimal'
+      - 'r136.c: max |N(x) n C| = 2 for |C| = 3 as well as for |C| >= 5 (the K4-free half of the fan bound)'
+      - 'r136.c: the smallest graph with min_C |attachPoints G C| >= 3 has n = 5, edges 0-2 0-3 0-4 1-2 1-3 1-4 2-3'
     next_step:
       - JSP90.AttachThreeResidual is the top target; the n = 5 witness shows a single shared attachment point can work
-      - sub-case (i): a triangle with one fan vertex of attachment size 2 and three attachment points in total -- measure whether ONE vertex always suffices
-      - sub-case (ii): |C| >= 5 with three attachment points (the only case where round 35's card_inter_neigh_le_two applies to both fan vertices)
+      - 'sub-case (i): a triangle with one fan vertex of attachment size 2 and three attachment points in total -- measure whether ONE vertex always suffices'
+      - 'sub-case (ii): |C| >= 5 with three attachment points (the only case where round 35''s card_inter_neigh_le_two applies to both fan vertices)'
       - combine with JSPProblem/Additive.lean additivity over anticomplete decompositions
-      - refuted this round by hand: two fan vertices in the same JSP90.fanClass need NOT be non-adjacent at LocIndep 1 (round 135 next_bet item (iii))
-      - JSP90.OddCycleErdosPosa r (unchanged: this is the missing jsp_000090_main)
+      - 'refuted this round by hand: two fan vertices in the same JSP90.fanClass need NOT be non-adjacent at LocIndep 1 (round 135 next_bet item (iii))'
+      - 'JSP90.OddCycleErdosPosa r (unchanged: this is the missing jsp_000090_main)'
     prize_ready: false
     missing_theorems: [jsp_000090_main]
