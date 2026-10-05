@@ -54,6 +54,80 @@ set `X` then every independent set of `H` is one of `G[X]`, so `α(H) ≤ α(G[X
 `jsp_000090_main` — the Lean name that the prize gate checks. It must be the **complete** Erdős
 #73 theorem above (`Erdős73 k` for every `k`), proved with no `sorry`.
 
+## Round 176 (`lean/JSPProblem/SunSum.lean`) — **THE CONSTANT IN ERDŐS #73 IS AT LEAST `2 k`**
+
+Attack family 95, the **lower-bound / sharpness axis**.  Rounds 171–175 computed *upper* bounds on the
+odd cycle transversal of a graph of defect at most `k` (all of them order-dependent, e.g.
+`JSP90.closeToBipartite_two_of_locIndep_one_card_le_eight`); this round changes the object once more
+and constrains **the constant of the headline theorem itself**, with **no order anywhere in the
+statements**.  `lake build` **OK** (`Build completed successfully (1333 jobs)`); **0 `sorry`,
+0 `admit`**; `harness/score.py --strict-prize`: `build_ok = true`, `partial_ok = true`,
+`missing_theorems = ["jsp_000090_main"]`.  46 declarations in one new file, imported from the root
+module `JSPProblem.lean`.
+
+### The headline statements
+
+```lean
+JSP90.erdos73On_two_mul_le {k m : ℕ} (hk : 1 ≤ k) (h : Erdős73On.{0} k m) : 2 * k ≤ m
+JSP90.not_erdos73On_lt_two_mul {k m : ℕ} (hk : 1 ≤ k) (hm : m < 2 * k) : ¬ Erdős73On.{0} k m
+JSP90.two_mul_le_of_erdos73 {k : ℕ} (hk : 1 ≤ k) (h : Erdős73.{0} k) : 2 * k ≤ h.choose
+```
+
+**Any constant `m` that makes Erdős #73 true at the parameter `k` must satisfy `2 * k ≤ m`.**  This
+is the first *order-free* lower bound on the constant in this development and it **doubles** the
+machine-checked bound `JSP90.no_constant_below_k` of `lean/JSPProblem/Sharp.lean` (whose witness
+`kTriangles k` spends one unit of Erdős's parameter on one vertex of transversal).  The witness is
+the `k`-fold **3-sun** (`sun3U k`): each 3-sun is `LocIndep 1` and needs **two** deleted vertices,
+so `k` disjoint copies are `LocIndep k` and need `2 k`.
+
+It also explains, at the level of the constant rather than of an order bound, why
+`JSP90.closeToBipartite_two_of_locIndep_one_card_le_eight` cannot be lowered to `1`: the `k = 1` case
+of this round's statement is `JSP90.not_erdos73On_one_one` of `lean/JSPProblem/OneK.lean`, which is
+**not** restated here (nor is its positive counterpart
+`JSP90.closeToBipartite_one_of_locIndep_one_card_le_five`).
+
+### The structural content — Erdős's hypothesis is *summed over components*
+
+* **`JSP90.sumGraph j H`**, the disjoint union of a finite family of graphs on `W × Fin j`, with its
+  fibres (`JSP90.fib`, `JSP90.mem_fib`) and the counting lemmas
+  `JSP90.card_eq_sum_card_inter_fib`, `JSP90.biUnion_inter_fib`, `JSP90.card_image_fib`,
+  `JSP90.card_image_pair`, `JSP90.disjoint_image_fib`, `JSP90.pairwiseDisjoint_image`.
+* **`JSP90.indepCard_sumGraph`: the independence number is additive over a disjoint union**,
+  `α(⊔ H i) (X) = ∑ α(H i) (X ∩ fib i)`, proved in both directions (`JSP90.isIndepSet_sumGraph`
+  splits an independent set, `JSP90.exists_indepCard_sumGraph` glues the pieces).
+* **`JSP90.locIndep_sumGraph`: `LocIndep (j * k) (⊔ H i)` if every `H i` is `LocIndep k`**, with
+  `JSP90.defOf_sumGraph_le` and `JSP90.maxDef_sumGraph_le` as the deficiency forms.  So the local
+  hypothesis of Erdős #73 is *additive over components*, with **no other hypothesis**.
+* **`JSP90.sun3U k`**, the disjoint union of `k` 3-suns: `JSP90.locIndep_sun3U k : LocIndep k`
+  by Part 2, `JSP90.maxDef_sun3U : MaxDef (sun3U k) = k` (the witness is *exact*, as
+  `kTriangles` is) and `JSP90.not_locIndep_sun3U : ¬ LocIndep (k - 1)`.
+* **`JSP90.deleteFinset_sumGraph_fib`: the residue of the union inside one fibre is the residue of
+  that piece** — the transport lemma, via the new `JSP90.isBipartite_induce_of_graphMap`
+  (bipartiteness passes down a graph homomorphism) and the membership bookkeeping that says a
+  point outside the deleted part of a fibre projects outside the deleted part of the piece.
+  `JSP90.card_ge_two_of_not_bipartite` and **`JSP90.not_closeToBipartite_lt_two_mul_sumGraph`** are
+  the lower bound in the language of the disjoint union: if every single vertex of every piece is
+  needed to make that piece bipartite, then no set of fewer than `2 j` vertices makes the whole
+  union bipartite.
+* `JSP90.not_closeToBipartite_lt_two_mul_sun3U` is the `sun3U` instance, and
+  `JSP90.card_le_one_of_sub_tri` / `JSP90.indepCard_tri_le` / `JSP90.card_tri_sun` /
+  `JSP90.adj_of_mem_T0` / `JSP90.isIndepSet_subset` are the tools for the exactness of the witness.
+
+`#print axioms` on all of the above reports only `[propext, Classical.choice, Quot.sound]`.
+
+### What is left
+
+Nothing of the *direction* proved here: the lower bound on `f(k)` is sharp as far as this
+development can tell.  `jsp_000090_main` is deliberately **not** declared; the missing direction is
+still `JSP90.OddCycleErdosPosa r` (Reed–Robertson–Seymour–Thomas) through
+`JSP90.erdos73_of_erdosPosa`.  The concrete next question, now that the *lower* bound is settled,
+is the matching **order-free upper** bound: is `f(k) = 2 k` (it is at `k = 1`, where the eight-vertex
+instance and `sun3` give `f(1) = 2` exactly)?  That is the first candidate for
+`jsp_000090_main` in a form that never mentions `|V|`, and it is recorded as the next bet of
+`policy.json`.
+
+---
+
 ## Round 171 (`lean/JSPProblem/TriEight.lean`) — **THE EIGHT-VERTEX TRANSFER IS PROVED**
 
 Attack family 92.  `lake build` **OK** (`Build completed successfully (1330 jobs)`); **0 `sorry`,
