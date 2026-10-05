@@ -54,6 +54,119 @@ set `X` then every independent set of `H` is one of `G[X]`, so `α(H) ≤ α(G[X
 `jsp_000090_main` — the Lean name that the prize gate checks. It must be the **complete** Erdős
 #73 theorem above (`Erdős73 k` for every `k`), proved with no `sorry`.
 
+## Round 165 (`lean/JSPProblem/TriCount.lean`) — **THE CORRECTION OF ROUND 164's READING OF
+"BAD", AND THE COUNTING STEP OF THE TRIANGLE CASE IN THE CORRECTED READING**
+
+Attack family 87.  `lake build` OK with **1309 jobs**; **0 `sorry`, 0 `admit`**; `partial_ok = true`,
+`missing_theorems = ["jsp_000090_main"]`.  This round executes the concrete next bet of round 164
+(`policy.json`) — *finish the graph-to-`Fin 7` transfer* — and, in doing so, finds that **the finite
+core round 164 shipped was proved for the wrong reason**: the `Bool` it used for "properness" of a
+two-colouring of the residue was **weaker** than properness, so its `bad8` was not "the vertex is
+bad", and the counting step it proved was not the counting step of the problem.
+
+### The correction (the round's main finding)
+
+Round 164 defined badness through
+
+```lean
+JSP90.properX A c = !((c 0 && (cross A 0 2 || cross A 0 3)) || (c 1 && (cross A 1 2 || cross A 1 3)))
+```
+
+which only checks that the **class-`{0,1}` endpoint** of a cross edge is not coloured `true`.  The
+colouring `c ≡ false` satisfies it and is not proper at all.  `JSP90.properX` is **deleted** and
+replaced by
+
+* **`JSP90.proper8`** — checks **all four** cross pairs, so `proper8 A m = true` **is** "`m` is a
+  proper two-colouring of `G[X]`"; **`JSP90.proper8_adj`** (by `decide`) is the reading lemma, and it
+  is exactly the tool the transfer of "the vertex `t` is bad" needs in both directions;
+* **`JSP90.bad8`** — now genuinely "`G[X + {t}]` is not bipartite";
+* **`JSP90.monoS_of_all`** — the other direction of the transfer (any two points of `S t` carrying the
+  same colour make `S t` monochromatic).
+
+The colourings are now packed (`JSP90.col4 : Fin 16 → Fin 4 → Bool`, `JSP90.col7 : Fin 128 → Fin 7 →
+Bool`), and the local structure is written in **pure `Bool` arithmetic** (`S t i || …`, `! cross A p q
+|| …`), which is what makes `decide` affordable.
+
+### `JSP90.loc7_lemma` — THE COUNTING STEP, PROVED IN THE CORRECTED READING
+
+```lean
+JSP90.loc7_lemma : ∀ (A : Fin 4 → Bool) (S : Fin 3 → Fin 4 → Bool),
+    hyps A S = true → ¬ ((∀ z : Fin 7, hasTripleAvoiding A S z = true))
+```
+
+i.e. **three bad vertices of a triangle over a bipartite four-element residue, the three neighbour
+sets meeting both colour classes, and the three sets with empty triple intersection ⟹ some vertex of
+the seven is avoided by no independent triple** — which contradicts Erdős's hypothesis read on the
+six-element subset `V \ {z}`.  This is the statement rounds 163–164 were aiming at; it is now proved
+**in the reading that matters**, and both transfer directions (`JSP90.hasTripleAvoiding_of_indep3`
+forward, `JSP90.exists_triple_of_hasTripleAvoiding` backward) are available.
+
+Proved **by `decide`**, sixteen times, once for each of the `2 ^ 4` configurations of the four cells of
+`G[X]` (`JSP90.loc7_lemma_0 … JSP90.loc7_lemma_15`, assembled by `JSP90.loc7_lemma` through
+`JSP90.exists_aBits`).  The split is forced: a **single** `decide` over all `2 ^ 16` configurations is
+killed by the kernel (`Lean exited with code 137` after `370–400 s`); the sixteen pieces build in
+`333 s` altogether.  `decide` and not `native_decide`, so `#print axioms JSP90.loc7_lemma` reports
+only `[propext, Classical.choice, Quot.sound]`.
+
+Also proved in this round:
+
+* **`JSP90.triple3`, `JSP90.hasTripleAvoiding`, `JSP90.erdos6`, `JSP90.erdos6_of_forall`** — the
+  Erdős side of the counting step, packed;
+* **`JSP90.ofDecideTrue`** (`p → decide p = true`, the direction this Lean version's core does *not*
+  provide) and **`JSP90.bool_four_or`** — the `decide`-valued glue every transfer lemma needs;
+* **`JSP90.exists_aBits`** — every configuration of the four cells is `aBits n` for some `n : Fin 16`.
+
+### The measurement, and a refuted variant
+
+`discovery/JSP-000090/r165c.c` (log `r165c.log`) re-measures the step over all `2^4 · 2^12 = 65 536`
+configurations `A × S` of the `Fin 7` language, with the **corrected** badness:
+
+| quantity | value |
+| --- | --- |
+| configurations with each `S t` meeting both classes, empty triple intersection, **all three vertices bad** | **816** |
+| of those, configurations with `¬ (∀ z, z is avoided by an independent triple)` | **816** (`0` violations) |
+| of those, configurations with the six-element condition `∀ z, ∃ independent triple avoiding z` | **0** |
+| of those, configurations with "two deletions leave the graph bipartite" | **288** (`528` violations) |
+
+So the transversal conclusion is **exactly right** (it contradicts Erdős in every one of the `816`
+configurations), and the *alternative* conclusion one might try to read off the same table — that two
+deletions always suffice — is **false**.  (Two earlier programs written in this round,
+`discovery/JSP-000090/r165.c` and `…/r165b.c`, are **void**: the first printed the complement of what
+its flag said, the second copied the adjacency matrix into a `4 × 4` buffer with the wrong stride.
+`r165c.c` is the corrected program and the only one to read.)
+
+### What is still missing — the transfer, named exactly
+
+`JSP90.loc7_lemma` is the only missing *mathematical* input of the triangle case; what is left is the
+**transfer**, in a new file (`lean/JSPProblem/TriFix.lean`, not yet written):
+
+1. the enumeration: from a triangle `T` with bipartite residue and a proper two-colouring `d` of
+   `X = V \ T`, produce `p0, p1, q0, q1` (the two points of each class, `JSP90.card_cls_ge_two`),
+   `xpt : Fin 4 → V`, `tpt : Fin 3 → V`, the bijection `inv : Fin 7 → V`, the four cells `A` and the
+   three neighbour sets `S`, and the correspondence `adj7 A S i j = decide (G.Adj (inv i) (inv j))`
+   (a `49`-case analysis);
+2. the three hypotheses of `hyps`: `htri` (empty triple intersection, from
+   `JSP90.card_adjIn_le_two_of_isNClique_three`), `hbi0`/`hbi1` (each `S t` meets both classes, from
+   `JSP90.exists_adjIn_color`), and the **corrected** badness transfer — a proper two-colouring of
+   `X + {t}` would give `monoS S t m = true` for `m := aBits`-style packing of the colouring, which
+   `JSP90.proper8_adj` + `JSP90.monoS_of_all` make available (this is the step that had **no** tool
+   under round 164's `properX`);
+3. Erdős's hypothesis on `univ \ {inv z}` (six elements, so `|S| ≥ 3`) gives an independent triple
+   avoiding `z`, i.e. `hasTripleAvoiding A S z = true`, contradicting `JSP90.loc7_lemma`.
+
+That closes `JSP90.triCase`, hence `JSP90.closeToBipartite_two_of_card_le_seven_of_triangleCase`
+(round 162), hence
+
+```lean
+JSP90.closeToBipartite_two_of_locIndep_one_card_le_seven : LocIndep 1 G → Fintype.card V ≤ 7 →
+    CloseToBipartite 2 G
+```
+
+with the **optimal** constant `2` (`sun3` on six vertices attains it), together with its transversal,
+`Erdős73On` and piece forms.
+
+---
+
 ## Round 162 (`lean/JSPProblem/ThreeOrder.lean`) — **MISSING LEMMA 3 IS CLOSED, AND THE
 FIVE-CYCLE CASE OF THE SHARP SEVEN-VERTEX INSTANCE WITH IT**
 
