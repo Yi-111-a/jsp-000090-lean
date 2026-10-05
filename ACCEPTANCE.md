@@ -54,6 +54,50 @@ set `X` then every independent set of `H` is one of `G[X]`, so `α(H) ≤ α(G[X
 `jsp_000090_main` — the Lean name that the prize gate checks. It must be the **complete** Erdős
 #73 theorem above (`Erdős73 k` for every `k`), proved with no `sorry`.
 
+## Round 166 (`lean/JSPProblem/TriFix.lean`) — **MISSING LEMMA 1 IS PROVED AND THE SEVEN-VERTEX AXIS IS
+## CLOSED WITH THE OPTIMAL CONSTANT `2`**
+
+Attack family 87.  `lake build` OK with **1310 jobs**; **0 `sorry`, 0 `admit`**; `partial_ok = true`,
+`missing_theorems = ["jsp_000090_main"]`.  This round executes the single remaining gap recorded by
+round 165 (`policy.json`, "THE TRANSFER") and, in doing so, closes the seven-vertex instance of
+Erdős #73 at `k = 1` with the constant `2` that the measurements have been asking for since round 144.
+
+### The transfer (MISSING LEMMA 1)
+
+```lean
+JSP90.triCase (hG : LocIndep 1 G) (hV : Fintype.card V ≤ 7) {T : Finset V} (hT : G.IsNClique 3 T)
+    (hXbip : (deleteFinset G T).IsBipartite) : ∃ t ∈ T, (deleteFinset G (T \ {t})).IsBipartite
+```
+
+`JSP90.card_cls_ge_two` forces the residue `X = V \ T` to have four points with two in each colour
+class; the file builds `xpt : Fin 4 → V`, `tpt : Fin 3 → V`, the bijection `inv : Fin 7 → V` (with
+`finv : V → Fin 7` as its inverse), the four cells `A` and the three neighbour sets `S`, so that
+`adj7 A S i j = decide (G.Adj (inv i) (inv j))`, and transfers the three hypotheses of `JSP90.hyps`:
+empty triple intersection, each `S_t` meeting both colour classes, and — the delicate half — **each
+`t` bad in the `Fin 7` language**, `monoS S t m = true ∧ proper8 A m = true` yielding a genuine
+two-colouring of `deleteFinset G (T \ {t})` through `JSP90.isBipartite_of_adjIn_mono`, with the
+residual colours read off `col4 m` and properness read off by `JSP90.proper8_adj`.  Erdős's hypothesis
+read on the six-element set `univ \ {inv z}` then gives an independent triple avoiding each vertex
+`z`, contradicting round 165's `decide`-proved counting step `JSP90.loc7_lemma`.
+
+### The axis
+
+`JSP90.closeToBipartite_two_of_locIndep_one_card_le_seven : LocIndep 1 G → |V| ≤ 7 →
+CloseToBipartite 2 G` — **Erdős #73 at `k = 1` on seven vertices, with the optimal constant `2`**
+(a shortest odd cycle has three, five or seven vertices; the two long cases were closed in round 162
+and the triangle case is `JSP90.triCase`; the bridge "the residue of every triangle is bipartite" is
+round 150's `JSP90.isBipartite_delete_of_isNClique_three_of_locIndep_one_card_le_seven`).  Downstream:
+`JSP90.erdos73On_one_two_of_card_le_seven`, `JSP90.tauOdd_le_two_of_locIndep_one_card_le_seven`,
+`JSP90.exists_hitsOddCycles_two_of_locIndep_one_card_le_seven`,
+`JSP90.closeToBipartite_two_of_locIndep_one_of_card_le_seven` (piece form),
+`JSP90.exists_hitsOddCycles_two_of_card_le_seven`, `JSP90.tauOdd_le_two_of_card_le_seven`.
+
+### Optimality
+
+`JSP90.tauOdd_sun3 : tauOdd sun3 = 2` and
+`JSP90.not_locIndepOneAllSmallOrder_one_of_card_le_seven` — the class is two vertices away from
+bipartite and **not** one, so the constant cannot be lowered.
+
 ## Round 165 (`lean/JSPProblem/TriCount.lean`) — **THE CORRECTION OF ROUND 164's READING OF
 "BAD", AND THE COUNTING STEP OF THE TRIANGLE CASE IN THE CORRECTED READING**
 

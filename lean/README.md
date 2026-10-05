@@ -2171,3 +2171,67 @@ vertices, `r138.c` `Q11`: `5 040` shortest cycles with `4 ≤ |attachPoints G C|
 * `Finset.eq_of_subset_of_card_le` returns `s = t` (not `t = s`), so it usually needs `.symm`;
 * `inter_attachPoints_of_isOddCycle_ne_of_packing_one` returns `D ∩ attachPoints G C` while
   `attachPoints G C ∩ D` is used elsewhere; convert with `rw [Finset.inter_comm]` at the statement level.
+
+---
+
+## Round 166 — `JSPProblem/TriFix.lean`: **MISSING LEMMA 1 AND THE SEVEN-VERTEX AXIS, CLOSED WITH THE OPTIMAL CONSTANT `2`**
+
+`lake build` OK with **1310 jobs**; **0 `sorry`, 0 `admit`**; `partial_ok = true`,
+`missing_theorems = ["jsp_000090_main"]`.  Round 165 had isolated and machine-checked the *finite*
+core of the triangle case (`JSP90.loc7_lemma`, by `decide`, in the corrected reading of "bad"); this
+round carries a graph into that language, closes the case, and closes the axis.
+
+### What is proved
+
+* **`JSP90.triCase` — MISSING LEMMA 1.**
+  `LocIndep 1 G → |V| ≤ 7 → (G.IsNClique 3 T) → (deleteFinset G T).IsBipartite →
+  ∃ t ∈ T, (deleteFinset G (T \ {t})).IsBipartite`.
+  The encoding: `xpt : Fin 4 → V` (two points in each colour class of the four-element residue, forced
+  by `JSP90.card_cls_ge_two`), `tpt : Fin 3 → V`, the bijection `inv : Fin 7 → V` with `finv` its
+  inverse, the four cells `A` (`JSP90.hcrossAll`), the three neighbour sets `S`, and
+  `JSP90.hadj7 : adj7 A S i j = decide (G.Adj (inv i) (inv j))` (a `49`-case analysis).  The three
+  hypotheses of `JSP90.hyps` are transferred — `JSP90.htri` (empty triple intersection),
+  `JSP90.hbi0`/`JSP90.hbi1` (each `S_t` meets both colour classes) and **`JSP90.hbad8`**, the delicate
+  half: `monoS S t m = true ∧ proper8 A m = true` for some `m : Fin 16` gives a genuine two-colouring
+  of `deleteFinset G (T \ {t})` through `JSP90.isBipartite_of_adjIn_mono`, with the residual colours
+  read off `col4 m` and properness read off by `JSP90.proper8_adj` (the tool round 165's correction
+  created).  Erdős's hypothesis read on the six-element set `univ \ {inv z}` then produces an
+  independent triple avoiding every vertex `z` (`JSP90.hE`), contradicting `JSP90.loc7_lemma`.
+* **`JSP90.monoS_get`** — reading monochromaticity *forward*, the piece round 165 lacked;
+  plus `JSP90.indep3_of_nadj`, `JSP90.bool_or3_false`, `JSP90.bool_eq_of_decide_true`,
+  `JSP90.opp2_involutive`, `JSP90.bitCol`, `JSP90.three_distinct_of_card_ge_three`,
+  `JSP90.exists_two_ne_of_card_ge_two`, `JSP90.card_inter_le_one_of_isNClique_three_indep`.
+* **`JSP90.closeToBipartite_two_of_locIndep_one_card_le_seven` — `LocIndep 1 → |V| ≤ 7 ⟹
+  CloseToBipartite 2 G`**, with the optimal constant.  The bridge round 162 was missing is round
+  150's `JSP90.isBipartite_delete_of_isNClique_three_of_locIndep_one_card_le_seven` (the residue of
+  every triangle is bipartite).
+* Downstream: `JSP90.LocIndepOneAllSmallOrder`, `JSP90.erdos73On_one_two_of_card_le_seven`,
+  `JSP90.tauOdd_le_two_of_locIndep_one_card_le_seven`,
+  `JSP90.exists_hitsOddCycles_two_of_locIndep_one_card_le_seven`,
+  `JSP90.closeToBipartite_two_of_locIndep_one_of_card_le_seven` (the piece form),
+  `JSP90.exists_hitsOddCycles_two_of_card_le_seven` and `JSP90.tauOdd_le_two_of_card_le_seven` (the
+  piece form in the transversal shape).
+* **Optimality**: `JSP90.tauOdd_sun3` and `JSP90.not_locIndepOneAllSmallOrder_one_of_card_le_seven`
+  — the class of graphs of order `≤ 7` satisfying `LocIndep 1` is two vertices away from bipartite and
+  **not** one.
+
+### Toolchain facts added this round
+
+* `JSP90.tcDec`/`JSP90.tcAdj` are already declared by an earlier file of the same namespace, even when
+  written `local instance` — a second file must use fresh names (`tcDecFix`, `tcAdjFix`);
+* `Bool.or` short-circuits (`true || b = true`), so `(a || b || c) = true` with `a = b = false`
+  reads back `c = true` (`JSP90.bool_or3_false`), while the "first two are `true`" version is
+  *unprovable*;
+* `Bool.and_eq_true_iff` must be applied **stepwise**: `monoS` and `indep3` are right-associated
+  `&&` chains, and a `.1.1.1` projection in one step fails on the printed (unparenthesised) term;
+* `Finset.mem_erase` reads `a ∈ s.erase b ↔ a ≠ b ∧ a ∈ s` (distinctness **first**), and `rcases`
+  cannot destructure `a ∈ s` at all (it is a `Quot.lift`, not an inductive) — use
+  `Finset.mem_inter.mp`, `Finset.mem_singleton.mp`, `Finset.mem_union.mp`;
+* `Finset.Subset.antisymm` is the safe way to prove `s = t` for `Finset`s (an `ext`/`simp only` proof
+  runs into the `CoeeSort` membership);
+* `decide p = false` needs `decide_eq_false : ¬ p → decide p = false` (`of_decide_eq_true` goes the
+  other way, and `Eq.symm` must be applied at the `Prop` level, not on the `Bool` equation);
+* a `let d := f`-bound function cannot be `rw`-ed (`rw [d]` fails with "invalid rewrite argument"):
+  use `simp only [d, …]`;
+* a docstring containing the word `admit` (or `sorry`) makes `harness/score.py` count a placeholder —
+  this cost `partial_ok` for one build (`admit: 1`) before the word was removed.

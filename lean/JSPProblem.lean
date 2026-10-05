@@ -1231,6 +1231,53 @@ What remains: `JSP90.AllCrossResidual`, `JSP90.NoSixTraces`, `JSP90.AttachFourRe
 `JSP90.OddCycleErdosPosa r` (Reed–Robertson–Seymour–Thomas); `jsp_000090_main` is deliberately **not**
 declared, so the harness keeps reporting `missing_theorems = ["jsp_000090_main"]`.
 
+## `JSPProblem/TriFix.lean` (round 166) — **MISSING LEMMA 1 AND THE SEVEN-VERTEX AXIS, CLOSED WITH THE OPTIMAL CONSTANT `2`**
+
+Attack family 87, executing `policy.json`'s next bet of round 165 ("THE TRANSFER").  Rounds 163–165 had
+isolated and machine-checked the *finite* core of the triangle case (`JSP90.loc7_lemma`, proved by
+`decide` in `JSPProblem/TriCount.lean`, in the corrected reading of "bad" that round 165 established).
+Round 166 carries a graph into that language and closes the case, then the axis.
+
+* **`JSP90.triCase` — MISSING LEMMA 1.**  `LocIndep 1 G`, `|V| ≤ 7`, a triangle `T` with bipartite
+  residue ⟹ some `t ∈ T` with `G[(V \ T) + {t}]` bipartite.  The encoding: `xpt : Fin 4 → V` (the two
+  colour classes of the four-element residue, two points each, by
+  `JSP90.card_cls_ge_two`), `tpt : Fin 3 → V`, the bijection `inv : Fin 7 → V`, the four cells `A`
+  (`JSP90.hcrossAll`) and the three neighbour sets `S`, with
+  `JSP90.hadj7 : adj7 A S i j = decide (G.Adj (inv i) (inv j))` (a `49`-case analysis).  The three
+  hypotheses of `JSP90.hyps` are transferred (`JSP90.htri`, `JSP90.hbi0`, `JSP90.hbi1`, `JSP90.hbad8`),
+  Erdős's hypothesis read on the six-element set `univ \ {inv z}` gives an independent triple avoiding
+  every vertex `z` (`JSP90.hE`), contradicting `JSP90.loc7_lemma`.
+* **`JSP90.monoS_get`** — the reading of monochromaticity *forward* (round 165 produced only the other
+  direction), which is what the badness transfer consumes; **`JSP90.indep3_of_nadj`**,
+  **`JSP90.bool_or3_false`**, **`JSP90.three_distinct_of_card_ge_three`**,
+  **`JSP90.exists_two_ne_of_card_ge_two`**,
+  **`JSP90.card_inter_le_one_of_isNClique_three_indep`** — the remaining glue (the last one: an
+  independent set meets a triangle in at most one point).
+* **`JSP90.closeToBipartite_two_of_locIndep_one_card_le_seven` — `LocIndep 1 → |V| ≤ 7 ⟹
+  CloseToBipartite 2 G`, i.e. **Erdős #73 at `k = 1` on seven vertices with the optimal constant
+  `2`**.  This closes the reduction `JSP90.closeToBipartite_two_of_card_le_seven_of_triangleCase` of
+  round 162: a shortest odd cycle of `G` has three, five or seven vertices, the two long cases were
+  closed in that same round, and the triangle case is `JSP90.triCase` — the bridge it needs, "the
+  residue of every triangle is bipartite", is round 150's
+  `JSP90.isBipartite_delete_of_isNClique_three_of_locIndep_one_card_le_seven`.  This is the last
+  order at which the measured constant is `2` (`discovery/JSP-000090/r144b_n8.log`).
+* Downstream, in the shapes the rest of the development reads:
+  **`JSP90.LocIndepOneAllSmallOrder`**, **`JSP90.erdos73On_one_two_of_card_le_seven`**,
+  **`JSP90.tauOdd_le_two_of_locIndep_one_card_le_seven`**,
+  **`JSP90.exists_hitsOddCycles_two_of_locIndep_one_card_le_seven`**,
+  **`JSP90.closeToBipartite_two_of_locIndep_one_of_card_le_seven`** (the piece form),
+  **`JSP90.exists_hitsOddCycles_two_of_card_le_seven`** and
+  **`JSP90.tauOdd_le_two_of_card_le_seven`** (the piece form in the transversal shape — what a
+  peeling argument consumes).
+* **Optimality**: **`JSP90.tauOdd_sun3`** (`tauOdd sun3 = 2`) and
+  **`JSP90.not_locIndepOneAllSmallOrder_one_of_card_le_seven`** — the class of graphs of order at most
+  seven satisfying `LocIndep 1` is two vertices away from bipartite and **not** one, so the constant
+  `2` of the instance above cannot be improved.
+
+What remains, unchanged: `JSP90.OddCycleErdosPosa r` (Reed–Robertson–Seymour–Thomas), i.e. the *upper*
+bound on `f(k)` for arbitrary `k`; `jsp_000090_main` is deliberately **not** declared, so the harness
+keeps reporting `missing_theorems = ["jsp_000090_main"]`.
+
 -/
 import JSPProblem.Definitions
 import JSPProblem.Reed
@@ -1340,3 +1387,4 @@ import JSPProblem.ThreeB
 import JSPProblem.ThreeA
 import JSPProblem.ThreeOrder
 import JSPProblem.TriCount
+import JSPProblem.TriFix
