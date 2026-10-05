@@ -7170,3 +7170,90 @@ seven-cycle case, the five-cycle case is the *only* thing still missing from
 order eight, the five-cycle case named above.  `jsp_000090_main` is deliberately **not** declared, so
 the harness keeps reporting `missing_theorems = ["jsp_000090_main"]`.  `formalization.yaml` remains
 `status: wip`, `prize_ready: false`.  No award claim is made.
+
+
+---
+
+## Round 175 (`lean/JSPProblem/IndepSplit.lean`) — the **INDEPENDENT-SET-SPLIT axis**: the EIGHT-VERTEX AXIS IS CLOSED, five-cycle case included, with no case analysis
+
+Attack family 94.  New module `lean/JSPProblem/IndepSplit.lean` (27 declarations, 432 lines, **0
+sorry, 0 admit**), imported from the root module `JSPProblem.lean`; `lake build` OK with 1332 jobs;
+`#print axioms` on every headline result shows only `[propext, Classical.choice, Quot.sound]`.
+`harness/score.py problems/JSP-000090` reports `build_ok = true, sorry = 0, admit = 0,
+placeholder_total = 0, partial_ok = true`, `missing_theorems = ["jsp_000090_main"]`.
+
+### The gap that is closed
+
+Rounds 171 (`JSPProblem/TriEight.lean`) and 172 (`JSPProblem/CycWitness.lean`) closed two of the three
+cases of
+
+```lean
+JSP90.closeToBipartite_two_of_locIndep_one_card_le_eight : LocIndep 1 G -> |V| <= 8 -> CloseToBipartite 2 G
+```
+
+and left the **five-cycle case** as the only remaining gap of the eight-vertex axis, to be attacked by
+pricing the points of the shortest odd five-cycle that a two-element certificate has to cover.
+
+**This round closes it, and the case analysis is not needed at all.**  The obstruction was not the
+counting but the *object*: rounds 152–172 ask **which odd cycles an odd cycle transversal must hit**,
+while `CloseToBipartite m G` is also the statement that **the vertices of `G` split into two
+independent sets and a remainder of at most `m` points**.  Under that reading Erdős's hypothesis can
+be applied a second time, and once applied twice at `k = 1` and `|V| <= 8` it yields the constant `2`.
+
+### What is proved
+
+| result | content |
+|---|---|
+| `JSP90.isBipartiteWith_of_cover`, `JSP90.closeToBipartite_of_cover` | the two directions of the reading: a cover of `V` by two independent sets and a remainder `s` **is** a bipartition of `G - s` |
+| **`JSP90.closeToBipartite_of_isIndepSet`** | **THE SPLIT LEMMA**, with **no hypothesis at all**: `CloseToBipartite (|V \ I| - α(G[V \ I])) G` for every independent set `I`.  The odd cycle transversal number of a graph is at most the deficiency of the complement of any independent set, and the two deleted pieces are `I` and a maximum independent set `K` of `G[V \ I]` |
+| `JSP90.exists_cover_of_isIndepSet` | the certificate: two disjoint independent sets `I`, `K` with `|K| = α(G[V \ I])` |
+| **`JSP90.closeToBipartite_one_iff_exists_cover`** | **the exact characterisation of `CloseToBipartite 1`**, both directions: the vertices of `G` split into two independent sets and at most one leftover vertex — *"defect `≤ 1` is bipartite plus one exception"*, machine-checked |
+| `JSP90.sdiff_indepCard_le_of_locIndep` | Erdős's hypothesis bounds the cost of the split **twice**: `|V \ I| - α(G[V \ I]) ≤ ((|V| + k) / 2 + k) / 2` |
+| **`JSP90.closeToBipartite_of_locIndep_of_card_le`** | **A NEW INSTANCE OF THE HEADLINE THEOREM, FOR EVERY `k`**: `LocIndep k G → CloseToBipartite (((|V| + k) / 2 + k) / 2) G`.  No odd girth, no packing number, no packing weight, no degree bound, no bound on the number of cut or branch vertices, no connectivity, no decomposition |
+| **`JSP90.closeToBipartite_two_of_locIndep_one_card_le_eight`** | **`LocIndep 1 G → |V| ≤ 8 → CloseToBipartite 2 G`: the eight-vertex axis, five-cycle case included.**  It subsumes round 171's `JSP90.triCaseEight` and round 172's `closeToBipartite_one_of_shortest_seven_of_card_le_eight` |
+| `JSP90.erdos73On_two_of_locIndep_one_card_le_eight`, `exists_hitsOddCycles_two_of_card_le_eight`, `tauOdd_le_two_of_card_le_eight`, `erdos73On_of_locIndep_of_card_le`, `exists_hitsOddCycles_of_locIndep_of_card_le`, `tauOdd_le_of_locIndep_of_card_le` | the same instances in the three shapes used by the rest of the development |
+| `JSP90.closeToBipartite_three_of_locIndep_one_card_le_nine`, `..._card_le_twelve`, `closeToBipartite_four_of_locIndep_one_card_le_fourteen`, `tauOdd_le_three_of_locIndep_one_card_le_twelve` | **the order ladder: orders 9, 12 and 14 had no statement in the whole development** |
+| `JSP90.eq_of_adj_of_isIndepSet`, `notAdj_of_isIndepSet_of_mem`, `univ_sdiff_sdiff`, `disjoint_of_subset_sdiff`, `coloring_of_isBipartite_delete`, `isIndepSet_filter_eq`, `closeToBipartite_two_of_cover_of_card_le_two`, `closeToBipartite_two_of_locIndep_one_card_le_seven'` | the supporting lemmas |
+
+The proof of the headline result is four lines: Erdős's hypothesis gives `α(G) ≥ 4` at `|V| ≤ 8`, so
+`J = V \ I` has at most four points for a maximum independent set `I`; Erdős's hypothesis again gives
+`α(G[J]) ≥ 2`; the split lemma then delivers a two-element odd cycle transversal.
+
+### Measurement (run before formalising, as rounds 76–80 established)
+
+* `r175/m.c`: over all `2^23` graphs on `Fin 8` with `C = {0, …, 4}` a five-cycle and `W = V \ C` of
+  size `3`, of the **5717** that satisfy `LocIndep 1`, the union of the points of `C` missed by *some*
+  odd cycle is **all of `C`** (`max |AllMissed| = 5`, attained 110 times).  **So the certificate-on-`C`
+  version of the five-cycle case — the statement round 172 aimed at — is FALSE**, while the union of
+  forbidden *pairs* of `C` has at most **5** of the 10 pairs, so a pair certificate exists with 0
+  failures.
+* `r175/p.c`: at most 4 of the 5 cycle edges of `C` are ever blocked by an odd cycle.
+* `r175/q.c`: the union of missed points of `C` is bounded by `0, 1, 2, 5` at orders `5, 6, 7, 8` — the
+  order-eight jump is the first at which an odd cycle can miss *all* of `C`.
+* `r175/t.c`: **for every `LocIndep 1` triangle-free graph on `n ≤ 8` vertices the odd cycle
+  transversal number is exactly `1`** (1, 11, 202 and 5717 such graphs at `n = 5, 6, 7, 8`).
+* `r175/r.c`: random search at orders 9 and 10 finds no `LocIndep 1` triangle-free graph with
+  `tau_odd ≥ 2`.
+
+### Refuted this round, so that no later round re-attempts it
+
+* **`alpha(G[X]) ≥ |X| / 2` for triangle-free `G` is FALSE** (the Petersen graph has `|V| = 10` and
+  `α = 4`), so `|X| ≤ 2 α(X) + 1` is **not** available from triangle-freeness.  The instance proved
+  here rests on Erdős's hypothesis, applied twice, and on nothing else.
+* **The certificate-on-`C` version of the eight-vertex five-cycle case is false** (110
+  counterexamples), so the `AllMissed` machinery of rounds 152–172 cannot be pushed past order seven.
+
+### Why this does not reach `jsp_000090_main`, stated exactly
+
+`JSP90.closeToBipartite_of_locIndep_of_card_le` bounds the transversal by `((|V| + k) / 2 + k) / 2`,
+which still mentions the **order** of `G`.  `LocIndep 0` is bipartiteness and bipartite graphs have
+arbitrarily many vertices, so no hypothesis at fixed `k` bounds `|V|`; the constant of the split is an
+order-dependent constant.  Eliminating the order is exactly the content of Reed's theorem
+(`O(k log k)`), and no finite amount of splitting removes it.  The concrete next target recorded in
+`discovery/JSP-000090/policy.json` is therefore `LocIndep 1` at order **nine** with the constant `2`
+(`p9`, round 76, is the first witness at which `2` is needed among triangle-free graphs), with
+`JSP90.closeToBipartite_one_iff_exists_cover` — the new exact characterisation — as the tool.
+
+`jsp_000090_main` is deliberately **not** declared, so the harness keeps reporting
+`missing_theorems = ["jsp_000090_main"]`.  `formalization.yaml` remains `status: wip`,
+`prize_ready: false`.  No award claim is made.

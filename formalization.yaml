@@ -2,70 +2,71 @@ jsp_id: JSP-000090
 catalog_url: https://github.com/TheJustinSunPrize/awards
 status: wip
 prize_ready: false
-last_round: 172
+last_round: 175
 last_round_summary: |
-  Round 172 -- THE EIGHT-VERTEX SEVEN-CYCLE CASE OF Erdos #73, CLOSED WITH THE OPTIMAL CONSTANT 1,
-  BY REMOVING THE FIVE-POSITION HYPOTHESIS FROM THE WITNESS LEMMA.  Attack family 93.  One new file
-  lean/JSPProblem/CycWitness.lean (23 declarations, 0 sorry/admit), lake build OK with 1331 jobs,
-  axiom report clean (propext, Classical.choice, Quot.sound), imported from the root module
-  JSPProblem.lean.  score.py --strict-prize: build_ok=true, sorry=0, admit=0, partial_ok=true,
+  Round 175 -- THE INDEPENDENT-SET-SPLIT AXIS: THE EIGHT-VERTEX AXIS OF Erdos #73 IS CLOSED, THE
+  FIVE-CYCLE CASE INCLUDED, WITH NO CASE ANALYSIS.  Attack family 94.  One new file
+  lean/JSPProblem/IndepSplit.lean (27 declarations, 432 lines, 0 sorry/admit), lake build OK with
+  1332 jobs, axiom report clean (propext, Classical.choice, Quot.sound), imported from the root
+  module JSPProblem.lean.  score.py --strict-prize: build_ok=true, sorry=0, admit=0, partial_ok=true,
   missing_theorems = ['jsp_000090_main'].
 
-  (i)  ROUNDS 152-162 WERE STATED ON Fin 5, AND ONLY TWO THINGS IN THAT CHAIN ARE REALLY ABOUT FIVE:
-       five_flip_false / five_pair_inj' (pure modular arithmetic on Fin 5) and
-       card_neighIn_five_eq_two (which used TRIANGLE-FREENESS to make (C \ {c}) u {x} chordless).
-       Both are replaced here by order-free statements:
-         JSP90.hshort_of_card_eq                     -- an odd cycle of the same cardinality as a
-                                                        shortest one is shortest (so |D| = |C| makes D
-                                                        induced, with NO triangle-freeness needed);
-         JSP90.filter_adj_C_eq_ringPair_of_five_le   -- the neighbours of o.f j inside a shortest odd
-                                                        cycle of ANY length >= 5 are exactly its two
-                                                        ring-neighbours (built from the already
-                                                        order-free JSP90.card_neighIn_C_eq_two and
-                                                        JSP90.neigh_eq_of_adj_of_adj of Seven.lean);
-         JSP90.filter_adj_eq_of_cycle_singleton      -- (C \ {c}) u {x} an odd cycle of cardinality
-                                                        |C| means x sees C exactly as c does
-                                                        (round 152's filter_adj_eq_of_fiveCycle_
-                                                        singleton, with the triangle step replaced by
-                                                        "a triangle is an odd cycle shorter than C");
-         JSP90.x_ne_y_of_two_sevenCycles_singleton -- THE WITNESS IS INJECTIVE, FOR ANY CYCLE LENGTH
-                                                        >= 5: two distinct missed points of C have
-                                                        distinct outside vertices;
-         JSP90.card_missedSeven_le_card_univ_sdiff  -- the missed points inject into V \ C, so
-                                                        |Missed| <= |V \ C| order-free.
+  (i)  THE OBJECT CHANGED.  Rounds 152-172 ask WHICH ODD CYCLES AN ODD CYCLE TRANSVERSAL MUST HIT;
+       this round reads CloseToBipartite m G the other way round -- as THE VERTICES SPLIT INTO TWO
+       INDEPENDENT SETS AND A REMAINDER OF AT MOST m POINTS -- and applies Erdos's hypothesis a
+       second time.  At k = 1 and |V| <= 8 that gives the constant 2 in four lines:
 
-  (ii) THE INSTANCE.  At LocIndep 1 and |V| <= 8 with a shortest odd cycle C of SEVEN vertices,
-       every odd cycle D has 7 <= |D| odd and |D| <= 8, hence |D| = 7, and D != C forces
-       |D \ C| = |C \ D| = 1.  So EVERY missed point of C is missed by a cycle of the form
-       (C \ {c}) u {x} (JSP90.subset_missed_of_card_V_le_card_C_add_one, order-free), and the
-       pigeonhole gives |AllMissed| <= |V \ C| <= 1 < 7 = |C|:
-         JSP90.hitsOddCycles_mem_C_of_shortest_seven_of_card_le_add_one  (certificate ON C),
-         JSP90.closeToBipartite_one_of_shortest_seven_of_card_le_add_one  -- A NEW INSTANCE OF THE
-           HEADLINE THEOREM WITH THE OPTIMAL CONSTANT 1, stated as |V| <= |C| + 1 and with NO LocIndep
-           hypothesis at all,
-         JSP90.closeToBipartite_one_of_shortest_seven_of_card_le_eight,
-         JSP90.closeToBipartite_one_of_locIndep_one_card_le_eight_of_oddGirth_ge_seven  -- the
-           eight-vertex odd-girth-at-least-seven class instance,
-         JSP90.erdos73On_one_oddGirth_ge_seven_eight  -- the same in the Erdős73On shape,
-         JSP90.tauOdd_le_one_of_shortest_seven_of_card_le_eight,
-         JSP90.not_closeToBipartite_zero_of_oddGirth_ge_seven_eight_of_not_isBipartite  -- the
-           constant 1 is optimal inside the class.
-       Together with round 171's JSP90.triCaseEight this leaves ONE case of
-       JSP90.closeToBipartite_two_of_locIndep_one_card_le_eight: the five-cycle case.
+         JSP90.closeToBipartite_of_isIndepSet (THE SPLIT LEMMA, no hypothesis at all)
+           CloseToBipartite (|V \ I| - alpha(G[V \ I])) G   for every independent set I
+         JSP90.sdiff_indepCard_le_of_locIndep
+           |V \ I| - alpha(G[V \ I]) <= ((|V| + k) / 2 + k) / 2
+         JSP90.closeToBipartite_of_locIndep_of_card_le  (NEW INSTANCE, EVERY k)
+           LocIndep k G -> CloseToBipartite (((|V| + k) / 2 + k) / 2) G
+         JSP90.closeToBipartite_two_of_locIndep_one_card_le_eight  (THE EIGHT-VERTEX AXIS, CLOSED)
+           LocIndep 1 G -> |V| <= 8 -> CloseToBipartite 2 G
 
-  (iii) MEASUREMENT (discovery/JSP-000090/r172b.c, all 2^21 graphs on Fin 8 containing the 7-cycle):
-       160 LocIndep-1 graphs have odd girth 7; |{c in C : some odd cycle misses c}| is 0 in 128 of
-       them and 1 in 32 (the bound |AllMissed| <= |V \ C| <= 1 is attained 32 times, so the theorem
-       is not vacuous and the pigeonhole is tight); tau_odd = 1 in all 160.
+       This subsumes round 171's JSP90.triCaseEight and round 172's
+       closeToBipartite_one_of_shortest_seven_of_card_le_eight.  The proof: alpha(G) >= 4 at
+       |V| <= 8, so J = V \ I has at most four points for a maximum independent set I; alpha(G[J]) >= 2
+       by Erdos's hypothesis again; delete J \ K.
 
-  (iv) MEASUREMENT OF THE REMAINING FIVE-CYCLE CASE (discovery/JSP-000090/r172.c, all 2^23 graphs on
-       Fin 8 containing the five-cycle): of 3 051 680 LocIndep-1 graphs in which that five-cycle is
-       shortest, max |AllMissed| = 5 (attained 110 times), so CloseToBipartite 1 with the certificate
-       on C is FALSE at order eight; the number of three-intersection five-cycles reaches 6 (so round
-       162's uniqueness fails), and points missed by four-intersection five-cycles reach 4.  But a PAIR
-       of points of C meets every odd cycle in every one of the 3 051 680 cases (0 failures) and
-       tau_odd = 1 throughout, so the eight-vertex five-cycle case is TRUE with the certificate a pair
-       of points of the shortest odd cycle -- the next concrete target.
+  (ii) THE EXACT CHARACTERISATION OF THE CONCLUSION AT m = 1, both directions:
+       JSP90.closeToBipartite_one_iff_exists_cover
+         CloseToBipartite 1 G <-> exists I K, G.IsIndepSet I and G.IsIndepSet K and Disjoint I K and
+           |V \ (I u K)| <= 1
+       i.e. "defect <= 1 is bipartite plus one exception", which is the form in which Erdos's
+       hypothesis can be applied twice.  Supporting: JSP90.coloring_of_isBipartite_delete,
+       JSP90.isIndepSet_filter_eq, JSP90.isBipartiteWith_of_cover, JSP90.closeToBipartite_of_cover,
+       JSP90.univ_sdiff_sdiff, JSP90.disjoint_of_subset_sdiff, JSP90.eq_of_adj_of_isIndepSet,
+       JSP90.notAdj_of_isIndepSet_of_mem, JSP90.exists_cover_of_isIndepSet,
+       JSP90.closeToBipartite_two_of_cover_of_card_le_two.
+
+  (iii) THE ORDER LADDER: orders 9, 12 and 14 had NO STATEMENT AT ALL in the development:
+       JSP90.closeToBipartite_three_of_locIndep_one_card_le_nine, ..._card_le_twelve,
+       JSP90.closeToBipartite_four_of_locIndep_one_card_le_fourteen,
+       JSP90.tauOdd_le_three_of_locIndep_one_card_le_twelve.  Plus the three shapes used elsewhere:
+       JSP90.erdos73On_two_of_locIndep_one_card_le_eight, JSP90.exists_hitsOddCycles_two_of_card_le_eight,
+       JSP90.tauOdd_le_two_of_card_le_eight, JSP90.erdos73On_of_locIndep_of_card_le,
+       JSP90.exists_hitsOddCycles_of_locIndep_of_card_le, JSP90.tauOdd_le_of_locIndep_of_card_le,
+       JSP90.closeToBipartite_two_of_locIndep_one_card_le_seven'.
+
+  (iv) MEASURED FIRST, and it REFUTED round 172's target statement.  r175/m.c: over all 2^23 graphs on
+       Fin 8 with C = {0..4} a five-cycle, of the 5717 satisfying LocIndep 1 the union of points of C
+       missed by SOME odd cycle is ALL of C (max |AllMissed| = 5, 110 counterexamples), so the
+       CERTIFICATE-ON-C version of the five-cycle case is FALSE; the union of forbidden PAIRS has at
+       most 5 of the 10 pairs.  r175/q.c: that union is bounded by 0, 1, 2, 5 at orders 5, 6, 7, 8.
+       r175/t.c: every LocIndep-1 triangle-free graph on n <= 8 has tau_odd = 1.  r175/r.c: random
+       search at orders 9, 10 finds none with tau_odd >= 2.  ALSO REFUTED: 'alpha(G[X]) >= |X| / 2 for
+       triangle-free G' is false (Petersen graph: |V| = 10, alpha = 4), so the proved instance rests on
+       Erdos's hypothesis, not on triangle-freeness.
+
+  (v)  WHAT IS NOT PROVED.  JSP90.closeToBipartite_of_locIndep_of_card_le still mentions |V|, and no
+       hypothesis at fixed k bounds |V| (LocIndep 0 is bipartiteness, and bipartite graphs have
+       arbitrarily many vertices), so the constant is ORDER-dependent and jsp_000090_main stays
+       undeclared; JSP90.OddCycleErdosPosa r (Reed-Robertson-Seymour-Thomas) is unchanged.  The
+       concrete next target is LocIndep 1 at order NINE with the constant 2 (p9, round 76, is the
+       first witness at which 2 is needed among triangle-free graphs), with
+       JSP90.closeToBipartite_one_iff_exists_cover as the tool.  No award claim is made.
 
 github_owner: Yi-111-a
 lean_repository: https://github.com/Yi-111-a/jsp-000090-lean
@@ -294,3 +295,35 @@ build:
       - 'JSP90.OddCycleErdosPosa r (unchanged: this is the missing jsp_000090_main)'
     prize_ready: false
     missing_theorems: [jsp_000090_main]
+
+  round_175:
+    module: lean/JSPProblem/IndepSplit.lean
+    attack_family: 94
+    status: wip
+    new_declarations: 27
+    new_lines: 432
+    sorry: 0
+    admit: 0
+    build_jobs: 1332
+    missing_theorems: [jsp_000090_main]
+    prize_ready: false
+    headline:
+      - 'JSP90.closeToBipartite_two_of_locIndep_one_card_le_eight: LocIndep 1 G -> |V| <= 8 -> CloseToBipartite 2 G (THE EIGHT-VERTEX AXIS IS CLOSED, FIVE-CYCLE CASE INCLUDED, NO CASE ANALYSIS)'
+      - 'JSP90.closeToBipartite_of_locIndep_of_card_le: LocIndep k G -> CloseToBipartite (((|V| + k) / 2 + k) / 2) G (NEW INSTANCE OF THE HEADLINE THEOREM FOR EVERY k)'
+      - 'JSP90.closeToBipartite_of_isIndepSet: CloseToBipartite (|V \ I| - alpha(G[V \ I])) G for EVERY independent set I, no hypothesis'
+      - 'JSP90.closeToBipartite_one_iff_exists_cover: CloseToBipartite 1 G <-> the vertices split into two independent sets and at most one leftover (EXACT CHARACTERISATION, both directions)'
+      - 'JSP90.sdiff_indepCard_le_of_locIndep: Erdos''s hypothesis bounds the cost of the split twice'
+      - 'JSP90.isBipartiteWith_of_cover, JSP90.closeToBipartite_of_cover, JSP90.univ_sdiff_sdiff, JSP90.disjoint_of_subset_sdiff (the two directions of the split)'
+      - 'JSP90.exists_cover_of_isIndepSet, JSP90.coloring_of_isBipartite_delete, JSP90.isIndepSet_filter_eq, JSP90.eq_of_adj_of_isIndepSet, JSP90.notAdj_of_isIndepSet_of_mem, JSP90.closeToBipartite_two_of_cover_of_card_le_two (supporting)'
+      - 'JSP90.erdos73On_two_of_locIndep_one_card_le_eight, JSP90.exists_hitsOddCycles_two_of_card_le_eight, JSP90.tauOdd_le_two_of_card_le_eight, JSP90.erdos73On_of_locIndep_of_card_le, JSP90.exists_hitsOddCycles_of_locIndep_of_card_le, JSP90.tauOdd_le_of_locIndep_of_card_le, JSP90.closeToBipartite_two_of_locIndep_one_card_le_seven'' (the three shapes)'
+      - 'JSP90.closeToBipartite_three_of_locIndep_one_card_le_nine, JSP90.closeToBipartite_three_of_locIndep_one_card_le_twelve, JSP90.closeToBipartite_four_of_locIndep_one_card_le_fourteen, JSP90.tauOdd_le_three_of_locIndep_one_card_le_twelve (the order ladder: orders 9, 12, 14 had no statement)'
+    measurements:
+      - 'r175/m.c: 0 violations among 5717 LocIndep-1 graphs on n = 8 containing a fixed five-cycle; but max |AllMissed| = 5 (110 counterexamples), so the CERTIFICATE-ON-C version of the five-cycle case is FALSE; the union of forbidden pairs of C has at most 5 of the 10 pairs'
+      - 'r175/q.c: the union of points of C missed by some odd cycle is bounded by 0, 1, 2, 5 at orders 5, 6, 7, 8'
+      - 'r175/t.c: every LocIndep-1 triangle-free graph on n <= 8 has tau_odd = 1 (1, 11, 202, 5717 graphs)'
+      - 'r175/r.c: random search at orders 9, 10 finds no LocIndep-1 triangle-free graph with tau_odd >= 2'
+      - 'refuted by hand: alpha(G[X]) >= |X| / 2 for triangle-free G is false (Petersen graph, |V| = 10, alpha = 4)'
+    next_step:
+      - 'LocIndep 1 at order NINE with the constant 2 (p9 of round 76 is the first witness needing 2 among triangle-free graphs); tool: JSP90.closeToBipartite_one_iff_exists_cover'
+      - 'eliminating |V| from the constant ((|V| + k) / 2 + k) / 2, which is exactly where Reed''s O(k log k) enters; no hypothesis at fixed k bounds |V|'
+      - 'JSP90.OddCycleErdosPosa r (unchanged: this is the missing jsp_000090_main)'

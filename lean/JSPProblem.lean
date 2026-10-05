@@ -1571,3 +1571,4 @@ import JSPProblem.TriFix
 import JSPProblem.TriResidue
 import JSPProblem.TriEight
 import JSPProblem.CycWitness
+import JSPProblem.IndepSplit
