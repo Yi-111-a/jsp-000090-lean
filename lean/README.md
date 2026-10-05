@@ -2235,3 +2235,84 @@ round carries a graph into that language, closes the case, and closes the axis.
   use `simp only [d, …]`;
 * a docstring containing the word `admit` (or `sorry`) makes `harness/score.py` count a placeholder —
   this cost `partial_ok` for one build (`admit: 1`) before the word was removed.
+
+## Round 167 — `JSPProblem/TriFive*.lean`: **THE EIGHT-VERTEX COUNTING STEP, AND THE REFUTATION OF THE SEVEN-VERTEX ONE**
+
+Attack family 88.  Round 166's `next_bet` predicted that the analogue of `JSP90.loc7_lemma` holds at
+`|V| = 8`, where the residue of a triangle has **five** points.  It does not, and this round says so
+with `23 976` counterexamples and then proves the step that *is* true.
+
+* **`JSPProblem/TriFiveLang.lean`** — the `Fin 8` language over a `K_{2,3}` residue (the colour classes
+  of sizes `2` and `3`, so six cells), with the three neighbour sets carried by **masks** (`Fin 32`):
+  every test is `Nat` arithmetic, which is what makes the table affordable.  `JSP90.badM_correct`,
+  `JSP90.badM_correct'`, `JSP90.badM_half`, `JSP90.badM_of_all`, `JSP90.exists_of_not_badM` (badness
+  as "no proper two-colouring of the residue makes the mask monochromatic", the `Bool` testing only
+  half of the colourings), `JSP90.sixMasks`, `JSP90.badSix`, `JSP90.badSix_of_all`,
+  `JSP90.exists_of_badSix`, `JSP90.hasInd3m_of_indep3`, `JSP90.mem_sixMasks`, `JSP90.clique_T`,
+  `JSP90.noInd36`, `JSP90.badSix'`.
+* **`JSPProblem/TriFiveA.lean` … `TriFiveP.lean`** — the sixty-four `decide` pieces, **four** per file,
+  chained (`A` imports the language, `B` imports `A`, …) so that `lake build` elaborates them one at a
+  time: sixteen pieces in one process need about `8 GB` here and are OOM-killed (exit code 137), the
+  lesson of round 164.
+* **`JSPProblem/TriFive.lean`** — **`JSP90.loc8_lemma`, THE COUNTING STEP OF THE EIGHT-VERTEX TRIANGLE
+  CASE**: three bad vertices of a triangle over a `K_{2,3}` residue, each neighbour set meeting both
+  colour classes, empty triple intersection ⟹ one of the three six-element subsets
+  `T + {0,1,2}`, `T + {0,1,3}`, `T + {0,1,4}` **contains no independent triple**, which `LocIndep 1`
+  forbids (`2|S| + 1 ≥ 6` forces an independent triple).
+* **Measurements** (`../discovery/JSP-000090/r167{,b,c,f}.c` and their logs): of the `2 097 152`
+  configurations of the language, `61 236` satisfy the three hypotheses; `23 976` of them have every
+  vertex of the eight avoided by an independent triple (**the seven-vertex conclusion, refuted**),
+  `6 444` also have an independent quadruple, and **`0`** are `LocIndep 1` — the full hypothesis is
+  what kills them, and it kills them with a *six*-element subset (a witness for all `61 236`;
+  `r167c.c`), with the three symmetric subsets above sufficing (`r167f.c`).
+
+Toolchain facts added this round:
+
+* `decide` cannot close a goal with **free local variables** ("Expected type must not contain free
+  variables"): every quantifier has to live inside the statement, and there is no `Decidable`
+  instance for `∀ i : Nat`, so `Fin` indices (or `i < n →` hypotheses) are required;
+* `Bool.and_eq_true_iff` must be applied **one level at a time** when reconstructing the left-nested
+  conjunction of a definition — `Bool.and a (Bool.and b c)` is *not* definitionally equal to
+  `Bool.and (Bool.and a b) c`;
+* a `decide` statement whose right-hand side re-evaluates the expensive predicates of the
+  left-hand side (e.g. `badM` six times per configuration) costs gigabytes: `JSP90.hyps8n_correct`
+  alone peaked at `5.7 GB` and was deleted as a triviality;
+* `decide` needs no interpreter, but `lake build` still insists on the `c` facets of a required
+  library when that library turns `supportInterpreter` on: see
+  `../discovery/JSP-000090/DISK_FULL_REPAIR.md` for the incident that made `lake build` impossible in
+  this round (the filesystem reached 100 %).
+
+## Round 168 — engineering notes (the `Fin 8` build and the reserved-block trap)
+
+* **THE `c` FACET IS IN THE PLAN EVEN FOR A TARGETED BUILD.**  `lake build JSPProblem.Definitions`
+  still wanted the generated-C (`c`) facet of 69 dependency modules (`Aesop`, `Batteries`, `Qq`,
+  `plausible`, `proofwidgets`, `LeanSearchClient`, `importGraph`) and of `Mathlib.Tactic.Linter.
+  DirectoryDependency`, whose `.olean` round 167 had lost; every one of them failed with
+  `resource exhausted … no space left on device` on its `…/build/ir` directory.  So there is no
+  cheap "build just this module" escape: with the `ir` directory gone, the *plan* is what breaks, not
+  the module.  The repair is the hard link, not a smaller target.
+* **`df` AVAIL 0 IS NOT THE SAME AS A FULL FILESYSTEM.**  `df` reported `Avail 0`, `Use% 100`, and
+  `mkdir` failed with `ENOSPC` in *every* directory, while a 50 MB `dd` into an existing directory
+  still succeeded.  The overlay sits on an ext4 whose 5 % root reserve (≈ 6.4 GB of a 126 GB volume)
+  is unavailable to user `box` but fully usable by root.  Consequence: **`lake build` under
+  `sudo -E env "PATH=$PATH" HOME=/home/box lake build` works where no `box` process can create a
+  directory**, and after it `sudo chown -R box:box .lake/build` restores normal operation — the
+  subsequent `lake build` as `box` is a 3 s no-op.  This is the difference between a broken build
+  (round 167) and a green one (round 168), and it is the first thing to try on this machine when
+  `ENOSPC` appears.
+* **HARD-LINK THE GENERATED C, DO NOT REGENERATE IT.**  `cp -al` of `mathlib/.lake/build/ir` (18 032
+  files, 3.5 GB apparent, 2.8 s) from `JSP-000018` costs no data blocks, and it is correct because
+  both trees pin Mathlib commit `5ed2965256430c3649e86755f9576b54eca72435` with identical
+  `lake-manifest.json` and `lean-toolchain`.  Break the link for the one file that will be rewritten
+  (`Mathlib/Tactic/Linter/DirectoryDependency.c`, whose `.olean` is missing) with
+  `cp --remove-destination`, so that a rebuild cannot corrupt the donor tree in place.
+* **A FILE THAT WAS NEVER COMPILED CONTAINS REAL ARITY DEFECTS.**  `TriFive.lean` was generated
+  mechanically and never built; all 64 branches of `JSP90.loc8_lemma` read
+  `exact loc8_read _ _ _ hA (loc8_piece_k s0 s1 s2)`, but `loc8_read` takes `n s0 s1 s2` *before* the
+  hypothesis `hA`, so `hA` was landing in the `s2` slot (64 identical
+  `Application type mismatch: The argument hA … is expected to have type Fin 32` errors).  Fixed to
+  `loc8_read _ _ _ _ hA …`.  A mechanically generated file is *not* a proved file.
+* **`decide` pieces must be built as root when the disk is full**: each `loc8_piece_k` needs ≈ 3 GB
+  of RSS and this machine has 15 GB shared with three other loops, so a piece is killed (exit 137) if
+  anything else is elaborating at the same time.  Build the pieces one file at a time
+  (`lake build JSPProblem.TriFiveI`, …) rather than with a parallel plan.

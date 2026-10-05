@@ -1278,6 +1278,122 @@ What remains, unchanged: `JSP90.OddCycleErdosPosa r` (Reed–Robertson–Seymour
 bound on `f(k)` for arbitrary `k`; `jsp_000090_main` is deliberately **not** declared, so the harness
 keeps reporting `missing_theorems = ["jsp_000090_main"]`.
 
+## `JSPProblem/TriFive.lean` (round 167) — **THE EIGHT-VERTEX COUNTING STEP, AND THE REFUTATION OF THE SEVEN-VERTEX ONE**
+
+Attack family 88, executing `policy.json`'s next bet of round 166 (the EIGHT-VERTEX INSTANCE).  At
+`|V| = 8` the residue of a triangle has **five** points, so the four-cell language of
+`JSPProblem/TriCount.lean` no longer describes it; this file rebuilds the language over `Fin 8` with
+the three neighbour sets carried by **masks** (`Fin 32`), which is what makes the table affordable
+(every test is `Nat` arithmetic).
+
+* **The seven-vertex counting step is FALSE at eight vertices.**  Round 166 predicted the analogue of
+  `JSP90.loc7_lemma`; the analogue has **23 976 counterexamples**
+  (`discovery/JSP-000090/r167b.c`, reproduced by `#eval`): `A = 63`, masks `19, 10, 5` satisfies all
+  three hypotheses *and* has every vertex of the eight avoided by an independent triple.  So the
+  five-point residue cannot be handled by the seven-vertex argument.
+* **What kills the configurations is Erdős's full hypothesis, and it kills them with a six-element
+  subset** (`r167c.c`): every one of the `61 236` configurations satisfying the three hypotheses has
+  a six-element subset with **no** independent triple (subsets of size `4`, `7`, `8` are witnesses
+  for only `34 812`, `37 260`, `54 792` of them), and a greedy cover (`r167f.c`) shows that the
+  **three symmetric** subsets `T + {0,1,2}`, `T + {0,1,3}`, `T + {0,1,4}` suffice — each is a witness
+  for `40 128` configurations.
+* **`JSP90.loc8_lemma` — THE COUNTING STEP OF THE EIGHT-VERTEX TRIANGLE CASE**: three bad vertices of
+  a triangle over a `K_{2,3}` residue, each neighbour set meeting both colour classes, empty triple
+  intersection ⟹ one of those three six-element subsets contains no independent triple, which
+  `LocIndep 1` forbids.  **Proved by `decide`**, sixty-four times, once for each of the `2 ^ 6`
+  configurations of the six cells (`JSP90.loc8_piece_0 … 63`, the same 64-way split that keeps
+  `JSP90.loc7_lemma` inside the kernel's memory budget; the whole file elaborates in ≈ 2.5 minutes).
+* **The readings the transfer needs** (`JSP90.badM_correct`, `JSP90.badM_correct'`,
+  `JSP90.badSix_correct`, `JSP90.badSix_correct'`, `JSP90.hyps8n_correct`): badness as "no proper
+  two-colouring of the residue makes the mask monochromatic" (the `Bool` tests only half of the
+  colourings, `i` and `31 - i` being equivalent), and the six-element subsets as masks over the eight.
+
+What remains: the transfer `JSP90.triCaseEight` (the graph carried into this language, as
+`JSP90.triCase` was for round 166), the eight-vertex bridge (the residue of a triangle is bipartite
+at `|V| ≤ 8`, by the five-vertex fact that a triangle-free graph on five vertices with an independent
+triple is bipartite), and `JSP90.closeToBipartite_two_of_locIndep_one_card_le_eight`; behind all of
+them `JSP90.OddCycleErdosPosa r` (Reed–Robertson–Seymour–Thomas), so `jsp_000090_main` is still
+deliberately **not** declared.
+
+## `JSPProblem/TriResidue.lean` (round 168) — **THE RESIDUE OF A TRIANGLE IS BIPARTITE AT `LocIndep 1`, AT EVERY ORDER**
+
+Attack family 90, closing the **second** of the two gaps round 167 recorded for the eight-vertex
+instance — and in a stronger form than asked for, because the counting argument has no order bound
+in it at all.
+
+* **`JSP90.not_isOddCycle_of_disjoint_of_isNClique_three_of_locIndep_one`** — at `LocIndep 1` a
+  triangle and an odd cycle of `G` are **never** vertex-disjoint.  Let `D` be an odd cycle of odd
+  cardinality `m`, vertex-disjoint from the triangle `T`.  Erdős's hypothesis on the `m + 3` points
+  of `T ∪ D` gives an independent set `S` with `2 * |S| + 1 ≥ m + 3`; an independent set meets the
+  triangle in at most **one** point (`JSP90.card_le_one_of_isIndepSet_sub_of_card_C_eq_three`) and
+  the odd cycle in at most `(m - 1) / 2` points
+  (`JSP90.two_mul_card_add_one_le_card_of_isIndepSet_sub_isOddCycle`, i.e. `α(C_m) ≤ ⌊m / 2⌋`), so
+  `2 * |S| + 1 ≤ m + 2`: contradiction.  At `m = 3` this is round 150's
+  `JSP90.not_isNClique_three_of_disjoint_of_locIndep_one`, which is *not* redeclared.
+* **`JSP90.isBipartite_delete_of_isNClique_three_of_locIndep_one`** — the residue of a triangle is
+  bipartite, **with no hypothesis on `|V|`**:
+
+  ```lean
+  LocIndep 1 G → G.IsNClique 3 T → (deleteFinset G T).IsBipartite
+  ```
+
+  This is round 150's
+  `JSP90.isBipartite_delete_of_isNClique_three_of_locIndep_one_card_le_seven` with the bound
+  `|V| ≤ 7` **removed**: that bound was there only because the five-vertex odd cycle of an
+  eight-vertex residue was out of reach, and the general count reaches it.  So the bridge round 167
+  listed as the second gap is closed, and closed in the general form, which also frees the triangle
+  case of Erdős #73 at `k = 1` from any confinement to small graphs.
+* **`JSP90.isBipartite_delete_of_isNClique_three_of_locIndep_one_card_le_eight`** — the same
+  statement in the shape the `Fin 8` transfer of `JSP90.loc8_lemma` consumes, and
+  **`JSP90.isBipartite_delete_of_isNClique_three_of_locIndep_one_piece`** — the piece form a peeling
+  argument reads.
+
+What remains: the transfer `JSP90.triCaseEight` — carrying a graph into the `Fin 8` language of
+`JSPProblem/TriFiveLang.lean` (`xpt : Fin 5 → V`, `tpt : Fin 3 → V`, `inv : Fin 8 → V`, the six cells
+`A : Fin 64` and the three masks `s t : Fin 32`, with `adj8n A s0 s1 s2 i j = decide (G.Adj (inv i)
+(inv j))`), the three hypotheses (each `S t` meeting both colour classes, empty triple intersection,
+and the badness read off the masks), and then Erdős's hypothesis on the three six-element subsets —
+followed by `JSP90.closeToBipartite_two_of_locIndep_one_card_le_eight`; behind all of them
+`JSP90.OddCycleErdosPosa r` (Reed–Robertson–Seymour–Thomas), so `jsp_000090_main` is still
+deliberately **not** declared.
+
+## `JSPProblem/TriEight.lean` (round 171) — **THE EIGHT-VERTEX TRANSFER, PROVED**
+
+Attack family 92.  Round 170 built the `Fin 8` machinery and left the transfer itself uncompiled;
+this round repairs the four tactic steps it named, installs `JSP90.triCaseEight`, and derives the
+first instance of the headline theorem at order eight.
+
+* **`JSP90.triCaseEight`** — **THE TRIANGLE CASE AT ORDER EIGHT**:
+
+  ```lean
+  LocIndep 1 G → Fintype.card V ≤ 8 → G.IsNClique 3 T →
+      ∃ t ∈ T, (deleteFinset G (T \ {t})).IsBipartite
+  ```
+
+  a graph is carried into the `Fin 8` language of `JSPProblem/TriFiveLang.lean` through `xpt : Fin 5
+  → V` (the residue, two points in the colour class of size two and three in the other),
+  `tpt : Fin 3 → V` (the triangle, carried by `5, 6, 7`), the bijection `inv : Fin 8 → V`, the
+  six cells `A : Fin 64` and the three masks `s0 s1 s2 : Fin 32`, with the sixty-four-case
+  correspondence `adj8n A s0.val s1.val s2 i.val j.val = decide (G.Adj (inv i) (inv j))`, the three
+  hypotheses transferred (`meetBoth` from `JSP90.exists_adjIn_color`, `tripleEmpty` from
+  `JSP90.card_adjIn_le_two_of_isNClique_three`, and badness from `JSP90.properM_get` +
+  `JSP90.okMono_read` + `JSP90.isBipartite_of_adjIn_mono`), and Erdŝs's hypothesis read on the three
+  six-element subsets `T + {0,1,2}`, `T + {0,1,3}`, `T + {0,1,4}` against `JSP90.loc8_lemma`.
+* **`JSP90.closeToBipartite_two_of_shortest_three_of_locIndep_one_card_le_eight`** — **A NEW INSTANCE
+  OF THE HEADLINE THEOREM, AT ORDER EIGHT, WITH THE CONSTANT `2`**: at `LocIndep 1` and `|V| ≤ 8`,
+  if a shortest odd cycle has three vertices then deleting at most **two** vertices leaves a bipartite
+  graph.  With `JSP90.exists_hitsOddCycles_two_of_shortest_three_of_locIndep_one_card_le_eight` (a
+  two-element odd cycle transversal) and `JSP90.tauOdd_le_two_of_shortest_three_of_locIndep_one_card_le_eight`.
+* **New machinery**: `JSP90.decide_eq_true_of_bool`, `JSP90.crossM_of_adj8n`,
+  `JSP90.card_six_inv`, `JSP90.mem_six_inv`, and `JSP90.hmod0` / `JSP90.hwAll`, which are what
+  overcome `Nat.testBit_zero` being `@[simp]` and *more specific* than `JSP90.cellsOf_bit_nat` (it
+  reduces bit `0` to `(cellsOf w).val % 2 = 1` before the reading can fire).
+
+`#print axioms` on every declaration of this file reports only
+`[propext, Classical.choice, Quot.sound]`.  The five- and seven-cycle cases at `|V| ≤ 8` are still
+open, so `JSP90.closeToBipartite_two_of_locIndep_one_card_le_eight` and `jsp_000090_main` are
+deliberately **not** declared.
+
 -/
 import JSPProblem.Definitions
 import JSPProblem.Reed
@@ -1388,3 +1504,24 @@ import JSPProblem.ThreeA
 import JSPProblem.ThreeOrder
 import JSPProblem.TriCount
 import JSPProblem.TriFix
+import JSPProblem.TriFiveLang
+import JSPProblem.TriFiveA
+import JSPProblem.TriFiveB
+import JSPProblem.TriFiveC
+import JSPProblem.TriFiveD
+import JSPProblem.TriFiveE
+import JSPProblem.TriFiveF
+import JSPProblem.TriFiveG
+import JSPProblem.TriFiveH
+import JSPProblem.TriFiveI
+import JSPProblem.TriFiveJ
+import JSPProblem.TriFiveK
+import JSPProblem.TriFiveL
+import JSPProblem.TriFiveM
+import JSPProblem.TriFiveN
+import JSPProblem.TriFiveO
+import JSPProblem.TriFiveP
+import JSPProblem.TriFive
+import JSPProblem.TriFix
+import JSPProblem.TriResidue
+import JSPProblem.TriEight
