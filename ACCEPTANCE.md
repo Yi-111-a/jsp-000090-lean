@@ -54,6 +54,66 @@ set `X` then every independent set of `H` is one of `G[X]`, so `α(H) ≤ α(G[X
 `jsp_000090_main` — the Lean name that the prize gate checks. It must be the **complete** Erdős
 #73 theorem above (`Erdős73 k` for every `k`), proved with no `sorry`.
 
+## Round 179 (`lean/JSPProblem/ConnLinear.lean`) — **THE NO-LOSS COMPONENT REDUCTION: THE
+## DEFICIENCIES OF THE COMPONENTS ADD, SO ERDŐS #73 REDUCES TO CONNECTED GRAPHS WITH THE CONSTANT
+## `C · k` AND NO FACTOR `k`**
+
+Attack family 97 continued, now **closing the blocker that round 178 named**.  `lake build` **OK**
+(1335 jobs); **0 `sorry`, 0 `admit`**; `harness/score.py --strict-prize`: `build_ok = true`,
+`partial_ok = true`, `missing_theorems = ["jsp_000090_main"]`.  21 new declarations appended to
+`lean/JSPProblem/ConnLinear.lean`; `#print axioms` reports only
+`[propext, Classical.choice, Quot.sound]`.
+
+Round 43's reduction `JSP90.erdos73On_of_piece` concludes `CloseToBipartite (k * m) G`: a **factor
+`k`**, because all pieces share one budget `m`.  At the sharp target of rounds 176–177
+(`τ(G) ≤ C · MaxDef G`) that factor is fatal.  This round removes it.
+
+* `JSP90.exists_eq_maxDefIn_sub`, `JSP90.maxDefInArg`, `JSP90.maxDefInArg_spec` — a maximiser of the
+  deficiency inside a piece chosen **without ℕ truncation** (`2 α(Z) ≤ |Z|`); this is what makes the
+  ℕ subtraction distribute.
+* `JSP90.defOf_eq_sum_defOf_sub` — the truncated deficiency is an **equality** on a partial cover by
+  subsets when no truncation occurs on any piece (`JSP90.sum_sub_eq_of_le`, `JSPProblem/Cut.lean`).
+* **`JSP90.sum_maxDefIn_le_maxDef`** — `∑ Y ∈ 𝒬, maxDefIn G Y ≤ MaxDef G` for every anticomplete
+  partition `𝒬`.  *This is exactly the lemma that round 178 declared as the round's blocker.*
+* **`JSP90.maxDefIn_eq_maxDef_induce`** — `maxDefIn G Y = MaxDef (induceFinset G Y)`, via
+  `JSP90.defOf_induceFinset_le_maxDefIn` (`defOf (induceFinset G Y) X ≤ maxDefIn G Y` for *every*
+  `X`, since the vertices of `X` outside `Y` are isolated in `G[Y]` and can only lower the
+  deficiency).
+* **`JSP90.sum_maxDef_induce_le_maxDef`** (`_sub`, `_compPieces`) and
+  `JSP90.sum_maxDef_induce_le_of_locIndep` — **`LocIndep k G` bounds the SUM of the
+  `MaxDef`s of an anticomplete partition's pieces.**  This is what round 43 could not say.
+* `JSP90.AnticoverPartition.toDecomposition`, `JSP90.sum_mul_nat`,
+  **`JSP90.closeToBipartite_mul_maxDef_of_anticoverPartition`** — if every piece is `C · MaxDef`-close
+  then `G` is `C · MaxDef G`-close (per-piece budgets summed by round 47's
+  `JSP90.closeToBipartite_of_anticoverFamily_cost`, bounded by the two lemmas above).
+* `JSP90.exists_compPiece_of_mem_compPieces`, **`JSP90.closeToBipartite_mul_of_piece_maxDef`**,
+  `JSP90.PieceMaxDefErdős73On`, `JSP90.closeToBipartite_mul_of_pieceMaxDefErdős73On` — **the
+  headline**: if every connected piece `s` of `G` with `MaxDef (induceFinset G s) ≤ r` is
+  `C · r`-close to bipartite, then `LocIndep k G ⟹ CloseToBipartite (C · k) G`, i.e.
+  `Erdős73On k (C · k)`.  **No factor `k`.**
+
+### A CORRECTION OF ROUND 178's NEGATIVE RESULT (important for the next rounds)
+
+Round 178 recorded as machine-checked that `MaxDef G = ∑ Y ∈ 𝒬, MaxDef (induceFinset G Y)` is
+false, with the counterexample `G = K_3 ⊔ K_1`, `𝒬 = {{0,1,2},{3}}`, "reading `1 = 0 + 0`".  The
+counterexample is **miscomputed**: `MaxDef (K_3) = 3 − 2 = 1`, so the sum is `1 + 0 = 1`.  The
+statement *is* false, but for a different reason: `𝒬` may be finer than the components, and then the
+pieces' `MaxDef`s do not see the deficiency of the whole.  The right counterexample is
+`G = K_6`, `𝒬 = {{0,1,2},{3,4,5}}`: `MaxDef (K_6) = 4` against `MaxDef (K_3) + MaxDef (K_3) = 2`.
+What is true, and is all the reduction needs, is the pair proved this round:
+`maxDefIn G Y = MaxDef (induceFinset G Y)` and `∑ Y ∈ 𝒬, MaxDef (induceFinset G Y) ≤ MaxDef G`.
+**Do not re-attempt the valuation identity `MaxDef G = ∑ Y ∈ 𝒬, MaxDef (induceFinset G Y)`; do use
+the inequality, which is proved.**
+
+### What remains
+
+`jsp_000090_main` is still deliberately not declared.  The remaining direction is now precisely:
+`JSP90.PieceMaxDefErdős73On C` for some `C` — a linear odd-cycle-transversal bound
+`τ(G) ≤ C · MaxDef G` on connected graphs.  For `C = 2` this is the sharp form of Erdős #73
+(`f(k) = 2 k`; the survey bound is `O(k log k)`).  The unchanged primary blocker is
+`JSP90.OddCycleErdosPosa r` (Reed–Robertson–Seymour–Thomas), of which
+`JSP90.erdos73_of_erdosPosa` gives the whole theorem.
+
 ## Round 178 (`lean/JSPProblem/ConnLinear.lean`) — **THE HYPOTHESIS SPLITS OVER THE CONNECTED
 ## COMPONENTS: `α` AND `|X|` ARE EXACTLY ADDITIVE OVER AN ANTICOMPLETE COVER**
 
