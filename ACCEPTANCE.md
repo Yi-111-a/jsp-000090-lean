@@ -7554,3 +7554,89 @@ order-dependent constant.  Eliminating the order is exactly the content of Reed'
 `jsp_000090_main` is deliberately **not** declared, so the harness keeps reporting
 `missing_theorems = ["jsp_000090_main"]`.  `formalization.yaml` remains `status: wip`,
 `prize_ready: false`.  No award claim is made.
+
+
+---
+
+## Round 180 — `lean/JSPProblem/TriDescent.lean` (new file, attack family 98): **the exact descent at a triangle**
+
+New module `JSPProblem/TriDescent.lean` (**30 declarations, 0 sorry/admit**, `lake build` OK with
+**1336 jobs**, axiom report clean: `propext, Classical.choice, Quot.sound` on every new result),
+imported from the root module `JSPProblem.lean`.  `harness/score.py --strict-prize` reports
+`build_ok = true, sorry = 0, admit = 0, placeholder_total = 0, partial_ok = true`,
+`missing_theorems = ["jsp_000090_main"]`.
+
+Round 179 closed the *connectivity* axis and named one remaining local step,
+`JSP90.PieceMaxDefErdős73On C` ("every connected graph of deficiency `r` is `C · r`-close to
+bipartite"), which `JSP90.closeToBipartite_mul_of_pieceMaxDefErdős73On` turns into the whole
+headline theorem for **any** universal `C`.  This round supplies the *arithmetic* of the classical
+triangle descent — the one step that must be exact if such a `C` is ever to exist — in the numerical
+language, with **no order bound and no case analysis**.
+
+### Part 1 — one triangle costs exactly one unit of deficiency
+
+* **`JSP90.maxDef_ge_add_one_maxDef_delete_of_isNClique`**
+  `G.IsNClique 3 T → 1 + MaxDef (deleteFinset G T) ≤ MaxDef G`.
+  This lifts round 118's `JSP90.maxDefIn_ge_one_add_maxDefIn_of_clique` from the `maxDefIn` form to
+  the `MaxDef`-of-the-deleted-graph form, through
+  `JSP90.maxDefIn_eq_maxDef_induce` (round 179).  No `LocIndep`, no odd girth, no order bound.
+* **`JSP90.locIndep_pred_of_isNClique`**
+  `G.IsNClique 3 T → LocIndep (k+1) G → LocIndep k (deleteFinset G T)`:
+  **Erdős's local parameter drops by exactly one at a triangle.**  This is the *statement* of the
+  descent that rounds 162–175 carried out by hand, four times, at orders seven and eight.
+
+### Part 2 — the iterated descent, and a packing bound with no factor
+
+* `JSP90.TriFamily` — a family of pairwise vertex-disjoint triangles (edges *between* the triangles
+  are allowed, which makes this class strictly larger than Part 4's);
+  `JSP90.deleteFinset_deleteFinset_of_union`, `JSP90.isNClique_three_deleteFinset`,
+  `JSP90.maxDef_ge_add_one_maxDef_delete_of_triFamily_peel` (the one-triangle step);
+* **`JSP90.maxDef_ge_card_add_maxDef_delete_of_triFamily`**
+  `𝒬.card + MaxDef (deleteFinset G (𝒬.biUnion id)) ≤ MaxDef G`, proved by induction on `𝒬`;
+* **`JSP90.card_triFamily_le_maxDef`** — hence **the number of pairwise disjoint triangles of `G`
+  is at most `MaxDef G`, with no factor**: the triangle *packing* is bounded by Erdős's own
+  parameter.
+
+### Part 3 — the cost of the descent
+
+* `JSP90.isOddCycle_deleteFinset_of_disjoint` — an odd cycle avoiding `Z` survives in `G − Z`;
+* `JSP90.card_biUnion_le_three_card` — `t` disjoint triangles use at most `3 t` vertices;
+* **`JSP90.closeToBipartite_three_mul_of_triFamily_of_isBipartite_delete`** (and
+  `tauOdd_le_three_mul_…`, `erdos73On_three_…`) — `TriFamily G 𝒬`, a bipartite residue and
+  `LocIndep k G` give **`CloseToBipartite (3 k) G`**: three vertices per triangle, with the
+  hypothesis entering **only** through `MaxDef G`.
+
+### Part 4 — the anticomplete case: both sides have the *exact* value, optimal constant `1`
+
+* **`JSP90.AnticompleteTriCover`** — `𝒬` pairwise disjoint and anticomplete triangles covering `V`;
+* **`JSP90.exists_oddCycle_of_anticompleteTriCover`** — the odd cycles of `G` are **exactly** the
+  members of `𝒬` (an odd cycle is connected, meets only one anticomplete piece, and both have at
+  least three vertices);
+* **`JSP90.tauOdd_eq_card_of_anticompleteTriCover`** and
+  **`JSP90.maxDef_eq_card_of_anticompleteTriCover`** — `MaxDef G = tauOdd G = 𝒬.card`, so Erdős's
+  hypothesis and its conclusion **coincide** on this class;
+* **`JSP90.closeToBipartite_of_anticompleteTriCover_of_locIndep`** (with
+  `erdos73On_one_of_anticompleteTriCover_of_locIndep`, `tauOdd_le_of_anticompleteTriCover_of_locIndep`)
+  — **AN INSTANCE OF THE HEADLINE THEOREM WITH THE OPTIMAL CONSTANT `k`** on this class.
+
+### Part 5 — the class is nonempty and the constant is optimal
+
+* **`JSP90.anticompleteTriCover_kTriangles`** — the `k` fibres of the sharp witness `kTriangles k`
+  are such a cover;
+* **`JSP90.erdos73On_kTriangles_anticompleteTri`** —
+  `(LocIndep k (kTriangles k) → CloseToBipartite m (kTriangles k)) ↔ k ≤ m`: the constant `1` per
+  triangle is **exact**, as in `JSP90.erdos73On_of_multi_optimal` (round 106).
+
+### What this says about the remaining gap, exactly
+
+Parts 1–2 show a triangle is worth **exactly one** unit of `MaxDef`; Part 4 shows it costs
+**exactly one** unit of `tauOdd` on the anticomplete class.  So the triangle descent is *free*, and
+its optimal constant is `1` per unit of deficiency.  What it does **not** give is the *existence* of
+a triangle-cut ladder: `kTriangles k` has one, while `k4sub` (round 126: `MaxDef = 1`,
+`tauOdd = 2`, triangle-free) has **none**.  The remaining step is therefore unchanged and is
+`JSP90.PieceMaxDefErdős73On C` for a universal `C` — i.e. Reed's theorem, `f(k) = O(k log k)` with
+the sharp lower bound `f(k) ≥ 2k` (`JSP90.tauOdd_p9Family`).
+
+`jsp_000090_main` is deliberately **not** declared, so the harness keeps reporting
+`missing_theorems = ["jsp_000090_main"]`.  `formalization.yaml` remains `status: wip`,
+`prize_ready: false`.  No award claim is made.

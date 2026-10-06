@@ -1575,3 +1575,4 @@ import JSPProblem.IndepSplit
 import JSPProblem.SunSum
 import JSPProblem.SunExact
 import JSPProblem.ConnLinear
+import JSPProblem.TriDescent
