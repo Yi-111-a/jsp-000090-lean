@@ -54,6 +54,101 @@ set `X` then every independent set of `H` is one of `G[X]`, so `α(H) ≤ α(G[X
 `jsp_000090_main` — the Lean name that the prize gate checks. It must be the **complete** Erdős
 #73 theorem above (`Erdős73 k` for every `k`), proved with no `sorry`.
 
+## Round 182 (`lean/JSPProblem/OddGirth3.lean`) — **AT `k = 1` THE ODD CYCLES OF A GRAPH OF
+## DEFICIENCY `≤ 1` HAVE A COMMON POINT UNLESS A FIVE-CYCLE APPEARS** (new attack family 99)
+
+`lake build` **OK** (1337 jobs); **0 `sorry`, 0 `admit`**; `harness/score.py problems/JSP-000090
+--strict-prize`: `build_ok = true`, `partial_ok = true`,
+`missing_theorems = ["jsp_000090_main"]`. 25 new declarations in one new file, imported from the
+root module `JSPProblem.lean`; `#print axioms` reports only
+`[propext, Classical.choice, Quot.sound]` on every headline result.
+
+Rounds 176–180 pinned the remaining direction to a linear odd-cycle-transversal bound
+`τ(G) ≤ C · MaxDef G`, with `C = 2` (the sharp form of Erdős #73) left open.  This round does **not**
+attack that constant.  It attacks the **`k = 1` case of Erdős #73 on the class of graphs whose odd
+cycles are all triangles** — a class on which the constant is `1`, so an instance there would be
+*sharp*, and the class is infinite and unbounded in order (**no `|V|` bound appears in any statement
+of the file**).
+
+### The class
+
+```lean
+JSP90.OddGirthThree G := ∀ C, IsOddCycle G C → C.card = 3
+```
+
+### What `LocIndep 1` gives, as reusable lemmas
+
+```lean
+JSP90.inter_ne_empty_of_isOddCycle_of_locIndep_one (hG : LocIndep 1 G) {C D}
+    (hC : IsOddCycle G C) (hD : IsOddCycle G D) : C ∩ D ≠ ∅
+```
+
+— **no two vertex-disjoint odd cycles**, since `t` disjoint odd cycles cost `t` units of deficiency
+(`JSP90.defOf_biUnion_ge_card` of `PackDescent.lean`) and `MaxDef G ≤ 1`.  The second consequence,
+"no `K₄`", was already in the development (`JSPProblem/OneK.lean`).
+
+### The geometry of a triangle on a triangle
+
+With `T = {a, b, c}` a triangle and every odd cycle a triangle, an odd cycle `D` sits on `T` in one of
+two ways, both recorded as predicates — `JSP90.TriAt G T x` (meeting `T` in the single point `x`) and
+`JSP90.TriCross G T x y` (meeting `T` along the edge `x y`) — and the outside points are computed by
+`JSP90.exists_two_of_triAt` (two outside points, both adjacent to `x`) and
+`JSP90.exists_third_of_triCross` (one outside point, adjacent to both `x` and `y`).
+
+### The two obstructions (the content of the round)
+
+```lean
+JSP90.exists_oddCycle_card_five_of_triAt_two (hG : LocIndep 1 G) … :
+    ∃ D, IsOddCycle G D ∧ D.card = 5
+JSP90.not_triAt_two_of_oddGirthThree (hG : LocIndep 1 G) (hog : OddGirthThree G) … :
+    ¬ (TriAt G T a ∧ TriAt G T b)
+
+JSP90.exists_oddCycle_card_five_of_triCross_three (hG : LocIndep 1 G) … :
+    ∃ D, IsOddCycle G D ∧ D.card = 5
+JSP90.not_triCross_three_of_oddGirthThree (hG : LocIndep 1 G) (hog : OddGirthThree G) … :
+    ¬ (TriCross G T a b ∧ TriCross G T a c ∧ TriCross G T b c)
+```
+
+* **Two triangles hanging at two points of a triangle force a five-cycle.**  The two triangles meet
+  (no disjoint odd cycles) at a point `w ∉ T`; if their outside pairs coincide, the five points
+  `a, c, b, w, u` are in cyclic adjacency, otherwise `u, a, b, v, w` are.
+* **Three triangles crossing `T` along its three edges force a five-cycle.**  The three outside points
+  lie outside `T` and are pairwise distinct — a coincidence is a `K₄` on `T` together with that point,
+  which `LocIndep 1` forbids — and then `a, z, b, c, w` are in cyclic adjacency.
+
+### What these two statements say
+
+**At `LocIndep 1`, in a graph whose odd cycles are all triangles, the odd cycles hanging at the three
+points of a triangle and those crossing its three edges form two families, each of which has a common
+point.**  That is exactly what the `k = 1` case of Erdős #73 on this class turns on, and no earlier
+round of this development had anything of the kind (rounds 166–171 carry `k = 1` only under
+`|V| ≤ 7` or `|V| ≤ 8`, with the constant `2`; `JSPProblem/OneK.lean` shows that constant `2` is
+forced, by `p9` = Petersen minus a vertex, so the sharp constant off this class is `2` and on it
+`k4sub`-type obstructions do not exist).
+
+### What is left — the single step missing in this file
+
+The **assembly** is written but does **not** compile, so it is not in the file; it is named exactly
+in `discovery/JSP-000090/policy.json`:
+
+1. `JSP90.hitsOddCycles_singleton_of_triAt` — `TriAt G T a` gives that `a` meets **every** odd cycle.
+   The only hard case is an odd cycle `D` avoiding `a`: then `D ∩ T = {b, c}`, so `D` is the triangle
+   `{b, c, z}`; `D` meets the triangle hanging at `a`, whence `a ~ z`, and `{a, b, c, z}` is a `K₄`.
+2. `JSP90.exists_hitsOddCycles_singleton_sub_T` — the case analysis on which of `a`, `b`, `c` lie in an
+   odd cycle `D`: none contradicts `inter_ne_empty_of_isOddCycle_of_locIndep_one`, one gives a
+   `TriAt` (excluded by `not_triAt_two_of_oddGirthThree` and its permutations), two give a `TriCross`
+   (covered by `not_triCross_three_of_oddGirthThree`), three means `v ∈ D`.
+3. `JSP90.closeToBipartite_one_of_locIndep_one_of_oddGirthThree` — `CloseToBipartite 1 G` through
+   `JSP90.closeToBipartite_iff_hitsOddCycles` at `m = 1`, plus its `tauOdd` and `Erdős73On` forms and
+   the sharpness witness `K₃` (`OddGirthThree`, `LocIndep 1`, not bipartite, so the constant cannot be
+   lowered below `1`).
+
+`jsp_000090_main` is still deliberately not declared; the unchanged primary blocker remains
+`JSP90.OddCycleErdosPosa r` (Reed–Robertson–Seymour–Thomas), of which
+`JSP90.erdos73_of_erdosPosa` gives the whole theorem.
+
+---
+
 ## Round 179 (`lean/JSPProblem/ConnLinear.lean`) — **THE NO-LOSS COMPONENT REDUCTION: THE
 ## DEFICIENCIES OF THE COMPONENTS ADD, SO ERDŐS #73 REDUCES TO CONNECTED GRAPHS WITH THE CONSTANT
 ## `C · k` AND NO FACTOR `k`**

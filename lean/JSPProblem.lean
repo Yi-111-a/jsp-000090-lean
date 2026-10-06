@@ -1576,3 +1576,4 @@ import JSPProblem.SunSum
 import JSPProblem.SunExact
 import JSPProblem.ConnLinear
 import JSPProblem.TriDescent
+import JSPProblem.OddGirth3
