@@ -54,6 +54,55 @@ set `X` then every independent set of `H` is one of `G[X]`, so `α(H) ≤ α(G[X
 `jsp_000090_main` — the Lean name that the prize gate checks. It must be the **complete** Erdős
 #73 theorem above (`Erdős73 k` for every `k`), proved with no `sorry`.
 
+## Round 178 (`lean/JSPProblem/ConnLinear.lean`) — **THE HYPOTHESIS SPLITS OVER THE CONNECTED
+## COMPONENTS: `α` AND `|X|` ARE EXACTLY ADDITIVE OVER AN ANTICOMPLETE COVER**
+
+Attack family 97, the **connectivity axis, on the hypothesis side**.  `lake build` **OK** (1335
+jobs); **0 `sorry`, 0 `admit`**; `harness/score.py --strict-prize`: `build_ok = true`,
+`partial_ok = true`, `missing_theorems = ["jsp_000090_main"]`.  22 declarations in one new file,
+imported from the root module `JSPProblem.lean`; `#print axioms` reports only
+`[propext, Classical.choice, Quot.sound]` on every headline result.
+
+Round 43 (`Connect.lean`) reduced Erdős #73 to connected graphs but only with the **loss of a
+factor `k`**, because its hypothesis `PieceErdős73On k m` is stated at a single parameter.  Rounds
+176–177 made the *sharp* target explicit (`τ(G) ≤ 2 · MaxDef G`, witnessed by the `k`-fold 3-sun),
+and at a sharp target a linear factor is not acceptable: one needs the deficiencies of the
+components to **add**.  This round supplies the additive object.
+
+* `JSP90.AnticoverPartition G 𝒬` — a finite family of pairwise disjoint, pairwise anticomplete
+  vertex sets covering `V` (the shape of the connected components), with
+  `JSP90.anticoverPartition_compPieces : AnticoverPartition G (compPieces G)`: **the connected
+  components of `G` are such a family** (this is what turns "a decomposition" into a *partition*).
+* `JSP90.indepCard_le_inter_add`, `JSP90.inter_add_le_indepCard`, `JSP90.card_union_le_indepCard` —
+  the two-piece splitting lemmas for `α`.
+* **`JSP90.card_eq_sum_inter`** — `|X| = ∑ X' ∈ 𝒬, |X ∩ X'|` for every anticomplete cover `𝒬`.
+* **`JSP90.indepCard_eq_sum_inter`** — **`α(X) = ∑ X' ∈ 𝒬, α(X ∩ X')`**: the independence number is
+  exactly additive over an anticomplete cover (an independent set splits over the pieces and the
+  pieces' independent sets reassemble), proved by induction on `𝒬`.
+* `JSP90.maxDefIn_le_maxDef_induce` — the per-piece bound `maxDefIn G Y ≤ MaxDef (induceFinset G Y)`,
+  i.e. a hypothesis on a piece bounds the deficiency measured *inside* that piece; and
+  `JSP90.maxDefIn_univ_eq : maxDefIn G univ = MaxDef G`.
+* **`JSP90.indepCard_univ_eq_sum_inter_compPieces`** — `α(G) = ∑ Y ∈ compPieces G, α(G[Y])`: the
+  independence number of a graph is the sum of the independence numbers of its connected
+  components — the hypothesis side of the reduction, matching round 177's
+  `JSP90.tauOdd_sumGraph` on the conclusion side.
+* `JSP90.indepCard_eq_sum_inter_compPieces`, `JSP90.card_univ_eq_sum_card_compPieces` (the sanity
+  check: both sides are `|V|`).
+
+### A NEGATIVE RESULT FOUND THIS ROUND (recorded, because it changes the plan)
+
+`MaxDef` itself is **not** additive over an anticomplete cover, and the equality
+`MaxDef G = ∑ Y ∈ 𝒬, MaxDef (induceFinset G Y)` is **FALSE**: for `G = K_3 ⊔ K_1` with
+`𝒬 = {{0,1,2},{3}}` it reads `1 = 0 + 0`.  The reason is the ℕ truncation in `defOf = |X| - 2 α(X)`:
+`MaxDef G` is a maximum over *all* vertex sets `X ⊆ V`, and the union of two pieces of deficiency
+`0` can have positive deficiency while each piece has none.  Consequently
+`Finset.sum_sub_distrib` is not available for `defOf` either (it is false for ℕ in general).
+The additive object is `α` (`indepCard`), which this round proves to be exactly additive, and the
+quantity to bound per piece is `maxDefIn G Y` (the deficiency measured *inside* the piece,
+`JSPProblem/Cut.lean`), which `maxDefIn_le_maxDef_induce` shows is bounded by the piece's
+hypothesis.
+
+
 ## Round 177 (`lean/JSPProblem/SunExact.lean`) — **`tauOdd` AND `MaxDef` ARE ADDITIVE OVER DISJOINT
 ## UNIONS, AND THE `k`-FOLD 3-SUN HAS TRANSVERSAL NUMBER EXACTLY `2 k`**
 
