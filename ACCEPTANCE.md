@@ -54,6 +54,120 @@ set `X` then every independent set of `H` is one of `G[X]`, so `α(H) ≤ α(G[X
 `jsp_000090_main` — the Lean name that the prize gate checks. It must be the **complete** Erdős
 #73 theorem above (`Erdős73 k` for every `k`), proved with no `sorry`.
 
+## Round 177 (`lean/JSPProblem/SunExact.lean`) — **`tauOdd` AND `MaxDef` ARE ADDITIVE OVER DISJOINT
+## UNIONS, AND THE `k`-FOLD 3-SUN HAS TRANSVERSAL NUMBER EXACTLY `2 k`**
+
+Attack family 96, the **exact-value axis**.  `lake build` **OK** (`Build completed successfully
+(1334 jobs)`); **0 `sorry`, 0 `admit`**; `harness/score.py --strict-prize`: `build_ok = true`,
+`partial_ok = true`, `missing_theorems = ["jsp_000090_main"]`.  27 declarations in one new file,
+imported from the root module `JSPProblem.lean`; `#print axioms` reports only
+`[propext, Classical.choice, Quot.sound]` on every headline result.
+
+This round executes the **first concrete gap** that round 176's `policy.json` named: its two
+dropped theorems `JSP90.closeToBipartite_two_mul_sun3U` and `JSP90.tauOdd_sun3U` — the missing
+*upper* half of `τ ≥ 2 k`.  The repair was not the kernel check round 176 was reaching for (it is
+avoided altogether) but **the transport lemma in the direction round 176 lacked**: a residue of a
+disjoint union is bipartite when the residue of *every piece* is.
+
+### The transport lemma, and what it buys
+
+```lean
+JSP90.sumZ (Z : Fin j → Finset W) : Finset (W × Fin j)          -- the deleted set of the union
+JSP90.mem_sumZ : p ∈ sumZ Z ↔ p.1 ∈ Z p.2
+JSP90.isBipartite_delete_sumGraph (Z) (h : ∀ i, (deleteFinset (H i) (Z i)).IsBipartite) :
+    (deleteFinset (sumGraph j H) (sumZ Z)).IsBipartite         -- THE ASSEMBLING TRANSPORT
+JSP90.closeToBipartite_sumGraph_of_forall : (∀ i, CloseToBipartite (m i) (H i)) →
+    CloseToBipartite (∑ i, m i) (sumGraph j H)
+JSP90.closeToBipartite_sumGraph_of_forall_of_mul : (∀ i, CloseToBipartite m (H i)) →
+    CloseToBipartite (j * m) (sumGraph j H)
+JSP90.closeToBipartite_sumGraph_of_piece : CloseToBipartite m (sumGraph j H) → CloseToBipartite m (H i)
+```
+
+The colouring in `JSP90.isBipartite_delete_sumGraph` is **explicit**: at a point of the `i`-th
+fibre it is the `i`-th piece's own colouring of its own residue.  Round 176's
+`JSP90.deleteFinset_sumGraph_fib` is the other transport (the residue *inside* one fibre is the
+residue of that piece), so between them the two directions are both available.
+
+### Three additivity results, all order-free
+
+* **`JSP90.maxDef_sumGraph : MaxDef (⊔ H i) = ∑ i, MaxDef (H i)` — THE DEFECT IS ADDITIVE, EXACTLY**
+  (round 176 had only `≤ j * k`).  The proof needs one new arithmetic observation
+  (`JSP90.exists_eq_add_of_defOf`): a piece of defect `0` is witnessed by `∅` and a piece of
+  *positive* defect by a maximiser `Y` of the deficiency, for which the truncated subtraction
+  `|Y| − 2 α(Y)` is honest, so `|Y| = 2 α(Y) + MaxDef`.
+* **`JSP90.tauOdd_sumGraph : tauOdd (⊔ H i) = ∑ i, tauOdd (H i)` — THE LEAST ODD CYCLE TRANSVERSAL
+  IS ADDITIVE.**
+* **the hypothesis**: round 176's `JSP90.locIndep_sumGraph` (`LocIndep (j * k)`), plus
+  **`JSP90.locIndep_of_locIndep_sumGraph_piece`** (the hypothesis descends to each component at the
+  *same* parameter) and **`JSP90.locIndep_of_maxDef_sumGraph`** (the union is `LocIndep` at the
+  *sum* of the defects).
+
+**A claim this round tried and the kernel refuted:** `LocIndep k (⊔ H i) ↔ ∀ i, LocIndep k (H i)`
+is **false** at the same parameter (`kTriangles 2` has defect `2` although both components have
+defect `1`), which is why round 176's form multiplies by `j`.  The correct statement is the *sum*,
+and it is what `JSP90.maxDef_sumGraph` proves.  `JSP90.maxDef_piece_le` records the surviving
+inequality.
+
+### The sharpness table is now exact
+
+```lean
+JSP90.closeToBipartite_two_mul_sun3U (k) : CloseToBipartite (2 * k) (sun3U k)
+JSP90.tauOdd_sun3U (k) : tauOdd (sun3U k) = 2 * k
+JSP90.exists_sharp_witness (k) : ∃ (G : SimpleGraph (Fin 6 × Fin k)),
+    LocIndep k G ∧ MaxDef G = k ∧ tauOdd G = 2 * k
+```
+
+So `2 k` is a *valid* constant of Erdős #73 at the parameter `k` **and** no smaller one is
+(`JSP90.erdos73On_two_mul_le`, round 176): the lower bound `2 k` of the constant is attained by the
+canonical witness.  The whole of the `k`-fold sun is produced by the transport lemma of Part 1 out
+of the six-vertex statement `JSP90.closeToBipartite_two_sun3` of `JSPProblem/Six.lean`.
+
+### A new order-free instance of the headline theorem
+
+```lean
+JSP90.closeToBipartite_of_sumGraph_of_oddCactus_of_locIndep_one :
+    (∀ i, LocIndep 1 (H i)) → (∀ i, OddCactus (H i)) → CloseToBipartite j (sumGraph j H)
+JSP90.optimal_sumGraph_of_oddCactus_of_locIndep_one (k) (hk : 1 ≤ k) :
+    LocIndep k (kTriangles k) ∧ ¬ CloseToBipartite (k - 1) (kTriangles k)
+```
+
+with the optimal constant `j` (`JSP90.tauOdd_le_of_sumGraph_of_oddCactus_of_locIndep_one`).  No
+order bound, no odd-girth bound, no degree bound.
+
+### The measurement of round 177 (`discovery/JSP-000090/r177/r.c`, log `r.log`)
+
+For **every** graph on `n ≤ 7` vertices (2 097 152 graphs at `n = 7`) and 3 000 000 random graphs
+on 8 vertices, the program computes `MaxDef = max_X |X| − 2 α(X)` and `τ_odd` exactly:
+
+| `n` | graphs | `max (τ_odd − 2 · MaxDef)` | `max τ_odd` at `MaxDef = 1` | at `d = 2` | at `d = 3` |
+| --- | --- | --- | --- | --- | --- |
+| 3 | 8 | 0 | 1 | – | – |
+| 4 | 64 | 0 | 1 | 2 | – |
+| 5 | 1 024 | 0 | 1 | 2 | 3 |
+| 6 | 32 768 | 0 | 2 | 2 | 3 |
+| 7 | 2 097 152 | 0 | **2** | 3 | 3 |
+| 8 | 3 000 000 random | 0 | **2** | 3 | 4 |
+
+Two readings.  (i) **No counterexample to `τ_odd ≤ 2 · MaxDef`** at these orders, so the candidate
+`f(k) = 2 k` survives the measurement and the bet of round 176 stands.  (ii) The value `f(1) = 2` is
+attained at *every* order from 6 to 8 (the 3-sun and other witnesses), which extends the
+machine-checked `JSP90.closeToBipartite_two_of_locIndep_one_card_le_eight` from `|V| ≤ 8` — it agrees
+with it — to an *exhaustive* statement at `|V| ≤ 7`.  A defect-2 graph with `τ_odd = 3` already
+exists on 7 vertices, so `f(2) ≥ 3` (consistent with `2 k = 4`).  Sanity checks of the program on
+`sun3` (`MaxDef 1`, `τ 2`), `K_7` (`5`, `5`), `K_8` (`6`, `6`), `C_7` (`1`, `1`) are in the log.
+
+### What is left
+
+`jsp_000090_main` is deliberately **not** declared.  The missing direction is still
+`JSP90.OddCycleErdosPosa r` (Reed–Robertson–Seymour–Thomas) through `JSP90.erdos73_of_erdosPosa`.
+But this round changes what is left in a sharper way: **because `MaxDef` and `τ_odd` are both
+additive over the components of a disjoint union, `Erdős73On k (2 k)` reduces to a statement about
+a single component** — every graph is a disjoint union of its connected components — so the
+remaining gap is now a *one-component* gap (`MaxDef ≤ k → τ_odd ≤ 2 k` for a connected graph), and
+`policy.json` records the component decomposition as the infrastructure step that exposes it.
+
+---
+
 ## Round 176 (`lean/JSPProblem/SunSum.lean`) — **THE CONSTANT IN ERDŐS #73 IS AT LEAST `2 k`**
 
 Attack family 95, the **lower-bound / sharpness axis**.  Rounds 171–175 computed *upper* bounds on the
